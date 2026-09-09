@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W01 探寻互联网新世界 · 交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="../../assets/css/common.css" />
+<style>
+  /* 断网对比 */
+  .switch { display:inline-flex; background:#E2E8F0; border-radius:999px; padding:4px; gap:4px; }
+  .switch button { padding:9px 20px; border-radius:999px; font-weight:800; font-size:15px; color:var(--ink-soft); transition:.2s; }
+  .switch button.on { background:#fff; color:var(--brand); box-shadow:var(--shadow-sm); }
+  .apps { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+  .app { background:#fff; border:2px solid var(--line); border-radius:14px; padding:16px 10px; text-align:center; transition:.3s; }
+  .app .ic { font-size:34px; } .app .nm { font-size:13.5px; font-weight:700; margin-top:6px; }
+  .app .st { font-size:12px; font-weight:800; margin-top:4px; }
+  .app.ok { border-color:var(--ok); background:#F1FBF6; } .app.ok .st { color:var(--ok); }
+  .app.dead { border-color:var(--no); background:#FEF3F3; filter:grayscale(.6); opacity:.85; } .app.dead .st { color:var(--no); }
+
+  /* 四阶段流程 */
+  .stages { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stage { background:#fff; border:2px solid var(--line); border-radius:16px; padding:18px 14px; text-align:center; cursor:pointer; transition:.2s; position:relative; }
+  .stage:hover { border-color:var(--brand); transform:translateY(-4px); box-shadow:var(--shadow); }
+  .stage.active { border-color:var(--brand2); background:var(--grad-soft); }
+  .stage .n { width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px; }
+  .stage .t { font-weight:800; font-size:16px; } .stage .e { font-size:30px; margin:4px 0; }
+  .stage-detail { margin-top:14px; background:#F8FAFC; border:1px dashed var(--line); border-radius:12px; padding:14px 16px; font-size:15px; color:var(--ink-soft); min-height:24px; }
+
+  /* TCP/IP 共同语言演示 */
+  .net-demo { display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; padding:10px 0; }
+  .net-group { background:#fff; border:2px solid var(--line); border-radius:16px; padding:16px; text-align:center; min-width:130px; }
+  .net-group .e { font-size:34px; } .net-group .l { font-weight:800; margin-top:4px; }
+  .net-link { font-size:34px; color:var(--no); transition:.4s; }
+  .net-demo.connected .net-link { color:var(--ok); }
+  .net-demo.connected .net-group { border-color:var(--ok); background:#F1FBF6; }
+
+  /* 时间轴游戏 */
+  .pool { display:flex; flex-wrap:wrap; gap:10px; padding:16px; background:#F8FAFC; border-radius:16px; border:2px dashed var(--line); min-height:70px; }
+  .ev { background:#fff; border:2px solid #C7D2FE; border-radius:12px; padding:10px 14px; font-weight:700; font-size:14.5px; cursor:pointer; transition:.16s; user-select:none; display:flex; align-items:center; gap:8px; box-shadow:var(--shadow-sm); }
+  .ev:hover { transform:translateY(-2px); border-color:var(--brand); }
+  .ev .yr { background:var(--grad); color:#fff; border-radius:8px; padding:2px 8px; font-size:12.5px; font-weight:800; }
+  .ev.sel { outline:3px solid var(--accent); border-color:var(--accent); transform:scale(1.04); }
+  .ev.placed { opacity:.35; pointer-events:none; }
+  .tl { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-top:16px; }
+  .slot { background:#fff; border:2px dashed #CBD5E1; border-radius:12px; min-height:96px; padding:8px; text-align:center; cursor:pointer; transition:.16s; position:relative; }
+  .slot .pos { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--brand2); color:#fff; width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center; }
+  .slot.over { border-color:var(--accent); background:#FFF7ED; }
+  .slot.filled { border-style:solid; }
+  .slot .card-in { font-size:13px; font-weight:700; }
+  .slot .card-in .yr { display:block; color:var(--brand); font-size:12px; margin-bottom:2px; }
+  .slot.right { border-color:var(--ok); background:#F1FBF6; } .slot.wrong { border-color:var(--no); background:#FEF3F3; }
+
+  /* 成就看板 */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .stat { background:var(--grad); color:#fff; border-radius:16px; padding:20px 14px; text-align:center; box-shadow:0 8px 22px rgba(124,58,237,.28); }
+  .stat:nth-child(2){ background:linear-gradient(135deg,#F97316,#FB923C); box-shadow:0 8px 22px rgba(249,115,22,.28);} 
+  .stat:nth-child(3){ background:linear-gradient(135deg,#0EA5E9,#38BDF8); box-shadow:0 8px 22px rgba(14,165,233,.28);} 
+  .stat:nth-child(4){ background:linear-gradient(135deg,#10B981,#34D399); box-shadow:0 8px 22px rgba(16,185,129,.28);} 
+  .stat .v { font-size:30px; font-weight:900; line-height:1.1; } .stat .k { font-size:13px; opacity:.95; margin-top:6px; }
+
+  /* IP 面板 */
+  .ip-panel { background:#0F172A; color:#E2E8F0; border-radius:14px; padding:16px 18px; font-family:Consolas,'Courier New',monospace; font-size:14px; line-height:1.9; }
+  .ip-panel .hl { color:#5EEAD4; font-weight:700; }
+  .addr { display:flex; align-items:center; gap:10px; background:#fff; border:2px solid var(--line); border-radius:12px; padding:10px 14px; margin-top:10px; }
+  .addr .bar { flex:1; font-family:Consolas,monospace; color:var(--ink-soft); }
+
+  /* 路线图 */
+  .road { position:relative; margin:26px 0 8px; }
+  .road .track { height:10px; border-radius:999px; background:#E2E8F0; }
+  .road .fill { height:10px; border-radius:999px; background:var(--grad); width:4%; transition:width 1.2s; }
+  .road .marks { display:flex; justify-content:space-between; margin-top:-24px; }
+  .mark { text-align:center; font-size:12px; width:70px; }
+  .mark .dot { width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #CBD5E1;margin:0 auto 6px; }
+  .mark.now .dot { border-color:var(--accent); background:var(--accent); box-shadow:0 0 0 5px rgba(249,115,22,.2); }
+  .mark.done .dot { border-color:var(--brand); background:var(--brand); }
+  .mark .lb { color:var(--ink-soft); font-weight:700; } .mark.now .lb { color:var(--accent); }
+
+  .reveal-box { background:#F8FAFC; border:1px dashed var(--line); border-radius:12px; padding:0 16px; max-height:0; overflow:hidden; opacity:0; transition:.4s; }
+  .reveal-box.show { padding:16px; max-height:260px; opacity:1; }
+  @media (max-width:900px){ .apps,.stages,.stats{grid-template-columns:repeat(2,1fr)} .tl{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:560px){ .tl{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span>宏文 · 交互课堂</div>
+    <div class="spacer"></div>
+    <a class="home-btn" href="../../index.html">🏠 课程中心</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">G7 第 1 周 · 🎯 项目立项课</span>
+    <h1>🌐 探寻互联网新世界</h1>
+    <p class="sub">看清互联网这张大网从哪来、有多强，同时给你的学期项目——"个人介绍网页"按下启动键！</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 0. 导入钩子：断网对比 -->
+  <div class="sec-title"><span class="bar"></span>🔥 先来个挑战：没有互联网的一天，你能活吗？</div>
+  <div class="card">
+    <p style="font-weight:700;margin-bottom:12px">拨动开关，看看"有网 / 断网"时，这些日常应用会怎样 👇</p>
+    <div class="switch">
+      <button id="sw-on" class="on" onclick="setNet(true)">📶 有网</button>
+      <button id="sw-off" onclick="setNet(false)">🚫 断网 24 小时</button>
+    </div>
+    <div class="apps" id="apps"></div>
+    <p id="net-msg" class="sec-note" style="margin-top:12px"></p>
+  </div>
+
+  <!-- 1. 四个发展阶段 -->
+  <div class="sec-title"><span class="bar"></span>① 互联网的四个发展阶段<span class="step">点一点看详情</span></div>
+  <div class="stages" id="stages"></div>
+  <div class="stage-detail" id="stage-detail">👆 点上面任意一个阶段，看看它突破了什么～</div>
+
+  <!-- 2. TCP/IP 共同语言 -->
+  <div class="sec-title"><span class="bar"></span>② TCP/IP：网络世界的"共同语言"</div>
+  <div class="card">
+    <p style="font-weight:700">两个网络说着"不同的语言"，本来没法交流。约定同一套规则（TCP/IP），就能互联互通 👇</p>
+    <div class="net-demo" id="netdemo">
+      <div class="net-group"><div class="e">🖥️</div><div class="l">网络 A</div><div style="font-size:12px;color:var(--ink-soft)">说"方言甲"</div></div>
+      <div class="net-link" id="netlink">🚫</div>
+      <div class="net-group"><div class="e">💻</div><div class="l">网络 B</div><div style="font-size:12px;color:var(--ink-soft)">说"方言乙"</div></div>
+    </div>
+    <div class="center"><button class="btn btn-primary" onclick="toggleProto()" id="proto-btn">🔌 启用 TCP/IP 共同规则</button></div>
+    <p id="proto-msg" class="sec-note center" style="margin-top:10px"></p>
+  </div>
+
+  <!-- 3. 招牌交互：时间轴拖拽游戏 -->
+  <div class="sec-title"><span class="bar"></span>③ 🕹 招牌互动：中国互联网大事记 · 时间轴排序</div>
+  <div class="card">
+    <p style="font-weight:700">把下面 6 张事件卡片，按<b>从早到晚</b>放进时间轴 ①→⑥ 的格子里。<span class="chip orange">点卡片 → 点格子</span>（电脑上也可直接拖拽）</p>
+    <div class="pool" id="pool"></div>
+    <div class="tl" id="tl"></div>
+    <div class="row mt" style="flex-wrap:wrap;gap:10px">
+      <button class="btn btn-primary" onclick="checkTL()">✅ 检查答案</button>
+      <button class="btn btn-ghost" onclick="resetTL()">🔄 重新开始</button>
+      <span id="tl-score" style="font-weight:800;color:var(--brand)"></span>
+    </div>
+  </div>
+
+  <!-- 4. 成就数据看板 -->
+  <div class="sec-title"><span class="bar"></span>④ 📊 中国互联网成就看板<span class="step">中国速度</span></div>
+  <div class="stats" id="stats">
+    <div class="stat"><div class="v" data-to="300" data-suffix="万+">0</div><div class="k">5G 基站数量</div></div>
+    <div class="stat"><div class="v" data-to="7" data-suffix="亿+">0</div><div class="k">5G 移动电话用户</div></div>
+    <div class="stat"><div class="v" data-to="5" data-suffix="亿户+">0</div><div class="k">千兆光网覆盖家庭</div></div>
+    <div class="stat"><div class="v" data-to="10" data-suffix="亿+">0</div><div class="k">网民规模（全球最大）</div></div>
+  </div>
+  <p class="sec-note mt-s">数据来源：《中国互联网络发展状况统计报告》。我国建成全球规模最大的光纤和 5G 网络 🇨🇳</p>
+
+  <!-- 5. 查IP + 两种打开网页 -->
+  <div class="sec-title"><span class="bar"></span>⑤ 🔍 实践探究：IP 地址 & 两种打开网页的方式</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3 style="font-size:17px">探究 1：每台设备都有"门牌号"——IP 地址</h3>
+      <p class="sec-note">在机房电脑上：网络属性 → 找到 IPv4 地址。它长这样 👇</p>
+      <div class="ip-panel">Windows IP 配置<br/><br/>以太网适配器 以太网:<br/>&nbsp;&nbsp;连接特定的 DNS 后缀 . . . : <br/>&nbsp;&nbsp;<span class="hl">IPv4 地址 . . . . . . . . . : 192.168.1.23</span><br/>&nbsp;&nbsp;子网掩码&nbsp; . . . . . . . . . : 255.255.255.0<br/>&nbsp;&nbsp;默认网关. . . . . . . . . : 192.168.1.1</div>
+      <p style="margin-top:10px;font-size:14.5px">💡 IP 地址 = 设备在网络中的<b>唯一门牌号</b>（数字形式）。找到你自己的了吗？</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:17px">探究 2：两种方式，打开同一个网页</h3>
+      <p class="sec-note">点两种按钮，看看地址栏最终一样吗？</p>
+      <div class="row" style="flex-wrap:wrap;gap:10px">
+        <button class="btn btn-ghost" onclick="openWeb('search')">🔎 方式1：搜索引擎搜"智慧教育平台"</button>
+        <button class="btn btn-ghost" onclick="openWeb('direct')">⌨️ 方式2：地址栏直接输 basic.smartedu.cn</button>
+      </div>
+      <div class="addr" id="addr1"><span class="chip">方式1 地址栏</span><span class="bar" id="bar1">（点击上方按钮）</span></div>
+      <div class="addr" id="addr2"><span class="chip orange">方式2 地址栏</span><span class="bar" id="bar2">（点击上方按钮）</span></div>
+      <p id="web-msg" class="sec-note" style="margin-top:8px"></p>
+    </div>
+  </div>
+
+  <!-- 6. 北斗 自主可控 -->
+  <div class="sec-title"><span class="bar"></span>⑥ 🛰 想一想：为什么要自建"北斗"，而不直接用 GPS？</div>
+  <div class="card">
+    <p style="font-weight:700">北斗和 GPS 精度其实相当。那我国为什么还要花大力气自主建设卫星导航系统？</p>
+    <div class="center mt"><button class="btn btn-accent" onclick="reveal('bd')">💡 揭晓答案</button></div>
+    <div class="reveal-box" id="bd">
+      <p><b style="color:var(--accent)">关键词：自主可控 · 国家安全。</b></p>
+      <p style="color:var(--ink-soft)">如果完全依赖别人的系统，关键时刻可能被"断供"。北斗让我们<b>不受制于人</b>——这就是"自主可控"对建设网络强国的战略意义。同样的道理也适用于芯片、操作系统等核心技术。</p>
+    </div>
+  </div>
+
+  <!-- 7. 项目路线图 -->
+  <div class="sec-title"><span class="bar"></span>⑦ 🎯 项目立项：你的学期大工程路线图</div>
+  <div class="card">
+    <p style="font-weight:700">这学期，每人要从 0 做一个<b>"个人介绍网页"</b>，最终发布上线、<b>全班互访</b>！你今天按下的是"启动键"👇</p>
+    <div class="road">
+      <div class="track"><div class="fill" id="roadfill"></div></div>
+      <div class="marks">
+        <div class="mark now"><div class="dot"></div><div class="lb">W1<br/>立项 🔥</div></div>
+        <div class="mark"><div class="dot"></div><div class="lb">W16<br/>第一个HTML</div></div>
+        <div class="mark"><div class="dot"></div><div class="lb">W20<br/>组建网站</div></div>
+        <div class="mark"><div class="dot"></div><div class="lb">W27<br/>发布+互访</div></div>
+        <div class="mark"><div class="dot"></div><div class="lb">W28<br/>网宠展示</div></div>
+      </div>
+    </div>
+    <div class="card card-soft mt" style="box-shadow:none">
+      <b>✍️ 我的项目宣言</b>（一句话：我想做一个什么样的个人网页？）
+      <input id="vow" type="text" placeholder="例如：我要做一个展示我画画的网页…" style="width:100%;margin-top:8px;padding:12px 14px;border-radius:12px;border:2px solid #E0E7FF;font-size:15px;font-family:inherit" />
+      <button class="btn btn-primary mt-s" onclick="saveVow()">🚀 按下启动键</button>
+      <span id="vow-msg" style="margin-left:10px;font-weight:700;color:var(--ok)"></span>
+    </div>
+  </div>
+
+  <!-- 8. 考点小测 -->
+  <div class="sec-title"><span class="bar"></span>⑧ 📝 考点小测<span class="step">全对有彩带</span></div>
+  <div id="quiz"></div>
+
+</main>
+
+<footer class="foot">G7-W01《探寻互联网新世界》· 交互课堂　|　对齐教学设计"平台图像化模块"：时间轴游戏 / 成就看板 / 项目路线图</footer>
+
+<script src="../../assets/js/common.js"></script>
+<script>
+/* ===== 0. 断网对比 ===== */
+var APPS = [
+  { ic:'🧭', nm:'实时导航' }, { ic:'📱', nm:'扫码支付' }, { ic:'🎬', nm:'刷视频' }, { ic:'💬', nm:'微信聊天' },
+  { ic:'🛒', nm:'网购下单' }, { ic:'🎮', nm:'在线游戏' }, { ic:'☁️', nm:'网盘同步' }, { ic:'🗺️', nm:'共享单车' }
+];
+function renderApps(on){
+  var box = HW.el('apps'); var h='';
+  APPS.forEach(function(a){
+    h += '<div class="app '+(on?'ok':'dead')+'"><div class="ic">'+a.ic+'</div><div class="nm">'+a.nm+'</div><div class="st">'+(on?'✓ 正常':'✕ 用不了')+'</div></div>';
+  });
+  box.innerHTML = h;
+}
+function setNet(on){
+  HW.el('sw-on').className = on?'on':''; HW.el('sw-off').className = on?'':'on';
+  renderApps(on);
+  HW.el('net-msg').textContent = on ? '✅ 有网时，生活处处都在线——互联网已经像空气一样渗透我们的生活。' : '😱 断网才 24 小时，这么多事都做不了！这就是互联网的"基础性作用"。';
+  HW.beep(on?'ok':'no');
+}
+
+/* ===== 1. 四个发展阶段 ===== */
+var STAGES = [
+  { e:'🖥️', t:'起步', d:'一台计算机多人用（分时共享）。人们开始想让计算机之间"说上话"。' },
+  { e:'📜', t:'形成', d:'不同单位的计算机想互连，需要一套"共同规则"——TCP/IP 协议诞生！这是关键突破。' },
+  { e:'🔗', t:'互联', d:'不同网络通过 TCP/IP 互相连通，"网中网"= Internet（互联网）真正形成。' },
+  { e:'🚀', t:'高速网络', d:'带宽从数十 Kbps 一路飙升到数 Gbps，视频、直播、云应用全面爆发。' }
+];
+(function(){
+  var box = HW.el('stages'); var h='';
+  STAGES.forEach(function(s,i){
+    h += '<div class="stage" data-i="'+i+'" onclick="showStage('+i+')"><div class="n">'+(i+1)+'</div><div class="e">'+s.e+'</div><div class="t">'+s.t+'</div></div>';
+  });
+  box.innerHTML = h;
+})();
+function showStage(i){
+  HW.all('.stage').forEach(function(s){ s.classList.remove('active'); });
+  HW.all('.stage')[i].classList.add('active');
+  HW.el('stage-detail').innerHTML = '<b style="color:var(--brand)">'+STAGES[i].t+'阶段：</b>'+STAGES[i].d;
+  HW.beep('tap');
+}
+
+/* ===== 2. TCP/IP 演示 ===== */
+var protoOn = false;
+function toggleProto(){
+  protoOn = !protoOn;
+  var demo = HW.el('netdemo');
+  if(protoOn){
+    demo.classList.add('connected'); HW.el('netlink').textContent='🔗';
+    HW.el('proto-btn').textContent='🔌 已启用（点我可关掉）';
+    HW.el('proto-msg').innerHTML='✅ 有了 TCP/IP 这套"共同语言"，网络 A 和 B 顺利对话，连成了更大的互联网！';
+    HW.beep('ok');
+  }else{
+    demo.classList.remove('connected'); HW.el('netlink').textContent='🚫';
+    HW.el('proto-btn').textContent='🔌 启用 TCP/IP 共同规则';
+    HW.el('proto-msg').innerHTML='❌ 没有共同规则，两个网络各说各话，无法交流。';
+  }
+}
+
+/* ===== 3. 时间轴游戏 ===== */
+var EVENTS = [
+  { yr:'1986', t:'第一封电子邮件从中国发出', e:'✉️' },
+  { yr:'1994', t:'中国正式接入国际互联网', e:'🌍' },
+  { yr:'90s后期', t:'出现第一批商业网站', e:'📄' },
+  { yr:'2009', t:'进入移动互联网时代', e:'📱' },
+  { yr:'2012', t:'各行业开始"互联网+"', e:'➕' },
+  { yr:'2019', t:'进入 5G 时代', e:'⚡' }
+];
+var slots = [null,null,null,null,null,null]; // 每格放事件 id
+var selected = null;                        // 当前选中的事件 id
+var order = [];                             // 打乱后的展示顺序
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function initTL(){
+  order = shuffle(EVENTS.map(function(_,i){return i;}));
+  slots = [null,null,null,null,null,null]; selected=null;
+  renderPool(); renderTL();
+  HW.el('tl-score').textContent='';
+}
+function renderPool(){
+  var h='';
+  order.forEach(function(id){
+    var placed = slots.indexOf(id) !== -1;
+    var ev = EVENTS[id];
+    h += '<div class="ev'+(selected===id?' sel':'')+(placed?' placed':'')+'" draggable="true" data-id="'+id+'" onclick="pickCard('+id+')" ondragstart="dragStart(event,'+id+')"><span class="yr">'+ev.yr+'</span>'+ev.e+' '+ev.t+'</div>';
+  });
+  HW.el('pool').innerHTML = h;
+}
+function renderTL(){
+  var h='';
+  for(var p=0;p<6;p++){
+    var id = slots[p]; var inner='';
+    if(id!==null){ var ev=EVENTS[id]; inner='<div class="card-in"><span class="yr">'+ev.yr+'</span>'+ev.e+' '+ev.t+'</div>'; }
+    else { inner='<div style="color:#CBD5E1;font-size:13px;margin-top:26px">放这里</div>'; }
+    h += '<div class="slot'+(id!==null?' filled':'')+'" data-pos="'+p+'" onclick="placeCard('+p+')" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'+p+')"><span class="pos">'+(p+1)+'</span>'+inner+'</div>';
+  }
+  HW.el('tl').innerHTML = h;
+}
+function pickCard(id){
+  if(slots.indexOf(id)!==-1) return;
+  selected = (selected===id)?null:id;
+  HW.beep('tap'); renderPool();
+}
+function placeCard(pos){
+  if(selected===null){
+    // 若点已占用的格子，把卡片取回
+    if(slots[pos]!==null){ var back=slots[pos]; slots[pos]=null; HW.beep('tap'); renderPool(); renderTL(); }
+    else { HW.toast('先点一张卡片，再点格子放入哦～'); }
+    return;
+  }
+  // 若该事件已在别的格，先移出
+  var old = slots.indexOf(selected); if(old!==-1) slots[old]=null;
+  // 若目标格已有卡片，挤回卡片池
+  slots[pos] = selected; selected=null;
+  HW.beep('ok'); renderPool(); renderTL();
+}
+function dragStart(e,id){ selected=id; e.dataTransfer.setData('text/plain', id); }
+function dragOver(e){ e.preventDefault(); e.currentTarget.classList.add('over'); }
+function dragLeave(e){ e.currentTarget.classList.remove('over'); }
+function drop(e,pos){ e.preventDefault(); e.currentTarget.classList.remove('over'); var id=parseInt(e.dataTransfer.getData('text/plain'),10); if(isNaN(id))return; selected=id; placeCard(pos); }
+function checkTL(){
+  var filled = slots.every(function(s){return s!==null;});
+  if(!filled){ HW.toast('还有格子没放满哦～','no'); return; }
+  var correct=0;
+  HW.all('.slot').forEach(function(el2,p){
+    el2.classList.remove('right','wrong');
+    if(slots[p]===p){ el2.classList.add('right'); correct++; } else { el2.classList.add('wrong'); }
+  });
+  HW.el('tl-score').textContent = '答对 '+correct+' / 6';
+  if(correct===6){ HW.confetti(120); HW.beep('win'); HW.el('tl-score').innerHTML='🎉 全对！你就是本节课的"互联网考古学家"！'; }
+  else { HW.beep('no'); HW.el('tl-score').innerHTML='答对 '+correct+' / 6，绿色=正确，红色=再想想（正确顺序：1986→1994→90s后期→2009→2012→2019）'; }
+}
+function resetTL(){ initTL(); HW.toast('已重置，再来一次！'); }
+
+/* ===== 4. 成就看板 countUp ===== */
+(function(){
+  var stats = HW.el('stats');
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        HW.all('.v', stats).forEach(function(v){
+          HW.countUp(v, +v.getAttribute('data-to'), v.getAttribute('data-suffix'), 1400);
+        });
+        io.disconnect();
+      }
+    });
+  }, { threshold:.4 });
+  io.observe(stats);
+})();
+
+/* ===== 5. 两种打开网页 ===== */
+var opened = { search:false, direct:false };
+function openWeb(mode){
+  if(mode==='search'){ opened.search=true; HW.el('bar1').textContent='https://basic.smartedu.cn/'; }
+  else { opened.direct=true; HW.el('bar2').textContent='https://basic.smartedu.cn/'; }
+  HW.beep('tap');
+  if(opened.search && opened.direct){
+    HW.el('web-msg').innerHTML='🎯 发现了吗？两种方式最终地址栏<b>一样</b>！搜索引擎帮你找到网址，和直接输入域名，殊途同归——最终都定位到同一个网站的地址。（域名怎么变成 IP？W7 揭秘）';
+  }
+}
+
+/* ===== 6. 北斗揭晓 ===== */
+function reveal(id){ var b=HW.el(id); b.classList.add('show'); HW.beep('ok'); }
+
+/* ===== 7. 项目宣言 ===== */
+function saveVow(){
+  var v = HW.el('vow').value.trim();
+  if(!v){ HW.toast('先写下你的网页愿景哦～','no'); return; }
+  HW.el('vow-msg').textContent='✅ 启动键已按下！';
+  HW.el('roadfill').style.width='12%';
+  HW.confetti(90); HW.beep('win');
+  HW.toast('🚀 项目立项成功，W16 见！','ok');
+}
+
+/* ===== 8. 小测 ===== */
+HW.quiz('quiz', [
+  { type:'single', q:'互联网发展经历了四个阶段，"不同网络之间通过统一协议实现互联互通"属于哪个阶段？', options:['起步阶段','形成阶段','互联阶段','高速网络阶段'], answer:2, explain:'"互联"阶段的关键就是不同网络真正连通成 Internet；而"形成"阶段的关键是 TCP/IP 协议诞生。' },
+  { type:'judge', q:'TCP/IP 协议的作用，是让不同的网络能够按照共同规则进行数据传输和通信。', answer:0, explain:'正确！TCP/IP 就是网络世界的"共同语言"，解决的是"能不能对话"，不是"对话速度"。' },
+  { type:'single', q:'下列哪一项【不属于】我国互联网建设的创新成就？', options:['建成全球规模最大的 5G 网络','自主建设北斗卫星导航系统','发明了世界上第一台计算机','千兆光网覆盖能力超 5 亿户'], answer:2, explain:'世界上第一台计算机（ENIAC，1946）诞生于美国，不属于我国互联网建设成就。' }
+], { perfectText:'🎉 全对！互联网考古第一课，满分通关！' });
+
+/* ===== 初始化 ===== */
+setNet(true);
+initTL();
+setTimeout(function(){ HW.el('roadfill').style.width='4%'; }, 400);
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W03 互联网影响新体验 · 交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="../../assets/css/common.css" />
+<style>
+  /* 打卡墙 */
+  .wall { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+  .bcard { background:#fff; border:2px solid var(--line); border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer; transition:.18s; user-select:none; }
+  .bcard:hover { transform:translateY(-3px); border-color:var(--brand); }
+  .bcard .e { font-size:30px; } .bcard .n { font-size:12.5px; font-weight:700; margin-top:4px; }
+  .bcard.done { background:var(--grad); color:#fff; border-color:transparent; }
+  .bcard.done .n { color:#fff; }
+  .buckets { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+  .bucket { border-radius:16px; padding:14px; min-height:120px; border:2px solid var(--line); }
+  .bucket.b1 { background:#EFF6FF; border-color:#BFDBFE; } .bucket.b2 { background:#F0FDF4; border-color:#BBF7D0; } .bucket.b3 { background:#FDF2F8; border-color:#FBCFE8; }
+  .bucket .bh { font-weight:800; display:flex; justify-content:space-between; align-items:center; }
+  .bucket .cnt { background:#fff; border-radius:999px; padding:2px 10px; font-size:13px; color:var(--brand); }
+  .bucket .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .bucket .chips span { background:#fff; border-radius:999px; padding:4px 10px; font-size:12.5px; font-weight:700; box-shadow:var(--shadow-sm); animation:pop .3s both; }
+
+  /* 行业看板 */
+  .ind { background:#fff; border:2px solid var(--line); border-radius:16px; padding:16px; cursor:pointer; transition:.2s; }
+  .ind:hover { border-color:var(--brand2); transform:translateY(-3px); box-shadow:var(--shadow); }
+  .ind .ih { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16px; }
+  .ind .ih .e { font-size:28px; }
+  .ind .ib { max-height:0; overflow:hidden; opacity:0; transition:.35s; font-size:14px; color:var(--ink-soft); }
+  .ind.open .ib { max-height:180px; opacity:1; margin-top:10px; }
+  .ind .arrow { margin-left:auto; transition:.3s; color:var(--brand); }
+  .ind.open .arrow { transform:rotate(90deg); }
+
+  /* 故宫入口 */
+  .palace { background:linear-gradient(135deg,#7C2D12,#B45309); color:#fff; border-radius:18px; padding:22px; }
+  .palace a.pb { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); padding:10px 16px; border-radius:12px; font-weight:700; margin:6px 8px 0 0; transition:.2s; }
+  .palace a.pb:hover { background:#fff; color:#B45309; transform:translateY(-2px); }
+
+  /* 方便vs变革 */
+  .scn { background:#fff; border:2px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+  .scn .st { font-weight:700; font-size:15px; margin-bottom:10px; }
+  .scn .choice { display:flex; gap:10px; }
+  .scn .choice button { flex:1; padding:9px; border-radius:10px; border:2px solid var(--line); font-weight:800; font-size:14px; transition:.16s; }
+  .scn .choice button:hover { border-color:var(--brand); }
+  .scn .choice button.right { border-color:var(--ok); background:#E7F8F1; color:#047857; }
+  .scn .choice button.wrong { border-color:var(--no); background:#FEECEC; color:#B91C1C; }
+  .scn .exp { font-size:13.5px; color:var(--ink-soft); margin-top:8px; display:none; }
+  .scn.answered .exp { display:block; }
+
+  /* 双刃剑 */
+  .blade { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .blade .side { border-radius:16px; padding:16px; }
+  .blade .good { background:#F0FDF4; border:2px solid #BBF7D0; } .blade .bad { background:#FEF3F3; border:2px solid #FECACA; }
+  @media (max-width:900px){ .wall{grid-template-columns:repeat(3,1fr)} .buckets{grid-template-columns:1fr} .blade{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span>宏文 · 交互课堂</div>
+    <div class="spacer"></div>
+    <a class="home-btn" href="../../index.html">🏠 课程中心</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">G7 第 3 周 · 🎯 项目推进</span>
+    <h1>🏛 互联网影响新体验</h1>
+    <p class="sub">帮小明策划社区"互联网影响新体验"活动——看见互联网如何改变生活、行业与文化，为你的网页攒下第一波真实灵感。</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 导入 -->
+  <div class="sec-title"><span class="bar"></span>🔥 策划者视角：从哪几个方面展示互联网的影响？</div>
+  <div class="card">
+    <p style="font-weight:700">小明被委托策划社区活动。如果换作你，会从哪几方面展示？归纳为三大板块 👇</p>
+    <div class="grid grid-3 mt-s">
+      <div class="card card-soft center" style="box-shadow:none"><div style="font-size:32px">🧑‍🤝‍🧑</div><b>① 个人生活</b><div style="color:var(--ink-soft);font-size:13px">互联网与我的一天</div></div>
+      <div class="card card-soft center" style="box-shadow:none"><div style="font-size:32px">🏭</div><b>② 各行各业</b><div style="color:var(--ink-soft);font-size:13px">互联网+行业革命</div></div>
+      <div class="card card-soft center" style="box-shadow:none"><div style="font-size:32px">🏛</div><b>③ 文化传承</b><div style="color:var(--ink-soft);font-size:13px">让文物活起来</div></div>
+    </div>
+  </div>
+
+  <!-- 招牌①：打卡墙 -->
+  <div class="sec-title"><span class="bar"></span>① ✅ 招牌互动：互联网行为打卡墙<span class="step" id="wall-count">已打卡 0 项</span></div>
+  <div class="card">
+    <p style="font-weight:700">点一点你今天做过的互联网行为，卡片会自动归类到三大场景 👇（至少打卡 5 项）</p>
+    <div class="wall mt-s" id="wall"></div>
+    <div class="buckets">
+      <div class="bucket b1"><div class="bh">🏠 生活起居 <span class="cnt" id="c1">0</span></div><div class="chips" id="chips1"></div></div>
+      <div class="bucket b2"><div class="bh">📚 工作学习 <span class="cnt" id="c2">0</span></div><div class="chips" id="chips2"></div></div>
+      <div class="bucket b3"><div class="bh">🎮 社交休闲 <span class="cnt" id="c3">0</span></div><div class="chips" id="chips3"></div></div>
+    </div>
+    <p id="wall-msg" class="sec-note" style="margin-top:12px"></p>
+  </div>
+
+  <!-- 招牌②：行业看板 -->
+  <div class="sec-title"><span class="bar"></span>② 🏭 招牌互动：互联网 + 行业革命<span class="step">点开看案例</span></div>
+  <div class="grid grid-3" id="inds"></div>
+  <div class="card card-soft mt-s"><b>💡 核心认知：</b>互联网不只是"方便"，更是"变革"——它让以前<b>不可能</b>的事变成了可能（远程手术 / 精准农业 / AI 导航）。</div>
+
+  <!-- 招牌③：故宫 -->
+  <div class="sec-title"><span class="bar"></span>③ 🖼 文化传承：让文物"活"起来、"火"起来</div>
+  <div class="palace">
+    <b style="font-size:17px">🏛 故宫数字博物馆 · 快速入口</b>
+    <p style="opacity:.92;font-size:14px;margin-top:6px">不用去北京，也能高清放大看文物细节、360° "走进" 宫殿——这就是互联网让文化突破时空限制。（需联网；老师可提前录屏备用）</p>
+    <div>
+      <a class="pb" href="https://www.dpm.org.cn/" target="_blank" rel="noopener">🏯 故宫博物院官网</a>
+      <a class="pb" href="https://digicol.dpm.org.cn/" target="_blank" rel="noopener">🖼 数字文物库</a>
+      <a class="pb" href="https://www.dpm.org.cn/panoramic.html" target="_blank" rel="noopener">🔄 全景故宫</a>
+    </div>
+  </div>
+
+  <!-- 方便 vs 变革 -->
+  <div class="sec-title"><span class="bar"></span>④ 🎯 辨析小游戏：这是"方便"还是"变革"？</div>
+  <div class="card">
+    <p class="sec-note" style="margin-top:0">判断标准：只是"换个方式做同样的事"=方便；"让以前做不到的事变成可能"=变革。</p>
+    <div id="scns" class="mt-s"></div>
+  </div>
+
+  <!-- 双刃剑 -->
+  <div class="sec-title"><span class="bar"></span>⑤ ⚖️ 辨证思考：互联网是"双刃剑"</div>
+  <div class="card">
+    <div class="blade">
+      <div class="side good"><b>👍 便利的一面</b><p style="font-size:14px;color:var(--ink-soft);margin-top:6px">随时随地获取信息、在线学习、远程医疗、扫码支付、维系感情……生活更高效。</p></div>
+      <div class="side bad"><b>⚠️ 需要注意的一面</b><p style="font-size:14px;color:var(--ink-soft);margin-top:6px">过度依赖 / 上网成瘾、隐私泄露、信息茧房、网络谣言……要辨证看待、合理使用。</p></div>
+    </div>
+    <p class="sec-note mt-s">会考提醒：出"互联网的影响全是正面的"这类判断题，答案是 <b style="color:var(--no)">✕ 错误</b>，要辨证看待。</p>
+  </div>
+
+  <!-- 项目推进 -->
+  <div class="sec-title"><span class="bar"></span>⑥ 🎯 项目推进：为网页攒内容灵感</div>
+  <div class="card">
+    <b>✍️ 我的网页要展示互联网的哪个影响？</b>
+    <p class="sec-note" style="margin:6px 0">例如："我与互联网的故事""我最喜欢的互联网应用""互联网改变了我的家乡"……写下至少 1 个打算放进网页的主题。</p>
+    <input id="idea" type="text" placeholder="我的网页内容灵感…" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E0E7FF;font-size:15px;font-family:inherit" />
+    <div class="center mt"><button class="btn btn-accent" onclick="saveIdea()">💾 存进我的灵感库</button><span id="idea-msg" style="margin-left:10px;font-weight:700;color:var(--ok)"></span></div>
+  </div>
+
+  <!-- 小测 -->
+  <div class="sec-title"><span class="bar"></span>⑦ 📝 考点小测<span class="step">全对有彩带</span></div>
+  <div id="quiz"></div>
+
+</main>
+
+<footer class="foot">G7-W03《互联网影响新体验》· 交互课堂　|　对齐教学设计：打卡墙 + 行业案例看板 + 故宫数字博物馆入口</footer>
+
+<script src="../../assets/js/common.js"></script>
+<script>
+/* ===== 打卡墙 ===== */
+var BEHAVIORS = [
+  { e:'⏰', n:'智能音箱', c:1 }, { e:'💳', n:'扫码支付', c:1 }, { e:'🛒', n:'网络购物', c:1 },
+  { e:'🏠', n:'智能家居', c:1 }, { e:'🧭', n:'导航出行', c:1 }, { e:'💰', n:'在线支付', c:1 },
+  { e:'📚', n:'在线学习', c:2 }, { e:'🔎', n:'搜索引擎', c:2 }, { e:'🤖', n:'AI 工具', c:2 }, { e:'☁️', n:'网盘同步', c:2 },
+  { e:'📹', n:'视频通话', c:3 }, { e:'🎬', n:'刷短视频', c:3 }, { e:'💬', n:'社交聊天', c:3 }, { e:'🎮', n:'网络游戏', c:3 },
+  { e:'🎧', n:'在线听歌', c:3 }, { e:'📺', n:'追剧看番', c:3 }, { e:'🍔', n:'外卖点餐', c:1 }, { e:'🚲', n:'共享单车', c:1 }
+];
+var checked = {};
+(function(){
+  var box=HW.el('wall'); var h='';
+  BEHAVIORS.forEach(function(b,i){ h += '<div class="bcard" data-i="'+i+'" onclick="toggleCheck('+i+')"><div class="e">'+b.e+'</div><div class="n">'+b.n+'</div></div>'; });
+  box.innerHTML=h;
+})();
+function toggleCheck(i){
+  checked[i] = !checked[i];
+  HW.all('.bcard')[i].classList.toggle('done', checked[i]);
+  HW.beep(checked[i]?'ok':'tap');
+  renderBuckets();
+}
+function renderBuckets(){
+  var cnt={1:0,2:0,3:0}; var chips={1:'',2:'',3:''};
+  BEHAVIORS.forEach(function(b,i){ if(checked[i]){ cnt[b.c]++; chips[b.c]+='<span>'+b.e+' '+b.n+'</span>'; } });
+  for(var k=1;k<=3;k++){ HW.el('c'+k).textContent=cnt[k]; HW.el('chips'+k).innerHTML=chips[k]; }
+  var total=cnt[1]+cnt[2]+cnt[3];
+  HW.el('wall-count').textContent='已打卡 '+total+' 项';
+  var msg=HW.el('wall-msg');
+  if(total===0){ msg.textContent=''; }
+  else if(total<5){ msg.innerHTML='👍 已打卡 '+total+' 项，再多点几个，看看你的一天有多"在线"～'; }
+  else { msg.innerHTML='🎉 你的一天有 <b>'+total+'</b> 项互联网行为！想一想：如果没有互联网，这些事你还能做吗？是"锦上添花"还是"不可或缺"？'; if(total===5){ HW.confetti(70); HW.beep('win'); } }
+}
+
+/* ===== 行业看板 ===== */
+var INDS = [
+  { e:'🎓', n:'互联网 + 教育', d:'在线学习平台、AI 智能体、生成式 AI 辅助学习——优质课程跨越山海，人人可学。' },
+  { e:'🔭', n:'互联网 + 科研', d:'高海拔宇宙线观测站"拉索"的数据全球共享，科学家联网协作探索宇宙奥秘。' },
+  { e:'🌾', n:'互联网 + 农业', d:'智慧种植、无人机植保、农产品直播带货——手机成了"新农具"，数据成了"新农资"。' },
+  { e:'🏭', n:'互联网 + 工业', d:'AI 量体定制、智能制造有限公司、网约车、无人驾驶——生产与出行更聪明。' },
+  { e:'🏥', n:'互联网 + 医疗', d:'远程会诊、AI 辅助诊断、在线挂号——专家资源下沉，跨城手术成为可能。' },
+  { e:'🚦', n:'互联网 + 交通', d:'实时导航避堵、共享单车、智慧红绿灯——出行更高效、更绿色。' }
+];
+(function(){
+  var box=HW.el('inds'); var h='';
+  INDS.forEach(function(x,i){ h += '<div class="ind" onclick="toggleInd('+i+')"><div class="ih"><span class="e">'+x.e+'</span>'+x.n+'<span class="arrow">▶</span></div><div class="ib">'+x.d+'</div></div>'; });
+  box.innerHTML=h;
+})();
+function toggleInd(i){ HW.all('.ind')[i].classList.toggle('open'); HW.beep('tap'); }
+
+/* ===== 方便 vs 变革 ===== */
+var SCNS = [
+  { t:'🏥 通过远程手术系统，医生跨城完成了一台手术', a:'变革', e:'以前做不到，现在做到了——这是根本性变革。' },
+  { t:'📅 用电子日历代替了纸质日历记事项', a:'方便', e:'还是"记事项"这件事，只是换了个工具——是方便。' },
+  { t:'💬 用微信群通知开会，替代了挨个打电话', a:'方便', e:'同样是"通知开会"，方式变了而已——是方便。' },
+  { t:'🌾 无人机按数据精准喷洒，实现智慧种植', a:'变革', e:'精准农业让"看天吃饭"变"靠数据种田"——是变革。' },
+  { t:'🎫 在网上买票，代替去窗口排队', a:'方便', e:'还是"买票"，只是不用排队了——是方便。' },
+  { t:'🤖 AI 辅助诊断，发现了医生肉眼难辨的早期病变', a:'变革', e:'让"早期精准发现"成为可能——是变革。' }
+];
+(function(){
+  var box=HW.el('scns'); var h='';
+  SCNS.forEach(function(s,i){
+    h += '<div class="scn" data-i="'+i+'"><div class="st">'+s.t+'</div><div class="choice"><button onclick="judge('+i+',\'方便\',this)">🟦 只是方便</button><button onclick="judge('+i+',\'变革\',this)">🟥 根本变革</button></div><div class="exp"></div></div>';
+  });
+  box.innerHTML=h;
+})();
+function judge(i, pick, btn){
+  var scn = HW.all('.scn')[i];
+  if(scn.classList.contains('answered')) return;
+  scn.classList.add('answered');
+  var s = SCNS[i];
+  var btns = scn.querySelectorAll('.choice button');
+  var correct = (pick === s.a);
+  btns.forEach(function(b){ b.disabled=true; });
+  if(correct){ btn.classList.add('right'); HW.beep('ok'); }
+  else { btn.classList.add('wrong'); (s.a==='变革'?btns[1]:btns[0]).classList.add('right'); HW.beep('no'); }
+  scn.querySelector('.exp').innerHTML = '<b>'+s.a+'</b>！'+s.e;
+}
+
+/* ===== 项目推进 ===== */
+function saveIdea(){
+  var v=HW.el('idea').value.trim();
+  if(!v){ HW.toast('先写下你的网页灵感哦～','no'); return; }
+  HW.el('idea-msg').textContent='✅ 已存入灵感库！';
+  HW.confetti(100); HW.beep('win'); HW.toast('🌟 从"体验者"变"创作者"，W16 见！','ok');
+}
+
+/* ===== 小测 ===== */
+HW.quiz('quiz', [
+  { type:'single', q:'下列哪一项【不属于】互联网对"个人生活"的影响场景？', options:['生活起居（智能音箱/在线支付）','工作学习（在线学习/AI工具）','社交休闲（即时通信/短视频）','工业制造（AI量体/无人驾驶）'], answer:3, explain:'"工业制造"属于"互联网+行业"，不是个人生活的三大场景（生活起居/工作学习/社交休闲）。' },
+  { type:'judge', q:'"互联网+"只是让各行业变得更"方便"，并没有带来根本性的变革。', answer:1, explain:'错误！"互联网+"是变革——让不可能变成可能（远程手术/精准农业/AI导航）。' },
+  { type:'single', q:'互联网让文化传承"活起来、火起来"的典型应用是？', options:['用快递寄送文物','数字博物馆和 AR/VR 体验','在电视上看纪录片','去实体博物馆参观'], answer:1, explain:'数字博物馆 + AR/VR 让文物突破时空限制，"活"（数字化呈现）起来、"火"（全网可访问）起来。' }
+], { perfectText:'🎉 全对！生活/行业/文化"互联网影响三部曲"通关！' });
+</script>
+</body>
+</html>

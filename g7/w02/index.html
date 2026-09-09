@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>W02 互联网应用新特征 · 交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="../../assets/css/common.css" />
+<style>
+  /* 时光滑动条 */
+  .era-year { font-size:52px; font-weight:900; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; text-align:center; line-height:1; }
+  .slider { -webkit-appearance:none; appearance:none; width:100%; height:12px; border-radius:999px; background:linear-gradient(90deg,#94A3B8,#4F46E5,#7C3AED,#EC4899); outline:none; margin:18px 0; }
+  .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:34px; height:34px; border-radius:50%; background:#fff; border:4px solid var(--brand2); box-shadow:var(--shadow); cursor:pointer; transition:.1s; }
+  .slider::-webkit-slider-thumb:hover { transform:scale(1.12); }
+  .slider::-moz-range-thumb { width:30px; height:30px; border-radius:50%; background:#fff; border:4px solid var(--brand2); cursor:pointer; }
+  .era-ticks { display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft); font-weight:700; margin-top:-8px; }
+  .screen { border-radius:16px; padding:20px; min-height:190px; transition:.4s; border:3px solid var(--line); }
+  .screen .stitle { font-weight:800; font-size:17px; margin-bottom:8px; }
+  .screen .sdesc { font-size:14.5px; opacity:.9; }
+  .dims { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+  .dim { background:#F8FAFC; border-radius:12px; padding:12px; text-align:center; }
+  .dim .dk { font-size:12.5px; color:var(--ink-soft); font-weight:700; } .dim .dv { font-size:15px; font-weight:800; margin-top:4px; color:var(--brand); }
+
+  /* 命令行模拟器 */
+  .term { background:#0B1020; color:#7CFF9B; border-radius:14px; padding:16px 18px; font-family:Consolas,'Courier New',monospace; font-size:14px; line-height:1.7; min-height:150px; white-space:pre-wrap; }
+  .term .cur { color:#fff; }
+  .cmdin { display:flex; gap:8px; margin-top:12px; }
+  .cmdin input { flex:1; padding:11px 14px; border-radius:10px; border:2px solid var(--line); font-family:Consolas,monospace; font-size:14.5px; }
+  .gui { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .gui .f { background:#fff; border:2px solid var(--line); border-radius:12px; padding:14px 8px; text-align:center; font-size:13px; font-weight:700; }
+  .gui .f .i { font-size:30px; }
+
+  /* 新特征卡片 */
+  .feat { background:#fff; border:2px solid var(--line); border-radius:16px; padding:18px 12px; text-align:center; transition:.2s; }
+  .feat:hover { transform:translateY(-4px); border-color:var(--brand2); box-shadow:var(--shadow); }
+  .feat .e { font-size:34px; } .feat .t { font-weight:800; margin-top:6px; font-size:15.5px; } .feat .d { font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+
+  /* 柱状图 */
+  .bars { display:grid; gap:12px; }
+  .barrow { cursor:pointer; }
+  .barrow .bl { display:flex; justify-content:space-between; font-weight:700; font-size:14.5px; margin-bottom:5px; }
+  .barrow .bt { height:26px; border-radius:8px; background:#EDF1F7; overflow:hidden; }
+  .barrow .bf { height:100%; width:0; border-radius:8px; background:var(--grad); transition:width 1s cubic-bezier(.22,1,.36,1); display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:#fff; font-size:12.5px; font-weight:800; }
+  .barrow .bd { max-height:0; overflow:hidden; opacity:0; transition:.35s; font-size:13.5px; color:var(--ink-soft); }
+  .barrow.open .bd { max-height:120px; opacity:1; padding-top:8px; }
+  @media (max-width:900px){ .dims{grid-template-columns:1fr} .gui{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span>宏文 · 交互课堂</div>
+    <div class="spacer"></div>
+    <a class="home-btn" href="../../index.html">🏠 课程中心</a>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">G7 第 2 周 · 🎯 项目推进</span>
+    <h1>⏳ 互联网应用新特征</h1>
+    <p class="sub">从"命令行考古"到"AI 智能推荐"——拖动时光滑动条，看懂互联网应用是怎么一步步变酷、变智能的。</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 导入 -->
+  <div class="sec-title"><span class="bar"></span>🔥 情境挑战：AI 社团报名，1990 vs 2025</div>
+  <div class="card">
+    <p style="font-weight:700">学校新成立的 AI 社团要招募成员，你是负责人，要设计一个报名方式。</p>
+    <div class="grid grid-2 mt-s">
+      <div class="card card-soft" style="box-shadow:none"><b>🕹 如果是 1990 年</b><p style="color:var(--ink-soft);font-size:14px;margin-top:6px">你只能用命令行发一封纯文字邮件，还得记住一堆命令……体验如何？</p></div>
+      <div class="card card-soft" style="box-shadow:none"><b>🤖 如果是 2025 年</b><p style="color:var(--ink-soft);font-size:14px;margin-top:6px">在线表单 / 扫码报名 / AI 帮你生成报名页——但 AI 做的，你敢直接用吗？</p></div>
+    </div>
+    <p class="sec-note mt-s">今天我们来做"互联网应用考古 + 未来预言家"👇</p>
+  </div>
+
+  <!-- 招牌①：时光滑动条 -->
+  <div class="sec-title"><span class="bar"></span>① 🎚 招牌互动：时光滑动条 · 穿越 35 年</div>
+  <div class="card">
+    <div class="era-year" id="era-year">1990</div>
+    <input type="range" min="1990" max="2025" value="1990" step="1" class="slider" id="slider" oninput="setEra(this.value)" />
+    <div class="era-ticks"><span>1990 命令行</span><span>2000 图形界面</span><span>2010 移动互联</span><span>2025 AI 智能</span></div>
+    <div class="screen mt" id="screen"></div>
+    <div class="dims">
+      <div class="dim"><div class="dk">📄 内容形式</div><div class="dv" id="d-content">纯文本</div></div>
+      <div class="dim"><div class="dk">🖱 交互方式</div><div class="dv" id="d-inter">命令行（记命令、打字）</div></div>
+      <div class="dim"><div class="dk">🧩 功能特征</div><div class="dv" id="d-func">单一应用</div></div>
+    </div>
+  </div>
+
+  <!-- 招牌②：命令行 vs 图形界面 -->
+  <div class="sec-title"><span class="bar"></span>② 💻 亲手体验：命令行 vs 图形界面</div>
+  <div class="card">
+    <p style="font-weight:700">在下面的"命令行"里输入 <span class="chip">dir</span> 再回车，看看纯文字界面；再点对比按钮看图形界面 👇</p>
+    <div class="term" id="term"><span class="cur">C:\Users\Student&gt;</span> <span id="term-input-hint" style="opacity:.6">（在此输入 dir 回车）</span></div>
+    <div class="cmdin">
+      <input id="cmd" type="text" placeholder="输入命令，例如 dir，然后回车" onkeydown="if(event.key==='Enter')runCmd()" />
+      <button class="btn btn-primary" onclick="runCmd()">运行</button>
+      <button class="btn btn-ghost" onclick="toggleGui()" id="gui-btn">🖼 看图形界面对比</button>
+    </div>
+    <div id="gui" class="gui mt hidden"></div>
+    <p id="cmd-msg" class="sec-note" style="margin-top:10px"></p>
+  </div>
+
+  <!-- 三维度 + 新特征 -->
+  <div class="sec-title"><span class="bar"></span>③ 互联网应用"新特征"（会考必背）</div>
+  <div class="grid grid-3" id="feats">
+    <div class="feat"><div class="e">👆</div><div class="t">交互性强</div><div class="d">点、滑、拖、说，随时回应你</div></div>
+    <div class="feat"><div class="e">🥳</div><div class="t">操作简单</div><div class="d">不用再记命令，鼠标/手指搞定</div></div>
+    <div class="feat"><div class="e">🎨</div><div class="t">图文声像并茂</div><div class="d">文字+图片+音频+视频多媒体</div></div>
+    <div class="feat"><div class="e">🤖</div><div class="t">智能化</div><div class="d">AI 推荐、语音助手、智能体</div></div>
+    <div class="feat"><div class="e">🎯</div><div class="t">个性化</div><div class="d">"千人千面"，懂你所需</div></div>
+    <div class="feat" style="background:var(--grad);color:#fff;border:none"><div class="e">🔑</div><div class="t" style="color:#fff">会考关键词</div><div class="d" style="color:rgba(255,255,255,.9)">交互性强·操作简单·图文声像并茂</div></div>
+  </div>
+
+  <!-- 招牌③：使用率柱状图 -->
+  <div class="sec-title"><span class="bar"></span>④ 📈 我国网民互联网应用使用率<span class="step">点柱子看详情</span></div>
+  <div class="card">
+    <p class="sec-note" style="margin-top:0">数据参考《中国互联网络发展状况统计报告》。点每一行可展开说明 👇</p>
+    <div class="bars mt-s" id="bars"></div>
+  </div>
+
+  <!-- 项目推进 -->
+  <div class="sec-title"><span class="bar"></span>⑤ 🎯 项目推进 + 未来预言家</div>
+  <div class="card">
+    <div class="grid grid-2">
+      <div>
+        <b>🔮 未来创新点畅想</b>
+        <p class="sec-note" style="margin:6px 0">未来互联网应用还可能有哪些创新？（如更深 AI 个性化 / AR 沉浸 / 脑机接口…）</p>
+        <input id="future" type="text" placeholder="写下你的一个预言…" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E0E7FF;font-size:15px;font-family:inherit" />
+      </div>
+      <div>
+        <b>🌐 我的网页要体现的新特征</b>
+        <p class="sec-note" style="margin:6px 0">你上周写了项目宣言，今天了解了"好应用长啥样"。你的个人网页要体现哪个新特征？</p>
+        <input id="myfeat" type="text" placeholder="例如：放我的画画作品=图文声像并茂…" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #E0E7FF;font-size:15px;font-family:inherit" />
+      </div>
+    </div>
+    <div class="center mt"><button class="btn btn-accent" onclick="saveFuture()">💾 保存我的畅想</button><span id="fut-msg" style="margin-left:10px;font-weight:700;color:var(--ok)"></span></div>
+  </div>
+
+  <!-- 小测 -->
+  <div class="sec-title"><span class="bar"></span>⑥ 📝 考点小测<span class="step">全对有彩带</span></div>
+  <div id="quiz"></div>
+
+</main>
+
+<footer class="foot">G7-W02《互联网应用新特征》· 交互课堂　|　对齐教学设计：特征变迁对比看板（时光滑动条）+ 网民应用使用率柱状图</footer>
+
+<script src="../../assets/js/common.js"></script>
+<script>
+/* ===== 时光滑动条 ===== */
+var ERAS = [
+  { min:1990, max:1999, bg:'#0B1020', fg:'#7CFF9B', title:'🖥️ 命令行 / telnet 纯文本 BBS', desc:'黑底绿字，全靠键盘敲命令。上 BBS 像"互联网考古现场"，全键盘操作、纯文字界面。', content:'纯文本', inter:'命令行（记命令、打字）', func:'单一应用' },
+  { min:2000, max:2009, bg:'#E8F0FE', fg:'#1A3E7E', title:'🖱 图形界面 / 门户网站', desc:'有了窗口、图标、鼠标点击。门户网站图文混排，上网从"考驾照"变"骑单车"。', content:'图文混排', inter:'图形界面（鼠标点、拖拽）', func:'门户聚合' },
+  { min:2010, max:2019, bg:'#FFF3E6', fg:'#9A3412', title:'📱 移动互联网 / 多媒体', desc:'触屏 App 爆发，图文声像、视频、直播、扫码支付。一个 App 能干很多事。', content:'图文声像多媒体', inter:'触控、手势、语音', func:'综合平台（一个App多能）' },
+  { min:2020, max:2025, bg:'linear-gradient(135deg,#EEF2FF,#FDF2F8)', fg:'#4F46E5', title:'🤖 智能化 / 个性化 / AI', desc:'AI 智能推荐、语音助手、生成式 AI。"千人千面"，应用越来越懂你。', content:'多媒体 + AI 生成', inter:'自然语言、个性化推荐', func:'智能综合平台' }
+];
+function setEra(y){
+  y = +y; HW.el('era-year').textContent = y;
+  var era = ERAS[0];
+  for(var i=0;i<ERAS.length;i++){ if(y>=ERAS[i].min && y<=ERAS[i].max){ era=ERAS[i]; break; } if(y>ERAS[ERAS.length-1].max) era=ERAS[ERAS.length-1]; }
+  var sc = HW.el('screen');
+  sc.style.background = era.bg; sc.style.color = era.fg; sc.style.borderColor = era.fg;
+  sc.innerHTML = '<div class="stitle">'+era.title+'</div><div class="sdesc">'+era.desc+'</div>';
+  HW.el('d-content').textContent = era.content;
+  HW.el('d-inter').textContent = era.inter;
+  HW.el('d-func').textContent = era.func;
+}
+
+/* ===== 命令行模拟器 ===== */
+var DIR_OUT = '\n 驱动器 C 中的卷是 Windows\n 卷的序列号是 8A3F-2C1D\n\n C:\\Users\\Student 的目录\n\n2026/09/01  08:12    <DIR>          .\n2026/09/01  08:12    <DIR>          ..\n2026/08/30  15:20    <DIR>          Desktop\n2026/08/31  09:05    <DIR>          Documents\n2026/09/01  08:10             1,024 notes.txt\n2026/08/29  20:33         3,481,600 homework.pptx\n               2 个文件      3,482,624 字节\n               4 个目录  128,849,018,880 可用字节\n';
+function runCmd(){
+  var v = HW.el('cmd').value.trim().toLowerCase();
+  var term = HW.el('term');
+  if(v === 'dir'){
+    term.innerHTML = '<span class="cur">C:\\Users\\Student&gt; dir</span>' + DIR_OUT + '<span class="cur">C:\\Users\\Student&gt;</span>';
+    HW.el('cmd-msg').innerHTML = '😵 看到了吗？纯文字、要记命令、还得自己看懂——这就是<b>命令行界面</b>。以前上网像"考驾照"。';
+    HW.beep('tap');
+  } else if(v){
+    term.innerHTML = '<span class="cur">C:\\Users\\Student&gt; '+v+'</span>\n\n“'+v+'” 不是内部或外部命令，也不是可运行的程序。\n（提示：试试输入 dir）\n\n<span class="cur">C:\\Users\\Student&gt;</span>';
+    HW.beep('no');
+  } else {
+    HW.toast('先输入 dir 试试～');
+  }
+  HW.el('cmd').value='';
+}
+var guiOn=false;
+function toggleGui(){
+  guiOn=!guiOn;
+  var g=HW.el('gui');
+  if(guiOn){
+    g.classList.remove('hidden');
+    g.innerHTML = '<div class="f"><div class="i">🖥️</div>Desktop</div><div class="f"><div class="i">📁</div>Documents</div><div class="f"><div class="i">📝</div>notes.txt</div><div class="f"><div class="i">📊</div>homework.pptx</div>';
+    HW.el('gui-btn').textContent='⌨️ 切回命令行';
+    HW.el('cmd-msg').innerHTML='🥳 <b>图形界面</b>：图标+鼠标，双击就打开，拖拽就能移动——直观、简单！这就是"交互方式"的变迁。';
+    HW.beep('ok');
+  } else {
+    g.classList.add('hidden'); HW.el('gui-btn').textContent='🖼 看图形界面对比';
+  }
+}
+
+/* ===== 使用率柱状图 ===== */
+var BARS = [
+  { n:'即时通信（微信/QQ）', v:99, d:'几乎人人都在用，是我国网民使用率最高的应用——聊天、语音、视频、支付都靠它。' },
+  { n:'网络视频', v:95, d:'追剧、看番、纪录片……长视频平台用户规模巨大，是娱乐主力。' },
+  { n:'短视频', v:94, d:'抖音/快手等，"刷一刷"停不下来，增长最快的应用之一。' },
+  { n:'网络支付', v:86, d:'扫码付、线上购物结算——移动支付让"出门不带钱包"成为日常。' },
+  { n:'网络购物', v:82, d:'淘宝/京东/拼多多，电商改变了消费方式，也催生了快递、直播带货。' }
+];
+(function(){
+  var box=HW.el('bars'); var h='';
+  BARS.forEach(function(b,i){
+    h += '<div class="barrow" onclick="toggleBar('+i+')"><div class="bl"><span>'+(i+1)+'. '+b.n+'</span><span>'+b.v+'%</span></div><div class="bt"><div class="bf" data-w="'+b.v+'">'+b.v+'%</div></div><div class="bd">'+b.d+'</div></div>';
+  });
+  box.innerHTML=h;
+  var io=new IntersectionObserver(function(en){ en.forEach(function(e){ if(e.isIntersecting){ HW.all('.bf',box).forEach(function(f){ f.style.width=f.getAttribute('data-w')+'%'; }); io.disconnect(); } }); },{threshold:.3});
+  io.observe(box);
+})();
+function toggleBar(i){ HW.all('.barrow')[i].classList.toggle('open'); HW.beep('tap'); }
+
+/* ===== 项目推进 ===== */
+function saveFuture(){
+  var f=HW.el('future').value.trim(), m=HW.el('myfeat').value.trim();
+  if(!f && !m){ HW.toast('至少写一个吧～','no'); return; }
+  HW.el('fut-msg').textContent='✅ 已保存！你从"用户"升级成"设计者"了';
+  HW.confetti(90); HW.beep('win');
+}
+
+/* ===== 小测 ===== */
+HW.quiz('quiz', [
+  { type:'single', q:'互联网应用的交互方式经历了怎样的变迁？', options:['从图形界面到命令行','从命令行到图形化界面','从语音到文字','从手机到电脑'], answer:1, explain:'方向是"命令行 → 图形化界面"，越来越直观、好操作。' },
+  { type:'blank', q:'当前互联网应用的新特征包括：交互性强、______、图文声像并茂等。（填四个字）', answer:'操作简单', explain:'关键词"操作简单"最容易漏写——相对于命令行的复杂，图形界面确实更简单。' },
+  { type:'single', q:'查阅统计报告后，我国网民使用率最高的互联网应用类别是？', options:['网络游戏','即时通信','电子邮件','网络文学'], answer:1, explain:'即时通信（微信/QQ）使用率最高，这个大趋势多年不变。' }
+], { perfectText:'🎉 全对！互联网应用考古 + 未来预言，双料通关！' });
+
+/* 初始化 */
+setEra(1990);
+</script>
+</body>
+</html>
