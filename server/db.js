@@ -39,6 +39,7 @@ export function initDb() {
       pet_type TEXT,
       pet_level INTEGER DEFAULT 1,
       pet_exp INTEGER DEFAULT 0,
+      custom_pet_id TEXT,
       created_at INTEGER,
       FOREIGN KEY (class_id) REFERENCES classes(id)
     );
@@ -50,6 +51,24 @@ export function initDb() {
       pet_type TEXT NOT NULL,
       earned_at INTEGER,
       FOREIGN KEY (student_id) REFERENCES students(id)
+    );
+
+    -- 自定义宠物表
+    CREATE TABLE IF NOT EXISTS custom_pets (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      created_at INTEGER,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- 自定义宠物等级图片表
+    CREATE TABLE IF NOT EXISTS custom_pet_images (
+      id TEXT PRIMARY KEY,
+      custom_pet_id TEXT NOT NULL,
+      level INTEGER NOT NULL,
+      image_path TEXT NOT NULL,
+      FOREIGN KEY (custom_pet_id) REFERENCES custom_pets(id)
     );
 
     -- 评价规则表

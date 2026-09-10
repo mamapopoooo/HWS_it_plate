@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'
 import { authMiddleware } from '../middleware/auth.js'
-import { calculateLevel } from '../utils/level.js'
+import { calculateLevel, MAX_LEVEL } from '../utils/level.js'
 
 const router = Router()
 
@@ -37,9 +37,9 @@ router.post('/', authMiddleware, (req, res) => {
     // Calculate new level based on exp
     const newLevel = calculateLevel(newExp)
 
-    // Check if pet graduated (reached level 8)
+    // Check if pet graduated (reached max level)
     let graduated = false
-    if (newLevel === 8 && student.pet_level < 8) {
+    if (newLevel === MAX_LEVEL && student.pet_level < MAX_LEVEL) {
       const badgeId = uuidv4()
       db.prepare('INSERT INTO badges (id, student_id, pet_type, earned_at) VALUES (?, ?, ?, ?)')
         .run(badgeId, studentId, student.pet_type, now)

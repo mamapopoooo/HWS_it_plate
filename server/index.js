@@ -13,6 +13,7 @@ import evaluationRoutes from './routes/evaluations.js'
 import ruleRoutes from './routes/rules.js'
 import backupRoutes from './routes/backup.js'
 import settingsRoutes from './routes/settings.js'
+import customPetsRoutes from './routes/custom-pets.js'
 
 const app = express()
 const PORT = 3002
@@ -53,7 +54,7 @@ if (rulesCount && rulesCount.count === 0) {
 const levelConfig = db.prepare("SELECT value FROM settings WHERE key = 'levelConfig'").get()
 if (!levelConfig) {
   db.prepare("INSERT INTO settings (key, value) VALUES ('levelConfig', ?)")
-    .run(JSON.stringify([40, 60, 80, 100, 120, 140, 160]))
+    .run(JSON.stringify([40, 40, 40, 40, 40, 40]))
 }
 
 // 注册路由
@@ -64,6 +65,7 @@ app.use('/api/evaluations', evaluationRoutes)
 app.use('/api/rules', ruleRoutes)
 app.use('/api/backup', backupRoutes)
 app.use('/api/settings', settingsRoutes)
+app.use('/api/custom-pets', customPetsRoutes)
 
 // 健康检查（公开）
 app.get('/api/health', (req, res) => {

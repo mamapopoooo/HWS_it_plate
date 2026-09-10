@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { PET_TYPES, getPetLevelImage } from '@/data/pets'
+import { PET_TYPES, getPetLevelImage, MAX_LEVEL } from '@/data/pets'
 import PetImage from '@/components/PetImage.vue'
 
 // 分类标签
@@ -31,8 +31,7 @@ function getLevelColor(level: number): string {
     4: 'from-cyan-400 to-teal-500',
     5: 'from-purple-400 to-violet-500',
     6: 'from-pink-400 to-rose-500',
-    7: 'from-rose-400 to-red-500',
-    8: 'from-yellow-400 via-amber-400 to-orange-500'
+    7: 'from-yellow-400 via-amber-400 to-orange-500'
   }
   return colors[level] || 'from-gray-400 to-gray-500'
 }
@@ -46,8 +45,7 @@ function getLevelName(level: number): string {
     4: '进阶',
     5: '稀有',
     6: '精英',
-    7: '史诗',
-    8: '传说'
+    7: '传说'
   }
   return names[level] || `Lv.${level}`
 }
@@ -232,7 +230,7 @@ function closeDetail() {
             <h3 class="text-lg font-bold text-gray-800 mb-4">选择等级预览</h3>
             <div class="grid grid-cols-4 md:grid-cols-8 gap-3">
               <button
-                v-for="level in 8"
+                v-for="level in MAX_LEVEL"
                 :key="level"
                 @click="selectedLevel = level"
                 class="relative aspect-square rounded-2xl overflow-hidden transition-all"

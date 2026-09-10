@@ -44,9 +44,9 @@ router.post('/', authMiddleware, (req, res) => {
 
   const id = uuidv4()
   const now = Date.now()
-  db.prepare('INSERT INTO students (id, class_id, name, student_no, total_points, pet_level, pet_exp, created_at) VALUES (?, ?, ?, ?, 0, 1, 0, ?)')
+  db.prepare('INSERT INTO students (id, class_id, name, student_no, total_points, pet_level, pet_exp, created_at) VALUES (?, ?, ?, ?, 0, 0, 0, ?)')
     .run(id, classId, name, studentNo || null, now)
-  res.json({ id, class_id: classId, name, student_no: studentNo || null, total_points: 0, pet_level: 1, pet_exp: 0, created_at: now })
+  res.json({ id, class_id: classId, name, student_no: studentNo || null, total_points: 0, pet_level: 0, pet_exp: 0, created_at: now })
 })
 
 // 更新学生
@@ -105,7 +105,7 @@ router.post('/import', authMiddleware, (req, res) => {
   }
 
   const now = Date.now()
-  const insertStmt = db.prepare('INSERT INTO students (id, class_id, name, student_no, total_points, pet_level, pet_exp, created_at) VALUES (?, ?, ?, ?, 0, 1, 0, ?)')
+  const insertStmt = db.prepare('INSERT INTO students (id, class_id, name, student_no, total_points, pet_level, pet_exp, created_at) VALUES (?, ?, ?, ?, 0, 0, 0, ?)')
 
   let imported = 0
   for (const student of students) {
@@ -135,18 +135,18 @@ router.put('/:id/pet', authMiddleware, (req, res) => {
     return res.status(404).json({ error: '学生不存在或无权访问' })
   }
 
-  // If student already has a pet, create a badge for it if level is 8
-  if (student.pet_type && student.pet_level >= 8) {
+  // If student already has a pet, create a badge for it if level is max
+  if (student.pet_type && student.pet_level >= 7) {
     const badgeId = uuidv4()
     db.prepare('INSERT INTO badges (id, student_id, pet_type, earned_at) VALUES (?, ?, ?, ?)')
       .run(badgeId, req.params.id, student.pet_type, now)
   }
 
-  // Update pet type and reset level/exp
+  // Update pet type and reset level/exp (选宠物后从1级开始)
   db.prepare('UPDATE students SET pet_type = ?, pet_level = 1, pet_exp = 0 WHERE id = ?')
     .run(petType, req.params.id)
 
-  res.json({ success: true })
+  res.json({ success: true, petLevel: 1 })
 })
 
 export default router

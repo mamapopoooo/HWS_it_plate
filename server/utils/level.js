@@ -1,5 +1,6 @@
-// 等级配置 (每级所需经验)
-export const LEVEL_CONFIG = [40, 60, 80, 100, 120, 140, 160]
+// 等级配置（7级，每级40分）
+export const LEVEL_CONFIG = [40, 40, 40, 40, 40, 40]
+export const MAX_LEVEL = 7
 
 // 计算等级
 export function calculateLevel(exp) {
@@ -13,7 +14,7 @@ export function calculateLevel(exp) {
       break
     }
   }
-  return Math.min(level, 8)
+  return Math.min(level, MAX_LEVEL)
 }
 
 // 获取等级进度
@@ -25,7 +26,7 @@ export function getLevelProgress(exp) {
   }
   const currentLevelExp = exp - prevTotal
   const required = LEVEL_CONFIG[level - 1] || 0
-  const isMaxLevel = level >= 8
+  const isMaxLevel = level >= MAX_LEVEL
 
   return {
     level,

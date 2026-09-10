@@ -5,13 +5,13 @@ import {
   getPetType, 
   getPetLevelImage,
   PET_TYPES,
-  LEVEL_CONFIG
+  LEVEL_CONFIG,
+  MAX_LEVEL
 } from './pets'
 
 describe('pets 数据和基础函数', () => {
   it('应该有正确数量的宠物类型', () => {
     expect(PET_TYPES.length).toBeGreaterThan(0)
-    // 至少有普通和神兽两个类别
     const categories = new Set(PET_TYPES.map(p => p.category))
     expect(categories.has('normal')).toBe(true)
     expect(categories.has('mythical')).toBe(true)
@@ -26,12 +26,9 @@ describe('pets 数据和基础函数', () => {
     }
   })
 
-  it('等级配置应该有 7 个级别（2-8级所需经验）', () => {
-    expect(LEVEL_CONFIG).toHaveLength(7)
-    // 每级所需经验应该递增
-    for (let i = 1; i < LEVEL_CONFIG.length; i++) {
-      expect(LEVEL_CONFIG[i]).toBeGreaterThanOrEqual(LEVEL_CONFIG[i - 1])
-    }
+  it('等级配置应为6个40分（7级系统）', () => {
+    expect(LEVEL_CONFIG).toEqual([40, 40, 40, 40, 40, 40])
+    expect(MAX_LEVEL).toBe(7)
   })
 })
 
@@ -52,31 +49,25 @@ describe('calculateLevel', () => {
     expect(calculateLevel(40)).toBe(2)
   })
 
-  it('100 经验应该是 3 级', () => {
-    // 40 + 60 = 100，刚好升到 3 级
-    expect(calculateLevel(100)).toBe(3)
+  it('80 经验应该是 3 级', () => {
+    expect(calculateLevel(80)).toBe(3)
   })
 
-  it('99 经验应该是 2 级', () => {
-    // 差 1 点到 3 级
-    expect(calculateLevel(99)).toBe(2)
+  it('79 经验应该是 2 级', () => {
+    expect(calculateLevel(79)).toBe(2)
   })
 
-  it('应该正确计算 4-7 级', () => {
-    const thresholds = [40, 60, 80, 100, 120, 140, 160]
-    let total = 0
-    
-    for (let i = 0; i < thresholds.length; i++) {
-      total += thresholds[i]
-      expect(calculateLevel(total)).toBe(i + 2)
-      expect(calculateLevel(total - 1)).toBe(i + 1)
-    }
+  it('应该正确计算 4-7 级（每级40分）', () => {
+    expect(calculateLevel(120)).toBe(4)
+    expect(calculateLevel(160)).toBe(5)
+    expect(calculateLevel(200)).toBe(6)
+    expect(calculateLevel(240)).toBe(7)
   })
 
-  it('满级应该是 8 级', () => {
+  it('满级应该是 7 级', () => {
     const maxExp = LEVEL_CONFIG.reduce((sum, req) => sum + req, 0)
-    expect(calculateLevel(maxExp)).toBe(8)
-    expect(calculateLevel(maxExp + 1000)).toBe(8) // 超出也应该封顶
+    expect(calculateLevel(maxExp)).toBe(7)
+    expect(calculateLevel(maxExp + 1000)).toBe(7)
   })
 })
 
@@ -98,11 +89,10 @@ describe('getLevelProgress', () => {
   })
 
   it('升级后应该重置当前经验', () => {
-    // 50 经验 = 2 级，当前 10/60
     const progress = getLevelProgress(50)
     expect(progress.current).toBe(10)
-    expect(progress.required).toBe(60)
-    expect(progress.percentage).toBe(17) // 10/60 ≈ 16.67%
+    expect(progress.required).toBe(40)
+    expect(progress.percentage).toBe(25)
   })
 
   it('满级应该显示 isMaxLevel=true', () => {
@@ -134,6 +124,13 @@ describe('getPetType', () => {
     expect(pet?.category).toBe('normal')
   })
 
+  it('应该能找到老虎', () => {
+    const pet = getPetType('tiger')
+    expect(pet).toBeDefined()
+    expect(pet?.name).toBe('老虎')
+    expect(pet?.category).toBe('mythical')
+  })
+
   it('不存在的宠物应该返回 undefined', () => {
     const pet = getPetType('non-existent-pet')
     expect(pet).toBeUndefined()
@@ -149,11 +146,11 @@ describe('getPetLevelImage', () => {
   it('等级超出范围应该返回边界值图片', () => {
     const image0 = getPetLevelImage('corgi', 0)
     const image1 = getPetLevelImage('corgi', 1)
-    expect(image0).toBe(image1) // 0 级应该返回 1 级图片
+    expect(image0).toBe(image1)
 
     const image9 = getPetLevelImage('corgi', 9)
-    const image8 = getPetLevelImage('corgi', 8)
-    expect(image9).toBe(image8) // 9 级应该返回 8 级图片
+    const image7 = getPetLevelImage('corgi', 7)
+    expect(image9).toBe(image7)
   })
 
   it('不存在的宠物应该返回空字符串', () => {

@@ -8,11 +8,11 @@ export interface PetType {
   levelImages?: Record<number, string>
 }
 
-// 生成等级图片路径的辅助函数
-function generateLevelImages(petId: string): Record<number, string> {
+// 生成等级图片路径的辅助函数（默认8级）
+function generateLevelImages(petId: string, maxLevel = 8): Record<number, string> {
   const basePath = `/pet-garden/pets/${petId}`
   const images: Record<number, string> = {}
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= maxLevel; i++) {
     images[i] = `${basePath}/lv${i}.png`
   }
   return images
@@ -47,6 +47,7 @@ export const PET_TYPES: PetType[] = [
   { id: 'corgi', name: '柯基', category: 'normal', image: getDefaultImage('corgi'), levelImages: generateLevelImages('corgi') },
   
   // 神兽
+  { id: 'tiger', name: '老虎', category: 'mythical', image: getDefaultImage('tiger'), levelImages: generateLevelImages('tiger', 7) },
   { id: 'white-tiger', name: '白虎', category: 'mythical', image: getDefaultImage('white-tiger'), levelImages: generateLevelImages('white-tiger') },
   { id: 'unicorn', name: '独角兽', category: 'mythical', image: getDefaultImage('unicorn'), levelImages: generateLevelImages('unicorn') },
   { id: 'azure-dragon', name: '青龙', category: 'mythical', image: getDefaultImage('azure-dragon'), levelImages: generateLevelImages('azure-dragon') },
@@ -56,8 +57,9 @@ export const PET_TYPES: PetType[] = [
   { id: 'suanni', name: '狻猊', category: 'mythical', image: getDefaultImage('suanni'), levelImages: generateLevelImages('suanni') },
 ]
 
-// 等级配置
-export const LEVEL_CONFIG = [40, 60, 80, 100, 120, 140, 160]
+// 等级配置（7级，每级40分）
+export const LEVEL_CONFIG = [40, 40, 40, 40, 40, 40]
+export const MAX_LEVEL = 7
 
 // 获取宠物信息
 export function getPetType(id: string): PetType | undefined {
@@ -69,8 +71,8 @@ export function getPetLevelImage(petId: string, level: number): string {
   const pet = getPetType(petId)
   if (!pet) return ''
   
-  // 确保等级在 1-8 范围内
-  const validLevel = Math.max(1, Math.min(8, level))
+  // 确保等级在 1-7 范围内（0=蛋，由调用方处理）
+  const validLevel = Math.max(1, Math.min(MAX_LEVEL, level))
   
   // 优先使用等级图片，如果没有则使用默认图片
   return pet.levelImages?.[validLevel] || pet.image || ''
@@ -93,7 +95,7 @@ export function calculateLevel(exp: number): number {
       break
     }
   }
-  return Math.min(level, 8)
+  return Math.min(level, MAX_LEVEL)
 }
 
 // 获取当前等级进度

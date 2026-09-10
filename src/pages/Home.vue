@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import AuthModal from '@/components/AuthModal.vue'
 import { useToast } from '@/composables/useToast'
 import { useAuth } from '@/composables/useAuth'
+import CustomPetCreator from '@/components/CustomPetCreator.vue'
 
 // Types
 interface Class {
@@ -23,6 +24,7 @@ interface Student {
   pet_type: string | null
   pet_level: number
   pet_exp: number
+  custom_pet_id?: string | null
 }
 
 // Toast 提示
@@ -84,6 +86,9 @@ const sortBy = ref<'name' | 'studentNo' | 'progress'>('name')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 const showSortMenu = ref(false)
 const showPetMenu = ref(false)
+const showCustomPetCreator = ref(false)
+const customPets = ref<any[]>([])
+const customPetTab = ref(false) // false=内置宠物, true=自定义宠物
 
 // 确认对话框状态
 const confirmDialog = ref({
@@ -202,30 +207,31 @@ const ranking = computed(() => {
 })
 
 function getLevelBgClass(level: number): string {
-  if (level >= 10) return 'from-yellow-400 via-amber-400 to-orange-400'
-  if (level >= 7) return 'from-pink-400 via-rose-400 to-red-400'
-  if (level >= 5) return 'from-purple-400 via-violet-400 to-indigo-400'
-  if (level >= 3) return 'from-blue-400 via-cyan-400 to-teal-400'
+  if (level === 0) return 'from-indigo-300 via-purple-300 to-pink-300'
+  if (level >= 7) return 'from-yellow-400 via-amber-400 to-orange-400'
+  if (level >= 5) return 'from-pink-400 via-rose-400 to-red-400'
+  if (level >= 3) return 'from-purple-400 via-violet-400 to-indigo-400'
   return 'from-gray-400 via-slate-400 to-zinc-400'
 }
 
 // 等级边框样式 - 每个等级都不同
 function getLevelBorderClass(level: number): string {
   const borders: Record<number, string> = {
+    0: 'border-2 border-dashed border-indigo-300', // 蛋：紫色虚线边框
     1: 'border border-gray-200', // 浅灰色细边框
     2: 'border-2 border-gray-300', // 灰色
     3: 'border-2 border-blue-400 shadow-md shadow-blue-400/10', // 蓝色
     4: 'border-2 border-cyan-400 shadow-md shadow-cyan-400/15', // 青色
     5: 'border-2 border-purple-400 shadow-lg shadow-purple-400/20', // 紫色
     6: 'border-2 border-pink-400 shadow-lg shadow-pink-400/25', // 粉色
-    7: 'border-2 border-rose-400 shadow-xl shadow-rose-400/30', // 红色
-    8: 'border-3 border-yellow-400 shadow-xl shadow-yellow-400/40', // 金色
+    7: 'border-3 border-yellow-400 shadow-xl shadow-yellow-400/40', // 金色满级
   }
   return borders[level] || ''
 }
 
 // 计算显示等级（基于经验值实时计算，修复数据不一致问题）
 function getDisplayLevel(student: Student): number {
+  if (!student.pet_type) return 0
   return calculateLevel(student.pet_exp)
 }
 
@@ -405,7 +411,15 @@ async function importStudents() {
 
 async function openPetSelect(student: Student) {
   selectedStudent.value = student
+  customPetTab.value = false
   showPetModal.value = true
+  // 加载自定义宠物
+  try {
+    const res = await api.get('/custom-pets')
+    customPets.value = res.data.pets || []
+  } catch (e) {
+    customPets.value = []
+  }
 }
 
 async function selectPet(petId: string) {
@@ -427,9 +441,66 @@ async function selectPet(petId: string) {
   }
 }
 
-// 打开详情面板
+// 保存自定义宠物
+async function handleSaveCustomPet(data: { name: string; images: Record<string, string> }) {
+  try {
+    await api.post('/custom-pets', data)
+    toast.success(`🎨 自定义宠物「${data.name}」创建成功！`)
+    showCustomPetCreator.value = false
+    // 重新加载自定义宠物列表
+    const res2 = await api.get('/custom-pets')
+    customPets.value = res2.data.pets || []
+    customPetTab.value = true
+  } catch (error) {
+    console.error('创建自定义宠物失败:', error)
+    toast.error('创建失败，请重试')
+  }
+}
+
+// 选择自定义宠物
+async function selectCustomPet(petId: string) {
+  if (!selectedStudent.value) return
+  try {
+    await api.post(`/custom-pets/${petId}/select`, { studentId: selectedStudent.value.id })
+    const pet = customPets.value.find(p => p.id === petId)
+    toast.success(` ${selectedStudent.value.name} 领养了自定义宠物「${pet?.name || '宠物'}」！`)
+    showPetModal.value = false
+    selectedStudent.value = null
+    await loadStudents()
+    if (detailStudent.value) {
+      detailStudent.value = students.value.find(s => s.id === detailStudent.value?.id) || null
+    }
+  } catch (error) {
+    console.error('领养自定义宠物失败:', error)
+    toast.error('领养失败，请重试')
+  }
+}
+
+// 删除自定义宠物
+async function deleteCustomPet(petId: string) {
+  const pet = customPets.value.find(p => p.id === petId)
+  confirmDialog.value = {
+    show: true,
+    title: '删除自定义宠物',
+    message: `确定要删除「${pet?.name}」吗？已领养该宠物的学生将重置为蛋。`,
+    confirmText: '删除',
+    cancelText: '取消',
+    type: 'danger' as const,
+    onConfirm: async () => {
+      try {
+        await api.delete(`/custom-pets/${petId}`)
+        toast.success('已删除')
+        customPets.value = customPets.value.filter(p => p.id !== petId)
+        await loadStudents()
+      } catch (e) {
+        toast.error('删除失败')
+      }
+      confirmDialog.value.show = false
+    }
+  }
+}
 async function openDetailPanel(student: Student) {
-  if (!student.pet_type) {
+  if (!student.pet_type && !student.custom_pet_id) {
     confirmDialog.value = {
       show: true,
       title: '领养宠物',
@@ -829,8 +900,27 @@ async function importBackup(event: Event) {
 }
 */
 
+function getStudentPetName(student: Student): string {
+  if (student.custom_pet_id && !student.pet_type) {
+    const cp = customPets.value.find(p => p.id === student.custom_pet_id)
+    return cp?.name || '自定义宠物'
+  }
+  if (!student.pet_type) return '未领养'
+  return getPetType(student.pet_type)?.name || '宠物'
+}
+
 function getStudentPetImage(student: Student): string {
-  if (!student.pet_type) return ''
+  // 自定义宠物
+  if (student.custom_pet_id && !student.pet_type) {
+    const cp = customPets.value.find(p => p.id === student.custom_pet_id)
+    if (cp && cp.images) {
+      const lvl = Math.max(1, Math.min(7, student.pet_level || 1))
+      return cp.images[lvl] || cp.images[1] || ''
+    }
+  }
+  if (!student.pet_type) return '/pet-garden/pets/tiger/egg.png'
+  // 蛋状态（level 0）显示蛋图
+  if (student.pet_level === 0) return '/pet-garden/pets/' + student.pet_type + '/egg.png'
   // 根据学生当前等级显示对应等级的宠物图片
   return getPetLevelImage(student.pet_type, student.pet_level)
 }
@@ -877,13 +967,13 @@ onMounted(async () => {
           
           <!-- 主内容 -->
           <div class="relative bg-white/95 backdrop-blur-xl rounded-3xl p-10 text-center shadow-2xl border-4 max-w-md"
-            :class="levelUpInfo.level >= 8 ? 'border-yellow-400 shadow-yellow-400/50' : levelUpInfo.level >= 5 ? 'border-purple-400 shadow-purple-400/50' : 'border-orange-400 shadow-orange-400/50'"
+            :class="levelUpInfo.level >= 7 ? 'border-yellow-400 shadow-yellow-400/50' : levelUpInfo.level >= 5 ? 'border-purple-400 shadow-purple-400/50' : 'border-orange-400 shadow-orange-400/50'"
           >
             <!-- 标题 -->
             <h2 class="text-3xl font-bold mb-2"
-              :class="levelUpInfo.level >= 8 ? 'text-gradient bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 bg-clip-text text-transparent' : 'text-gradient'"
+              :class="levelUpInfo.level >= 7 ? 'text-gradient bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 bg-clip-text text-transparent' : 'text-gradient'"
             >
-              {{ levelUpInfo.level >= 8 ? '恭喜毕业！' : '升级啦！' }}
+              {{ levelUpInfo.level >= 7 ? '恭喜毕业！' : '升级啦！' }}
             </h2>
             
             <!-- 宠物进化动画区域 -->
@@ -913,7 +1003,7 @@ onMounted(async () => {
                 <span class="text-sm text-gray-400">Lv.{{ levelUpInfo.prevLevel }}</span>
                 <span class="text-lg">➜</span>
                 <span class="text-xl font-bold"
-                  :class="levelUpInfo.level >= 8 ? 'text-yellow-500' : levelUpInfo.level >= 5 ? 'text-purple-500' : 'text-orange-500'"
+                  :class="levelUpInfo.level >= 7 ? 'text-yellow-500' : levelUpInfo.level >= 5 ? 'text-purple-500' : 'text-orange-500'"
                 >
                   Lv.{{ levelUpInfo.level }}
                 </span>
@@ -927,10 +1017,9 @@ onMounted(async () => {
             
             <!-- 等级称号 -->
             <div class="text-base">
-              <span v-if="levelUpInfo.level >= 10" class="text-yellow-500 font-bold">🏆 传说级宠物</span>
-              <span v-else-if="levelUpInfo.level >= 8" class="text-pink-500 font-bold">🌟 史诗级宠物</span>
-              <span v-else-if="levelUpInfo.level >= 5" class="text-purple-500 font-bold">⭐ 稀有宠物</span>
-              <span v-else-if="levelUpInfo.level >= 3" class="text-blue-500 font-bold">💎 优秀宠物</span>
+              <span v-if="levelUpInfo.level >= 7" class="text-yellow-500 font-bold">🏆 传说级宠物</span>
+              <span v-else-if="levelUpInfo.level >= 5" class="text-pink-500 font-bold">🌟 史诗级宠物</span>
+              <span v-else-if="levelUpInfo.level >= 3" class="text-purple-500 font-bold">💎 优秀宠物</span>
               <span v-else class="text-green-500 font-bold">🌱 成长中</span>
             </div>
           </div>
@@ -1185,25 +1274,18 @@ onMounted(async () => {
             
             <!-- 宠物图片区域 -->
             <div class="aspect-square flex items-center justify-center relative rounded-t-2xl"
-              :class="student.pet_type ? 'bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100' : 'bg-gradient-to-br from-gray-100 via-slate-50 to-gray-100'"
+              :class="student.pet_type ? 'bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100' : 'bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50'"
             >
-              <!-- 有宠物时使用 PetImage 组件 -->
-              <template v-if="student.pet_type">
-                <div class="w-full h-full overflow-hidden" style="border-radius: 14px 14px 0 0; margin: -1px -1px 0 -1px; width: calc(100% + 2px);">
-                  <PetImage
-                    :src="getStudentPetImage(student)"
-                    :alt="getPetType(student.pet_type)?.name"
-                    size="full"
-                    :rounded="false"
-                    :show-loading="true"
-                    class="w-full h-full"
-                  />
-                </div>
-              </template>
-              <!-- 未领养宠物 -->
-              <div v-else class="flex flex-col items-center">
-                <span class="text-6xl pet-unknown">❓</span>
-                <span class="text-xs text-gray-400 mt-2 group-hover:text-orange-400 transition-colors">点击领养</span>
+              <!-- 始终显示宠物图片（无宠物时显示蛋） -->
+              <div class="w-full h-full overflow-hidden" style="border-radius: 14px 14px 0 0; margin: -1px -1px 0 -1px; width: calc(100% + 2px);">
+                <PetImage
+                  :src="getStudentPetImage(student)"
+                  :alt="student.pet_type ? (getPetType(student.pet_type)?.name || '宠物') : '宠物蛋'"
+                  size="full"
+                  :rounded="false"
+                  :show-loading="true"
+                  class="w-full h-full"
+                />
               </div>
               
               <!-- 等级徽章 -->
@@ -1211,8 +1293,9 @@ onMounted(async () => {
                 class="absolute bottom-3 right-3 font-bold px-3 py-1 rounded-full shadow-lg text-white text-sm"
                 :class="`bg-gradient-to-r ${getLevelBgClass(getDisplayLevel(student))}`"
               >
-                <span v-if="getDisplayLevel(student) >= 10">👑</span>
-                <span v-else>Lv.</span>{{ getDisplayLevel(student) }}
+                <span v-if="getDisplayLevel(student) >= 7">👑</span>
+                <span v-else-if="getDisplayLevel(student) === 0">🥚</span>
+                <span v-else>Lv.</span>{{ getDisplayLevel(student) === 0 ? '' : getDisplayLevel(student) }}
               </div>
             </div>
             
@@ -1222,8 +1305,8 @@ onMounted(async () => {
               <div class="flex items-center justify-between mb-2">
                 <span class="font-bold text-lg text-gray-800 group-hover:text-orange-500 transition-colors">{{ student.name }}</span>
                 <span class="text-xs px-2 py-1 rounded-full" 
-                  :class="student.pet_type ? 'bg-gradient-to-r from-orange-100 to-pink-100 text-orange-600' : 'bg-gray-100 text-gray-400'">
-                  {{ student.pet_type ? getPetType(student.pet_type)?.name : '未领养' }}
+                  :class="(student.pet_type || student.custom_pet_id) ? 'bg-gradient-to-r from-orange-100 to-pink-100 text-orange-600' : 'bg-gray-100 text-gray-400'">
+                  {{ getStudentPetName(student) }}
                 </span>
               </div>
               
@@ -1455,13 +1538,37 @@ onMounted(async () => {
     <Transition name="modal">
       <div v-if="showPetModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-3xl max-h-[90vh] overflow-auto shadow-2xl animate-scale-in">
-          <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span class="text-3xl">🐾</span>
+          <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+            <span class="text-3xl"></span>
             <span>为 <span class="text-gradient bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">{{ selectedStudent?.name }}</span> 选择宠物伙伴</span>
           </h3>
+
+          <!-- 标签切换 -->
+          <div class="flex gap-2 mb-4">
+            <button
+              @click="customPetTab = false"
+              class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              :class="!customPetTab ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            >
+               内置宠物
+            </button>
+            <button
+              @click="customPetTab = true"
+              class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              :class="customPetTab ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            >
+              🎨 自定义宠物 ({{ customPets.length }})
+            </button>
+            <button
+              @click="showCustomPetCreator = true"
+              class="ml-auto px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all"
+            >
+              ＋ 创建新宠物
+            </button>
+          </div>
           
-          <!-- 宠物网格 - 所有宠物混合显示 -->
-          <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <!-- 内置宠物网格 -->
+          <div v-if="!customPetTab" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <button 
               v-for="pet in PET_TYPES" 
               :key="pet.id"
@@ -1498,6 +1605,48 @@ onMounted(async () => {
             </button>
           </div>
 
+          <!-- 自定义宠物网格 -->
+          <div v-else class="grid grid-cols-3 md:grid-cols-4 gap-3">
+            <div v-if="customPets.length === 0" class="col-span-full text-center py-12 text-gray-400">
+              <div class="text-5xl mb-3">🎨</div>
+              <p class="text-lg font-medium">还没有自定义宠物</p>
+              <p class="text-sm mt-1">点击上方「＋ 创建新宠物」开始绘制</p>
+            </div>
+            <div
+              v-for="pet in customPets"
+              :key="pet.id"
+              class="relative bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-3 border-2 border-purple-200 overflow-hidden"
+            >
+              <!-- 图片 -->
+              <div class="w-full aspect-square mx-auto mb-2 rounded-xl overflow-hidden bg-white">
+                <img
+                  v-if="pet.images && pet.images[1]"
+                  :src="pet.images[1]"
+                  class="w-full h-full object-contain"
+                />
+                <div v-else class="w-full h-full flex items-center justify-center text-gray-300">无图</div>
+              </div>
+              <!-- 名称 -->
+              <div class="text-base font-bold text-center text-purple-700 mb-2">{{ pet.name }}</div>
+              <!-- 操作按钮 -->
+              <div class="flex gap-1">
+                <button
+                  @click="selectCustomPet(pet.id)"
+                  class="flex-1 px-2 py-1.5 bg-purple-500 text-white rounded-lg text-xs font-medium hover:bg-purple-600 transition-colors"
+                >
+                  领养
+                </button>
+                <button
+                  @click="deleteCustomPet(pet.id)"
+                  class="px-2 py-1.5 bg-red-100 text-red-500 rounded-lg text-xs hover:bg-red-200 transition-colors"
+                  title="删除"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="mt-6 p-4 bg-gradient-to-r from-orange-50 via-pink-50 to-purple-50 rounded-xl text-sm text-gray-600 text-center border border-orange-100">
             <span class="text-lg">💡</span> 点击宠物即可领养，宠物会陪伴学生一起成长！
           </div>
@@ -1508,6 +1657,13 @@ onMounted(async () => {
         </div>
       </div>
     </Transition>
+
+    <!-- 自定义宠物创建器 -->
+    <CustomPetCreator
+      v-if="showCustomPetCreator"
+      @save="handleSaveCustomPet"
+      @cancel="showCustomPetCreator = false"
+    />
 
     <!-- 排行榜模态框 -->
     <Transition name="modal">
@@ -1539,11 +1695,9 @@ onMounted(async () => {
               <!-- 宠物头像 -->
               <div class="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-orange-100 to-pink-100 shadow-inner">
                 <img 
-                  v-if="student.pet_type" 
                   :src="getStudentPetImage(student)" 
                   class="w-10 h-10 object-contain"
                 />
-                <span v-else class="text-2xl">❓</span>
               </div>
               
               <!-- 信息 -->
@@ -1777,16 +1931,14 @@ onMounted(async () => {
             <div class="flex items-center gap-4">
               <div class="w-20 h-20 rounded-2xl overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
                 <img 
-                  v-if="detailStudent.pet_type" 
                   :src="getStudentPetImage(detailStudent)" 
                   class="w-16 h-16 object-contain"
                 />
-                <span v-else class="text-4xl">❓</span>
               </div>
               <div class="text-white">
                 <h3 class="text-2xl font-bold">{{ detailStudent.name }}</h3>
                 <p class="text-white/80 text-sm">
-                  {{ detailStudent.pet_type ? getPetType(detailStudent.pet_type)?.name : '未领养' }}
+                  {{ getStudentPetName(detailStudent) }}
                   · Lv.{{ getDisplayLevel(detailStudent) }}
                   · ⭐ {{ detailStudent.total_points }}
                 </p>
