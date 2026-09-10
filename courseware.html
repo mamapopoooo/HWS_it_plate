@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>可交互课件 · 宏文交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/css/common.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html" style="color:inherit"><span class="dot"></span>宏文 · 交互课堂</a>
+    <div class="spacer"></div>
+    <span class="chip">Zone 2 · 可交互课件</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">🎮 能拖 · 能点 · 能玩</span>
+    <h1>可交互课件</h1>
+    <p class="sub">选择年级与学期，再点第几课进入互动网页。每课一个"招牌交互"，课末小测自动判分（学习单与作业就嵌在课里）。</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="sel-row">
+    <span class="sel-label">年级</span>
+    <div class="seg" id="seg-grade">
+      <button class="seg-btn" data-v="g6">六年级</button>
+      <button class="seg-btn on" data-v="g7">七年级</button>
+    </div>
+    <span class="sel-label">学期</span>
+    <div class="seg" id="seg-sem">
+      <button class="seg-btn on" data-v="shang">上学期</button>
+      <button class="seg-btn" data-v="xia">下学期</button>
+    </div>
+    <span class="sel-label" id="cur-label"></span>
+    <span class="chip green" id="cur-count"></span>
+  </div>
+
+  <div class="lesson-grid" id="grid"></div>
+
+  <div class="card card-soft mt-l">
+    <b>💡 说明：</b>灰色课次表示交互页制作中（占位）。复习讲义与复习题在
+    <a href="resources.html" style="color:var(--brand);font-weight:800">学习单 · 作业 · 复习</a> 区；
+    学习单与作业按课堂习惯直接嵌入各课交互页的课末小测。
+  </div>
+
+</main>
+
+<footer class="foot">
+  宏文学校 G6/G7 信息科技 · 交互课堂平台　|　Zone 2 可交互课件　|　纯静态零依赖 · 学生数据不出校
+</footer>
+
+<script src="assets/js/common.js"></script>
+<script src="assets/js/curriculum.js"></script>
+<script>
+(function () {
+  var state = { grade: 'g7', sem: 'shang' };
+
+  function bindSeg(id, key) {
+    var seg = document.getElementById(id);
+    seg.addEventListener('click', function (e) {
+      var btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      state[key] = btn.getAttribute('data-v');
+      var all = seg.querySelectorAll('.seg-btn');
+      for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
+      btn.classList.add('on');
+      render();
+    });
+  }
+
+  function render() {
+    var g = window.CURRICULUM[state.grade];
+    var list = window.CUR.lessons(state.grade, state.sem);
+    document.getElementById('cur-label').textContent =
+      g.label + ' · ' + (state.sem === 'shang' ? '上学期' : '下学期');
+    var done = 0;
+    for (var i = 0; i < list.length; i++) if (list[i].url) done++;
+    document.getElementById('cur-count').textContent = '共 ' + list.length + ' 课 · 已上线 ' + done + ' 课';
+
+    var html = '';
+    for (var j = 0; j < list.length; j++) {
+      var ls = list[j];
+      if (ls.url) {
+        html += '<a class="lesson-card fade-up" href="' + ls.url + '">' +
+          '<span class="ln">' + ls.no + '</span>' +
+          '<span class="lt">' + ls.title + '</span>' +
+          '<span class="ls">可进入 →</span></a>';
+      } else {
+        html += '<div class="lesson-card empty" title="本课交互页制作中">' +
+          '<span class="ln">' + ls.no + '</span>' +
+          '<span class="lt">' + ls.title + '</span>' +
+          '<span class="ls">制作中</span></div>';
+      }
+    }
+    document.getElementById('grid').innerHTML = html;
+  }
+
+  bindSeg('seg-grade', 'grade');
+  bindSeg('seg-sem', 'sem');
+  render();
+})();
+</script>
+</body>
+</html>

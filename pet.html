@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>网宠 · 加减分 · 宏文交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/css/common.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html" style="color:inherit"><span class="dot"></span>宏文 · 交互课堂</a>
+    <div class="spacer"></div>
+    <span class="chip orange">Zone 1 · 网宠 / 加减分</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">🐣 每人一只蛋 · 七级进阶</span>
+    <h1>网宠 · 加减分</h1>
+    <p class="sub">学生选宠物、攒积分升级（每级 40 分，共 7 级）；教师端批量加学生、一键加减分。本区数据只存校内服务器，不出校。</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="box">
+    <div class="placeholder"><div class="ph-ico">🔄</div><p>正在检测校内网宠服务…</p></div>
+  </div>
+
+  <div class="grid grid-3 mt-l">
+    <div class="card flat"><b>🐣 起步是蛋</b><p style="color:var(--ink-soft);font-size:14px;margin-top:8px">教师批量导入名单后，每人初始一只蛋；学生首次进入自选宠物物种。</p></div>
+    <div class="card flat"><b>⭐ 每级 40 分</b><p style="color:var(--ink-soft);font-size:14px;margin-top:8px">积分满 40 升一级，共 7 级；每升一级宠物形态进阶（蛋 → L1 … L7）。</p></div>
+    <div class="card flat"><b>🔒 数据不出校</b><p style="color:var(--ink-soft);font-size:14px;margin-top:8px">网宠区跑在校内局域网的 class-pet-garden 服务上，公网只放课件与资料。</p></div>
+  </div>
+</main>
+
+<footer class="foot">
+  宏文学校 G6/G7 信息科技 · 交互课堂平台　|　Zone 1 网宠 / 加减分（校内局域网）　|　学生数据不出校
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script>
+(function () {
+  var cfg = window.PLATFORM_CONFIG;
+  var box = document.getElementById('box');
+
+  function showReachable() {
+    box.innerHTML =
+      '<div class="card" style="text-align:center;padding:34px">' +
+      '<div style="font-size:46px">🐾</div>' +
+      '<h3 style="margin:10px 0 6px">检测到校内网宠服务在线</h3>' +
+      '<p style="color:var(--ink-soft)">教师机服务可达。点下面按钮进入网宠花园：学生选宠物 / 看积分，教师加减分。</p>' +
+      '<a class="btn btn-primary mt" style="display:inline-block" href="' + cfg.petBase + '" target="_blank" rel="noopener">进入网宠花园 →</a>' +
+      '</div>';
+  }
+
+  function showOffline() {
+    box.innerHTML =
+      '<div class="placeholder"><div class="ph-ico">🏫</div>' +
+      '<p><b>网宠区需在校内局域网访问</b>，且教师机已启动服务。当前（公网或未开服务）无法进入。</p>' +
+      '<p style="margin-top:10px">教师机启动方法：在 class-pet-garden 目录运行 <code>node server/index.js</code>。</p>' +
+      '<p style="margin-top:6px">启动后如需修改地址，编辑 <code>assets/js/config.js</code> 的 petBase 为教师机实际 IP / 端口。</p>' +
+      '<p style="margin-top:6px">当前配置：<code>' + cfg.petBase + '</code></p>' +
+      '</div>';
+  }
+
+  var ctrl = ('AbortController' in window) ? new AbortController() : null;
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, cfg.petProbeTimeout);
+  var opts = { mode: 'no-cors', cache: 'no-store' };
+  if (ctrl) opts.signal = ctrl.signal;
+
+  fetch(cfg.petBase, opts)
+    .then(function () { clearTimeout(timer); showReachable(); })
+    .catch(function () { clearTimeout(timer); showOffline(); });
+})();
+</script>
+</body>
+</html>

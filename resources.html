@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>学习单 · 作业 · 复习 · 宏文交互课堂</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%234F46E5'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23EC4899'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/css/common.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html" style="color:inherit"><span class="dot"></span>宏文 · 交互课堂</a>
+    <div class="spacer"></div>
+    <span class="chip green">Zone 3 · 学习单 / 作业 / 复习</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">📚 复习 · 巩固 · 备会考</span>
+    <h1>学习单 · 作业 · 复习</h1>
+    <p class="sub">按年级 / 学期 / 第几课查看复习讲义与复习题。学习单与作业按课堂习惯嵌入各课交互页，这里聚焦"复习"。</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="sel-row">
+    <span class="sel-label">年级</span>
+    <div class="seg" id="seg-grade">
+      <button class="seg-btn" data-v="g6">六年级</button>
+      <button class="seg-btn on" data-v="g7">七年级</button>
+    </div>
+    <span class="sel-label">学期</span>
+    <div class="seg" id="seg-sem">
+      <button class="seg-btn on" data-v="shang">上学期</button>
+      <button class="seg-btn" data-v="xia">下学期</button>
+    </div>
+    <span class="sel-label" id="cur-label"></span>
+  </div>
+
+  <div class="lesson-grid" id="grid"></div>
+
+  <div class="card mt-l" id="panel"></div>
+
+</main>
+
+<footer class="foot">
+  宏文学校 G6/G7 信息科技 · 交互课堂平台　|　Zone 3 学习单 / 作业 / 复习　|　纯静态零依赖 · 学生数据不出校
+</footer>
+
+<script src="assets/js/common.js"></script>
+<script src="assets/js/curriculum.js"></script>
+<script>
+(function () {
+  var state = { grade: 'g7', sem: 'shang', no: 1 };
+
+  // 复习资料库：key = 年级-学期-课次。首期仅 G7 上第 1 课。
+  var RESOURCES = {
+    'g7-shang-1': {
+      outline: [
+        '<b>互联网四个发展阶段</b>：起步 → 形成 → 互联 → 高速网络。"不同网络通过统一协议实现互联互通"属于<b>互联</b>阶段。',
+        '<b>TCP/IP</b>：网络世界的"共同语言"，让不同网络按共同规则进行数据传输和通信。',
+        '<b>我国创新成就</b>：建成全球规模最大的 5G 网络、自主建设北斗卫星导航系统、千兆光网覆盖超 5 亿户、网民规模全球最大。',
+        '<b>IP 地址</b>：设备在网络中的唯一"门牌号"（数字形式）。打开网页两种方式：搜索引擎搜索 / 地址栏直接输入域名，殊途同归。',
+        '<b>自主可控</b>：自建北斗而非依赖 GPS——关键时刻不被"断供"，关乎国家安全；同理适用于芯片、操作系统等核心技术。'
+      ],
+      quiz: [
+        { type: 'single', q: '互联网发展经历了四个阶段，"不同网络之间通过统一协议实现互联互通"属于哪个阶段？', options: ['起步阶段', '形成阶段', '互联阶段', '高速网络阶段'], answer: 2, explain: '统一协议互联是"互联"阶段的核心特征。' },
+        { type: 'judge', q: 'TCP/IP 协议的作用，是让不同的网络能够按照共同规则进行数据传输和通信。', options: ['正确', '错误'], answer: 0, explain: 'TCP/IP 是网络世界的"共同语言"。' },
+        { type: 'single', q: '下列哪一项【不属于】我国互联网建设的创新成就？', options: ['建成全球规模最大的 5G 网络', '自主建设北斗卫星导航系统', '发明了世界上第一台计算机', '千兆光网覆盖能力超 5 亿户'], answer: 2, explain: '世界上第一台计算机并非我国发明。' }
+      ],
+      sheet: '本课学习单与作业已嵌入交互页课末小测。'
+    }
+  };
+
+  function hasRes(key) { return !!RESOURCES[key]; }
+
+  function bindSeg(id, key) {
+    var seg = document.getElementById(id);
+    seg.addEventListener('click', function (e) {
+      var btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      state[key] = btn.getAttribute('data-v');
+      var all = seg.querySelectorAll('.seg-btn');
+      for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
+      btn.classList.add('on');
+      // 切换年级/学期时默认选该学期第一课
+      state.no = window.CUR.lessons(state.grade, state.sem)[0].no;
+      render();
+    });
+  }
+
+  function renderGrid() {
+    var g = window.CURRICULUM[state.grade];
+    var list = window.CUR.lessons(state.grade, state.sem);
+    document.getElementById('cur-label').textContent =
+      g.label + ' · ' + (state.sem === 'shang' ? '上学期' : '下学期');
+    var html = '';
+    for (var j = 0; j < list.length; j++) {
+      var ls = list[j];
+      var key = window.CUR.key(state.grade, state.sem, ls.no);
+      var on = hasRes(key);
+      var sel = (ls.no === state.no) ? ' style="border-color:var(--brand)"' : '';
+      html += '<div class="lesson-card' + (on ? '' : ' dim') + '" data-no="' + ls.no + '"' + sel + '>' +
+        '<span class="ln">' + ls.no + '</span>' +
+        '<span class="lt">' + ls.title + '</span>' +
+        '<span class="ls"' + (on ? '' : ' style="color:#9AA3B2"') + '>' + (on ? '有资料 →' : '整理中') + '</span></div>';
+    }
+    document.getElementById('grid').innerHTML = html;
+    document.getElementById('grid').onclick = function (e) {
+      var card = e.target.closest('.lesson-card');
+      if (!card) return;
+      state.no = parseInt(card.getAttribute('data-no'), 10);
+      render();
+    };
+  }
+
+  function renderPanel() {
+    var key = window.CUR.key(state.grade, state.sem, state.no);
+    var r = RESOURCES[key];
+    var list = window.CUR.lessons(state.grade, state.sem);
+    var ls = null;
+    for (var i = 0; i < list.length; i++) if (list[i].no === state.no) ls = list[i];
+    var panel = document.getElementById('panel');
+    if (!r) {
+      panel.innerHTML = '<div class="placeholder"><div class="ph-ico">📭</div>' +
+        '<p><b>第 ' + state.no + ' 课《' + ls.title + '》</b> 复习资料整理中。</p>' +
+        '<p style="margin-top:6px">可先回 <a href="courseware.html" style="color:var(--brand);font-weight:800">可交互课件</a> 做互动与课末小测。</p></div>';
+      return;
+    }
+    var html = '<div class="sec-title" style="margin-top:0"><span class="bar"></span>第 ' + state.no +
+      ' 课《' + ls.title + '》· 复习讲义</div><ul style="margin:0;padding-left:20px;line-height:1.9;font-size:14.5px">';
+    for (var k = 0; k < r.outline.length; k++) html += '<li>' + r.outline[k] + '</li>';
+    html += '</ul>' +
+      '<p class="sec-note" style="margin-top:12px">📎 ' + r.sheet + '　互动页：<a href="' + ls.url + '" style="color:var(--brand);font-weight:800">打开本课交互页 →</a></p>' +
+      '<div class="sec-title" style="margin-top:22px"><span class="bar"></span>复习题 · 自动判分</div>' +
+      '<div id="quizmount"></div>';
+    panel.innerHTML = html;
+    window.HW.quiz(document.getElementById('quizmount'), r.quiz);
+  }
+
+  function render() { renderGrid(); renderPanel(); }
+
+  bindSeg('seg-grade', 'grade');
+  bindSeg('seg-sem', 'sem');
+  render();
+})();
+</script>
+</body>
+</html>
