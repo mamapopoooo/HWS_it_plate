@@ -34,6 +34,8 @@
       <button class="seg-btn" data-v="g6">六年级</button>
       <button class="seg-btn on" data-v="g7">七年级</button>
     </div>
+    <span class="sel-label" id="track-label" style="display:none">方向</span>
+    <div class="seg" id="seg-track" style="display:none"></div>
     <span class="sel-label">学期</span>
     <div class="seg" id="seg-sem">
       <button class="seg-btn on" data-v="shang">上学期</button>
@@ -61,9 +63,9 @@
 <script src="assets/js/curriculum.js"></script>
 <script>
 (function () {
-  var state = { grade: 'g7', sem: 'shang' };
+  var state = { grade: 'g7', sem: 'shang', track: null };
 
-  function bindSeg(id, key) {
+  function bindSeg(id, key, onChange) {
     var seg = document.getElementById(id);
     seg.addEventListener('click', function (e) {
       var btn = e.target.closest('.seg-btn');
@@ -72,15 +74,40 @@
       var all = seg.querySelectorAll('.seg-btn');
       for (var i = 0; i < all.length; i++) all[i].classList.remove('on');
       btn.classList.add('on');
+      if (onChange) onChange();
       render();
     });
   }
 
+  function updateTrackSelector() {
+    var tracks = window.CUR.tracks(state.grade);
+    var trackLabel = document.getElementById('track-label');
+    var trackSeg = document.getElementById('seg-track');
+    if (tracks && tracks.length > 1) {
+      trackLabel.style.display = '';
+      trackSeg.style.display = '';
+      trackSeg.innerHTML = '';
+      tracks.forEach(function (t, i) {
+        var btn = document.createElement('button');
+        btn.className = 'seg-btn' + (i === 0 ? ' on' : '');
+        btn.setAttribute('data-v', t.key);
+        btn.textContent = t.label;
+        trackSeg.appendChild(btn);
+      });
+      state.track = tracks[0].key;
+    } else {
+      trackLabel.style.display = 'none';
+      trackSeg.style.display = 'none';
+      state.track = null;
+    }
+  }
+
   function render() {
     var g = window.CURRICULUM[state.grade];
-    var list = window.CUR.lessons(state.grade, state.sem);
+    var list = window.CUR.lessons(state.grade, state.sem, state.track);
+    var trackLabel = state.track && g.tracks ? g.tracks[state.track].label : g.sub;
     document.getElementById('cur-label').textContent =
-      g.label + ' · ' + (state.sem === 'shang' ? '上学期' : '下学期');
+      g.label + ' · ' + trackLabel + ' · ' + (state.sem === 'shang' ? '上学期' : '下学期');
     var done = 0;
     for (var i = 0; i < list.length; i++) if (list[i].url) done++;
     document.getElementById('cur-count').textContent = '共 ' + list.length + ' 课 · 已上线 ' + done + ' 课';
@@ -96,15 +123,17 @@
       } else {
         html += '<div class="lesson-card empty" title="本课交互页制作中">' +
           '<span class="ln">' + ls.no + '</span>' +
-          '<span class="lt">' + ls.title + '</span>' +
+          '<span class="lt">' + (ls.title || '待制作') + '</span>' +
           '<span class="ls">制作中</span></div>';
       }
     }
     document.getElementById('grid').innerHTML = html;
   }
 
-  bindSeg('seg-grade', 'grade');
+  bindSeg('seg-grade', 'grade', updateTrackSelector);
   bindSeg('seg-sem', 'sem');
+  bindSeg('seg-track', 'track');
+  updateTrackSelector();
   render();
 })();
 </script>
