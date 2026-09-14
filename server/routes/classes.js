@@ -23,6 +23,19 @@ router.post('/', authMiddleware, (req, res) => {
   res.json({ id, user_id: req.userId, name, created_at: now, updated_at: now })
 })
 
+// 获取班级学生列表
+router.get('/:classId/students', authMiddleware, (req, res) => {
+  const cls = db.prepare('SELECT * FROM classes WHERE id = ?').get(req.params.classId)
+  if (!cls) {
+    return res.status(404).json({ error: '班级不存在' })
+  }
+  if (cls.user_id !== req.userId) {
+    return res.status(403).json({ error: '无权访问此班级' })
+  }
+  const students = db.prepare('SELECT * FROM students WHERE class_id = ? ORDER BY name').all(req.params.classId)
+  res.json({ students })
+})
+
 // 更新班级
 router.put('/:id', authMiddleware, (req, res) => {
   const { name } = req.body

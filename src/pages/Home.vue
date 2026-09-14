@@ -161,6 +161,14 @@ function setSort(by: 'name' | 'studentNo' | 'progress', order: 'asc' | 'desc') {
 }
 
 // Computed
+// 返回平台地址：生产环境从 /pet-garden/ 返回上一级，开发环境用 referrer
+const platformUrl = computed(() => {
+  if (document.referrer && !document.referrer.includes('/pet-garden/')) {
+    return document.referrer
+  }
+  return '../'
+})
+
 const filteredStudents = computed(() => {
   let result = [...students.value]
   if (searchQuery.value) {
@@ -1037,6 +1045,9 @@ onMounted(async () => {
     <header class="bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 shadow-lg px-4 py-3 flex items-center justify-between sticky top-0 z-30">
       <!-- Left -->
       <div class="flex items-center gap-3">
+        <a :href="platformUrl" class="text-white/90 hover:text-white bg-white/20 hover:bg-white/30 rounded-xl px-3 py-2 text-sm font-medium transition-all flex items-center gap-1" title="返回平台">
+          ← 平台
+        </a>
         <h1 class="text-xl font-bold text-white drop-shadow-lg flex items-center gap-2">
           <span class="text-2xl animate-bounce-slow">🐾</span>
           <span class="text-gradient">班级宠物园</span>
