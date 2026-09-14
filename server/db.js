@@ -94,6 +94,12 @@ export function initDb() {
       FOREIGN KEY (student_id) REFERENCES students(id)
     );
 
+    -- 设置表
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
     -- 插入默认评价规则
     INSERT OR IGNORE INTO evaluation_rules (id, name, points, category, is_custom, created_at) VALUES
       ('rule_1', '课堂积极发言', 2, '学习', 0, 1704067200000),
