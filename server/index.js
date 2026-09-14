@@ -18,6 +18,19 @@ import customPetsRoutes from './routes/custom-pets.js'
 const app = express()
 const PORT = 3002
 
+// 课程平台地址（可在 settings 表中配置，默认空）
+function getPlatformUrl() {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'platformUrl'").get()
+    return row ? row.value : ''
+  } catch { return '' }
+}
+
+// 全局配置接口
+app.get('/api/config', (req, res) => {
+  res.json({ platformUrl: getPlatformUrl() })
+})
+
 // Middleware
 app.use(cors())
 app.use(express.json())

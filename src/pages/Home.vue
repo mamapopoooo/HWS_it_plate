@@ -89,6 +89,7 @@ const showPetMenu = ref(false)
 const showCustomPetCreator = ref(false)
 const customPets = ref<any[]>([])
 const customPetTab = ref(false) // false=内置宠物, true=自定义宠物
+const configPlatformUrl = ref('') // 课程平台地址，从后端配置获取
 
 // 确认对话框状态
 const confirmDialog = ref({
@@ -161,8 +162,9 @@ function setSort(by: 'name' | 'studentNo' | 'progress', order: 'asc' | 'desc') {
 }
 
 // Computed
-// 返回平台地址：生产环境从 /pet-garden/ 返回上一级，开发环境用 referrer
+// 返回课程平台：优先用后端配置的平台地址，其次 referrer，最后相对路径
 const platformUrl = computed(() => {
+  if (configPlatformUrl.value) return configPlatformUrl.value
   if (document.referrer && !document.referrer.includes('/pet-garden/')) {
     return document.referrer
   }
@@ -937,6 +939,13 @@ function getStudentPetImage(student: Student): string {
 onMounted(async () => {
   isLoading.value = true
   try {
+    // 获取平台配置
+    try {
+      const configRes = await api.get('/config')
+      if (configRes.data?.platformUrl) {
+        configPlatformUrl.value = configRes.data.platformUrl
+      }
+    } catch { /* 配置接口可选 */ }
     await loadClasses()
     await loadRules()
   } finally {

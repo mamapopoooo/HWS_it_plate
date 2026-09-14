@@ -10,9 +10,19 @@ router.get('/', (req, res) => {
   const settings = db.prepare('SELECT * FROM settings').all()
   const result = {}
   for (const s of settings) {
-    result[s.key] = JSON.parse(s.value)
+    try { result[s.key] = JSON.parse(s.value) } catch { result[s.key] = s.value }
   }
   res.json(result)
+})
+
+// 更新设置
+router.put('/:key', authMiddleware, (req, res) => {
+  const { key } = req.params
+  const { value } = req.body
+  if (value === undefined) return res.status(400).json({ error: '缺少 value' })
+  const strValue = typeof value === 'string' ? value : JSON.stringify(value)
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, strValue)
+  res.json({ success: true, key, value: strValue })
 })
 
 // 修复经验值（将 pet_exp 与 total_points 同步）
