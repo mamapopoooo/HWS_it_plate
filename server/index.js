@@ -14,6 +14,7 @@ import ruleRoutes from './routes/rules.js'
 import backupRoutes from './routes/backup.js'
 import settingsRoutes from './routes/settings.js'
 import customPetsRoutes from './routes/custom-pets.js'
+import gameRoutes from './routes/game.js'
 
 const app = express()
 const PORT = 3002
@@ -79,6 +80,7 @@ app.use('/api/rules', ruleRoutes)
 app.use('/api/backup', backupRoutes)
 app.use('/api/settings', settingsRoutes)
 app.use('/api/custom-pets', customPetsRoutes)
+app.use('/api/game', gameRoutes)
 
 // 健康检查（公开）
 app.get('/api/health', (req, res) => {
