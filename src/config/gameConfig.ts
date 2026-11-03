@@ -121,6 +121,17 @@ export function formFromAwaken(tier: number, awakenLevel: number): number {
   return Math.min(cap, Math.max(1, awakenLevel + 1))
 }
 
+/** 宠物图片回落链：formImages[N] → formImages[1] → /pets/{id}/form{N}.png */
+export function formImage(pet: PetTemplate, form: number = 1): string {
+  const prefix = pet.id.replace('pet_', '')
+  const basePath = `/pet-garden/pets/${prefix}`
+  if (pet.formImages) {
+    if (pet.formImages[form]) return pet.formImages[form]
+    if (pet.formImages[1]) return pet.formImages[1]
+  }
+  return `${basePath}/form${form}.png`
+}
+
 /** "zhen,xun" → "震 + 巽"；"all" → "全属" */
 export function trigramLabel(csv: string): string {
   if (!csv) return '—'
