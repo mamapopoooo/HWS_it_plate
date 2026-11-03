@@ -100,7 +100,7 @@ const dockItems: DockItem[] = [
 
 /** 只给已建好的页面跳转，未建的按钮保持禁用（不留死链） */
 const DOCK_ROUTES: Record<string, string> = {
-  battle: '/battle',
+  battle: '/duel',
   collection: '/collection',
   ranking: '/ranking',
   shop: '/shop',
@@ -148,7 +148,7 @@ function onTouch() {
 }
 
 function goBattle() {
-  void router.push('/battle')
+  void router.push('/duel')
 }
 
 function goGacha() {
