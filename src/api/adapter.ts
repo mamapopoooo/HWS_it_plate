@@ -9,6 +9,8 @@
  */
 import { reactive } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { EVENTS } from '@/config/contentConfig'
+import type { EventDef } from '@/config/contentConfig'
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHARACTER,
@@ -17,6 +19,7 @@ import {
   DEMO_PROFILE,
   DEMO_QUESTS,
   DEMO_RANK,
+  DEMO_STUDENTS,
   DEMO_SUBMISSIONS,
 } from './demo'
 import type {
@@ -28,9 +31,11 @@ import type {
   Gender,
   Opponent,
   OwnedMap,
+  PointsRecord,
   Profile,
   QuestProgress,
   RankRow,
+  TeacherStudent,
   Wallet,
 } from './types'
 
@@ -310,4 +315,58 @@ export async function fetchOpponent(power: number): Promise<Opponent> {
 /** 结算上报（失败不影响本地显示，仅记账） */
 export async function reportBattle(report: BattleReport): Promise<boolean> {
   return tryPost('/v2/battle/pve/result', report, (d) => Boolean(asRecord(d)?.success), false)
+}
+
+/* ---------------- 活动 ---------------- */
+
+function pickEvents(data: unknown): EventDef[] | null {
+  const rows = asArray(asRecord(data)?.events)
+  if (!rows) return null
+  return rows.map((raw, i) => {
+    const e = asRecord(raw) ?? {}
+    return {
+      id: str(e.id),
+      name: str(e.name),
+      type: str(e.type, 'festival'),
+      startDate: str(e.startDate, str(e.start_date, '')),
+      endDate: str(e.endDate, str(e.end_date, '')),
+      desc: str(e.description, ''),
+      reward: [],
+      banner: str(e.banner_image) || undefined,
+      sortOrder: num(e.sort_order, i + 1),
+    }
+  })
+}
+
+/** 进行中的活动；接口未就绪时用 seeds 里的活动表 */
+export async function fetchEvents(): Promise<EventDef[]> {
+  return tryGet('/v2/events/active', pickEvents, EVENTS)
+}
+
+/* ---------------- 教师端 ---------------- */
+
+function pickStudents(data: unknown): TeacherStudent[] | null {
+  const rows = asArray(asRecord(data)?.students)
+  if (!rows) return null
+  return rows.map((raw) => {
+    const s = asRecord(raw) ?? {}
+    return {
+      id: str(s.id),
+      name: str(s.name, str(s.real_name)),
+      studentNo: str(s.student_no, str(s.username)),
+      points: num(s.points, num(s.total_points)),
+      petName: str(s.pet_name, '—'),
+      petLevel: num(s.pet_level, 1),
+    }
+  })
+}
+
+/** 班级名单（含积分与宠物等级） */
+export async function fetchTeacherStudents(): Promise<TeacherStudent[]> {
+  return tryGet('/v2/teacher/students', pickStudents, DEMO_STUDENTS)
+}
+
+/** 批量同步积分（教师端加减分） */
+export async function syncPoints(records: PointsRecord[]): Promise<boolean> {
+  return tryPost('/v2/teacher/sync-points', { records }, (d) => Boolean(asRecord(d)?.success), false)
 }

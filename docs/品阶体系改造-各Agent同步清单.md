@@ -130,6 +130,9 @@ export function getCoefficient(cfg: TrigramConfig, atk: string, def: string): nu
 | `POST /v2/gacha/draw` | `{ results: [ { tier, pet_id, is_new, fragments } ] }` | 未实现时前端本地抽卡 |
 | `POST /v2/battle/pvp/match` | `{ opponent: { templateId, level, awakenLevel, nickname } }` | body 传 `{ power }`；未实现时用占位对手 |
 | `POST /v2/battle/pve/result` | `{ success }` | body：`{ winner: 'player' \| 'enemy', turns, playerPetId }` |
+| `GET /v2/events/active` | `{ events: [ { id, name, type, start_date, end_date, description, banner_image, sort_order } ] }` | 未实现时用 `docs/seeds/events.json` |
+| `GET /v2/teacher/students` | `{ students: [ { id, name \| real_name, student_no \| username, points \| total_points, pet_name, pet_level } ] }` | 教师工作台名单 |
+| `POST /v2/teacher/sync-points` | `{ success, synced }` | body：`{ records: [ { studentNo, amount, reason } ] }` |
 
 > 请求超时 **1500ms**：超过即视为接口未就绪并回落占位，页面不会卡住。
 > 若字段名与上表不一致，**只改 `adapter.ts` 里的 pick 函数**，页面无需改动。

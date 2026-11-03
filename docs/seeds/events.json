@@ -1,0 +1,49 @@
+{
+  "_comment": "内容层：活动。加活动 = 插一行 + 传横图（banner 可缺省）。日期用 ISO 字符串，按当天日期比较即可，不涉及时区换算。",
+  "events": [
+    {
+      "id": "event_2026a_liangyi",
+      "name": "两仪降临",
+      "type": "festival",
+      "startDate": "2026-10-20",
+      "endDate": "2026-11-20",
+      "desc": "活动期间，求签时「太极」的出率提升至 2.5%，阴阳鱼不再遥远。",
+      "reward": [{ "item": "ticket", "amount": 3 }],
+      "banner": "/pet-garden/events/liangyi.png",
+      "sortOrder": 1
+    },
+    {
+      "id": "event_2026a_classbattle",
+      "name": "班级战·第一赛季",
+      "type": "classbattle",
+      "startDate": "2026-11-01",
+      "endDate": "2026-11-30",
+      "desc": "同年级班级互相比分，每日斗法可为班级贡献积分；赛季末按名次发节气皮肤。",
+      "reward": [{ "item": "points", "amount": 200 }],
+      "banner": "/pet-garden/events/classbattle.png",
+      "sortOrder": 2
+    },
+    {
+      "id": "event_2026a_double_fragment",
+      "name": "灵纹双倍周",
+      "type": "double",
+      "startDate": "2026-11-05",
+      "endDate": "2026-11-12",
+      "desc": "重复宠物折算的灵纹碎片 ×2，适合补齐觉醒材料。",
+      "reward": [],
+      "banner": "/pet-garden/events/fragment.png",
+      "sortOrder": 3
+    },
+    {
+      "id": "event_2026b_winter",
+      "name": "冬至·玄冥试炼",
+      "type": "festival",
+      "startDate": "2026-12-15",
+      "endDate": "2026-12-31",
+      "desc": "尚未开始：冬至期间开放玄武主题的限时关卡。",
+      "reward": [{ "item": "pet", "id": "pet_xuanwu" }],
+      "banner": "/pet-garden/events/winter.png",
+      "sortOrder": 4
+    }
+  ]
+}

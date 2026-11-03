@@ -14,6 +14,7 @@ import type {
   Profile,
   QuestProgress,
   RankRow,
+  TeacherStudent,
   Wallet,
 } from './types'
 
@@ -94,6 +95,22 @@ export const DEMO_CHARACTER: CharacterState = {
   skinId: 'skin_base_f',
   ownedSkinIds: ['skin_base_f', 'skin_school_f'],
 }
+
+/** 教师端：占位班级名单（接口未就绪时使用） */
+export const DEMO_STUDENTS: TeacherStudent[] = [
+  { id: 's01', name: '李四', studentNo: '20260101', points: 1250, petName: '白虎·监兵', petLevel: 7 },
+  { id: 's02', name: '王小二', studentNo: '20260102', points: 1180, petName: '白泽', petLevel: 6 },
+  { id: 's03', name: '张三', studentNo: '20260103', points: 1120, petName: '九尾狐', petLevel: 5 },
+  { id: 's04', name: '赵六', studentNo: '20260104', points: 1050, petName: '鹿蜀', petLevel: 5 },
+  { id: 's05', name: '陈七', studentNo: '20260105', points: 980, petName: '夫诸', petLevel: 4 },
+  { id: 's06', name: '周八', studentNo: '20260106', points: 940, petName: '天狗', petLevel: 4 },
+  { id: 's07', name: '吴九', studentNo: '20260107', points: 905, petName: '鵸鵌', petLevel: 3 },
+  { id: 's08', name: '郑十', studentNo: '20260108', points: 860, petName: '长右', petLevel: 3 },
+  { id: 's09', name: '孙一', studentNo: '20260109', points: 820, petName: '羬羊', petLevel: 3 },
+  { id: 's10', name: '马二', studentNo: '20260110', points: 760, petName: '赤鱬', petLevel: 2 },
+  { id: 's11', name: '朱三', studentNo: '20260111', points: 700, petName: '讙', petLevel: 2 },
+  { id: 's12', name: '胡四', studentNo: '20260112', points: 650, petName: '文鳐鱼', petLevel: 1 },
+]
 
 /** 斗法占位对手（匹配接口未就绪时使用） */
 export const DEMO_OPPONENT: Opponent = {

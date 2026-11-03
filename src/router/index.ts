@@ -24,6 +24,9 @@ const router = createRouter({
     { path: '/pet/:id', name: 'pet-detail', component: () => import('@/pages/PetDetail.vue') },
     // v3 斗法（重做版，保留 /battle 作为旧版入口）
     { path: '/duel', name: 'duel', component: () => import('@/pages/Duel.vue') },
+    { path: '/events', name: 'events', component: () => import('@/pages/Events.vue') },
+    // 教师端 v3 国风皮肤（M2 迁到 /admin 并加 role 守卫）
+    { path: '/teacher', name: 'teacher', component: () => import('@/pages/TeacherDesk.vue') },
     // 教师端：造物审核（M2 迁到 /admin/review 并加 role 守卫）
     { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue') },
 

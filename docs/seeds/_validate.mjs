@@ -110,6 +110,19 @@ if (skins && economy) {
   console.log(`G7 系数: ${economy.gradeCoef['7']}，单抽 ${economy.gacha.single} 分`)
 }
 
+const events = load('events.json')
+if (events) {
+  const ids = new Set()
+  for (const e of events.events) {
+    if (ids.has(e.id)) problems.push(`活动 id 重复: ${e.id}`)
+    ids.add(e.id)
+    const iso = /^\d{4}-\d{2}-\d{2}$/
+    if (!iso.test(e.startDate) || !iso.test(e.endDate)) problems.push(`${e.id} 日期格式应为 YYYY-MM-DD`)
+    if (e.startDate > e.endDate) problems.push(`${e.id} 起止日期颠倒`)
+  }
+  console.log(`活动: ${events.events.length} 个`)
+}
+
 console.log('\n=== 结果 ===')
 if (problems.length === 0) console.log('通过：种子数据一致')
 else problems.forEach((p) => console.log('问题: ' + p))

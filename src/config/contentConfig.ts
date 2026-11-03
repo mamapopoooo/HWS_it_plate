@@ -9,6 +9,7 @@ import questsSeed from '../../docs/seeds/quests.json'
 import achievementsSeed from '../../docs/seeds/achievements.json'
 import skinsSeed from '../../docs/seeds/skins.json'
 import skillsSeed from '../../docs/seeds/skill_effects.json'
+import eventsSeed from '../../docs/seeds/events.json'
 import { ECONOMY, priceFor } from '@/config/gameConfig'
 
 export interface ShopItem {
@@ -121,4 +122,43 @@ export function rewardText(reward: AchievementDef['reward']): string {
       return r.item
     })
     .join(' · ')
+}
+
+/* ---------------- 活动 ---------------- */
+
+export interface EventDef {
+  id: string
+  name: string
+  type: string
+  /** ISO 日期，如 2026-11-01 */
+  startDate: string
+  endDate: string
+  desc: string
+  reward: Array<{ item: string; amount?: number; id?: string }>
+  banner?: string
+  sortOrder: number
+}
+
+export const EVENTS = eventsSeed.events as unknown as EventDef[]
+
+export type EventPhase = 'active' | 'upcoming' | 'ended'
+
+/** 本地日期（避免 toISOString 的时区偏移把日期挪一天） */
+export function todayIso(date = new Date()): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+export function eventPhase(event: EventDef, date = new Date()): EventPhase {
+  const today = todayIso(date)
+  if (today < event.startDate) return 'upcoming'
+  if (today > event.endDate) return 'ended'
+  return 'active'
+}
+
+/** 进行中的活动（大厅面板用） */
+export function activeEvents(date = new Date()): EventDef[] {
+  return EVENTS.filter((e) => eventPhase(e, date) === 'active').sort((a, b) => a.sortOrder - b.sortOrder)
 }

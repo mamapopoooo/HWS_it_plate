@@ -7,9 +7,11 @@
  */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchProfile } from '@/api/adapter'
+import { fetchEvents, fetchProfile } from '@/api/adapter'
 import { DEMO_PROFILE } from '@/api/demo'
 import type { Profile } from '@/api/types'
+import { activeEvents, eventPhase } from '@/config/contentConfig'
+import type { EventDef } from '@/config/contentConfig'
 import GameHud from '@/components/layout/GameHud.vue'
 import GameDock, { type DockItem } from '@/components/layout/GameDock.vue'
 import TaijiAltar from '@/components/pet/TaijiAltar.vue'
@@ -31,8 +33,13 @@ const router = useRouter()
 /** 玩家档案：由 adapter 填充（真接口优先，未就绪回落占位） */
 const profile = ref<Profile>(DEMO_PROFILE)
 
+/** 进行中的活动（右侧榜文面板） */
+const activeEventList = ref<EventDef[]>(activeEvents())
+
 onMounted(async () => {
   profile.value = await fetchProfile()
+  const list = await fetchEvents()
+  activeEventList.value = list.filter((e) => eventPhase(e) === 'active')
 })
 
 /* ---------------- 占位数据（M2 换接口） ---------------- */
@@ -253,10 +260,17 @@ onUnmounted(() => {
         </section>
 
         <section class="gw-scroll side__panel">
-          <div class="gw-scroll-head"><span>节气榜文</span><em>第二赛季</em></div>
-          <p class="side__notice">
-            G6-1 班 反超 G6-2 班，现 <b class="num">280 : 265</b><br />
-            赛季余四日六时，周五双倍功名
+          <div class="gw-scroll-head">
+            <span>节气榜文</span>
+            <em>
+              <a class="side__more" @click="router.push('/events')">全部 {{ activeEventList.length }} 个 →</a>
+            </em>
+          </div>
+          <p v-if="activeEventList.length === 0" class="side__notice">暂无进行中的活动。</p>
+          <p v-for="e in activeEventList.slice(0, 2)" :key="e.id" class="side__notice side__event">
+            <b>{{ e.name }}</b>
+            <span class="side__dates num">{{ e.endDate }}</span>
+            <span class="side__edesc">{{ e.desc }}</span>
           </p>
         </section>
 
@@ -515,6 +529,27 @@ onUnmounted(() => {
 }
 .side__notice b {
   color: var(--cinnabar);
+}
+.side__event {
+  display: block;
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+.side__dates {
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+.side__edesc {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.side__more {
+  font-size: 11px;
+  color: var(--stone-blue);
+  cursor: pointer;
+  border-bottom: 1px dotted rgba(46, 92, 138, 0.5);
 }
 
 /* ---------- 底部 ---------- */

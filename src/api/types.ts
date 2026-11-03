@@ -119,3 +119,20 @@ export interface BattleReport {
   turns: number
   playerPetId: string
 }
+
+/** 教师端：班级学生一行 */
+export interface TeacherStudent {
+  id: string
+  name: string
+  studentNo: string
+  points: number
+  petName: string
+  petLevel: number
+}
+
+/** 教师端：一条加分/扣分记录 */
+export interface PointsRecord {
+  studentNo: string
+  amount: number
+  reason: string
+}
