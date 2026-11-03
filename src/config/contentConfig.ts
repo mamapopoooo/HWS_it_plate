@@ -8,6 +8,7 @@ import shopSeed from '../../docs/seeds/shop.json'
 import questsSeed from '../../docs/seeds/quests.json'
 import achievementsSeed from '../../docs/seeds/achievements.json'
 import skinsSeed from '../../docs/seeds/skins.json'
+import skillsSeed from '../../docs/seeds/skill_effects.json'
 import { ECONOMY, priceFor } from '@/config/gameConfig'
 
 export interface ShopItem {
@@ -74,6 +75,23 @@ export function skinPrice(skin: SkinDef, grade: number): number {
   const base = table[skin.theme] ?? 0
   return base === 0 ? 0 : priceFor(base, grade)
 }
+
+/* ---------------- 造物（无极）技能效果池 ---------------- */
+
+export interface SkillEffect {
+  code: string
+  name: string
+  cost: number
+  impl: string
+  description: string
+}
+
+export const SKILL_EFFECTS = skillsSeed.effects as unknown as SkillEffect[]
+/** 灵力预算与技能个数（学生只能选效果，不能填数值） */
+export const CUSTOM_BUDGET = skillsSeed.customBudget
+export const CUSTOM_SKILL_COUNT = skillsSeed.customSkillCount
+export const CUSTOM_NAME_MAX = skillsSeed.nameMaxLength
+export const CUSTOM_DESC_MAX = skillsSeed.descMaxLength
 
 /** 按点号路径读 economy，例如 "skin.hanfu" */
 function readEconomy(path: string): number | undefined {

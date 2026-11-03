@@ -67,6 +67,10 @@ function back() {
   void router.push('/lobby')
 }
 
+function goCreate() {
+  void router.push('/custom')
+}
+
 function onSelect(pet: PetTemplate) {
   // M2：跳详情页 /pet/:id
   console.info('[图鉴] 选中', pet.name, pet.pinyin)
@@ -124,8 +128,8 @@ function onSelect(pet: PetTemplate) {
           技能也从效果池里自己配 —— 审核通过后，全班只有你有这一只。
         </p>
         <p v-else>前往造物，给自己的神兽命名、配技能。</p>
-        <button class="gw-seal gw-seal--primary" :disabled="!canCreate">
-          {{ canCreate ? '前往造物' : '双鱼未集齐' }}
+        <button class="gw-seal gw-seal--primary" @click="goCreate">
+          {{ canCreate ? '前往造物' : '预览造物界面' }}
         </button>
       </div>
 

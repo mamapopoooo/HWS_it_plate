@@ -20,6 +20,7 @@ const router = createRouter({
     { path: '/quests', name: 'quests', component: () => import('@/pages/Quests.vue') },
     { path: '/achievements', name: 'achievements', component: () => import('@/pages/Achievements.vue') },
     { path: '/character', name: 'character', component: () => import('@/pages/Character.vue') },
+    { path: '/custom', name: 'custom', component: () => import('@/pages/CustomPet.vue') },
 
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },
