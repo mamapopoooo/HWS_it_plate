@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { api } from '@/api'
+import { useGameStore } from './game'
 
 interface PetTemplate {
   id: string
@@ -11,6 +12,19 @@ interface PetTemplate {
   skills_json: string
   image_prefix: string
   rarity: number
+  // v3 新增
+  tier?: number
+  trigram?: string
+  style?: string
+  pinyin?: string
+  source?: string
+  formImages?: Record<number, string>
+  formCount?: number
+  tierName?: string
+  base_hp?: number
+  base_attack?: number
+  base_defense?: number
+  base_speed?: number
 }
 
 interface PlayerPet {
@@ -26,6 +40,15 @@ interface PlayerPet {
   template_name: string
   element: string
   role: string
+  // v3 新增
+  tier?: number
+  trigram?: string
+  style?: string
+  source?: string
+  form?: number
+  power?: number
+  tier_name?: string
+  formImages?: Record<number, string>
 }
 
 export const usePetStore = defineStore('pets', () => {
@@ -33,14 +56,43 @@ export const usePetStore = defineStore('pets', () => {
   const myPets = ref<PlayerPet[]>([])
   const selectedTeam = ref<string[]>([])
 
+  // v3: 品阶筛选
+  const filterTier = ref<number | null>(null)
+  const filterTrigram = ref<string>('')
+
+  const gameStore = useGameStore()
+
+  // v3: 按品阶分组
+  const groupedByTier = computed(() => {
+    const groups: Record<number, PetTemplate[]> = {}
+    for (const p of templates.value) {
+      const tier = p.tier || 1
+      if (!groups[tier]) groups[tier] = []
+      groups[tier].push(p)
+    }
+    return groups
+  })
+
   async function loadTemplates() {
-    const data = await api.getPetTemplates()
-    templates.value = data.pets
+    // 优先使用 v3 API
+    if (gameStore.configLoaded) {
+      await gameStore.loadPetTemplates()
+      templates.value = gameStore.petTemplates as any[]
+    } else {
+      const data = await api.getPetTemplates()
+      templates.value = data.pets
+    }
   }
 
   async function loadMyPets() {
-    const data = await api.getMyPets()
-    myPets.value = data.pets
+    // 优先使用 v3 API
+    try {
+      await gameStore.loadMyPets()
+      myPets.value = gameStore.myPets as any[]
+    } catch {
+      const data = await api.getMyPets()
+      myPets.value = data.pets
+    }
   }
 
   async function obtainPet(templateId: string) {
@@ -49,9 +101,15 @@ export const usePetStore = defineStore('pets', () => {
   }
 
   async function awakenPet(petId: string) {
-    const data = await api.awakenPet(petId)
-    await loadMyPets()
-    return data
+    try {
+      const data = await gameStore.awakenPet(petId)
+      myPets.value = gameStore.myPets as any[]
+      return data
+    } catch {
+      const data = await api.awakenPet(petId)
+      await loadMyPets()
+      return data
+    }
   }
 
   async function equipSkin(petId: string, skinId: string) {
@@ -72,9 +130,15 @@ export const usePetStore = defineStore('pets', () => {
     selectedTeam.value = []
   }
 
+  function setFilter(tier: number | null, trigram?: string) {
+    filterTier.value = tier
+    filterTrigram.value = trigram || ''
+  }
+
   return {
     templates, myPets, selectedTeam,
+    filterTier, filterTrigram, groupedByTier,
     loadTemplates, loadMyPets, obtainPet, awakenPet, equipSkin,
-    toggleTeamSelect, clearTeam
+    toggleTeamSelect, clearTeam, setFilter
   }
 })

@@ -1,7 +1,7 @@
 // API 封装层
 const BASE_URL = '/api/v2'
 
-function getToken(): string | null {
+export function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
