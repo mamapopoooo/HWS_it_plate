@@ -128,6 +128,8 @@ export function getCoefficient(cfg: TrigramConfig, atk: string, def: string): nu
 | `GET /v2/admin/custom-pets/pending` | `{ items: [ { id, student_name, nickname, pet_name, pinyin, description, skills[], submitted_at_display, status, review_note } ] }` | `skills` 为 effect code 数组 |
 | `POST /v2/admin/custom-pets/:id/review` | `{ success }` | body：`{ action: 'approve' \| 'reject', note }` |
 | `POST /v2/gacha/draw` | `{ results: [ { tier, pet_id, is_new, fragments } ] }` | 未实现时前端本地抽卡 |
+| `POST /v2/battle/pvp/match` | `{ opponent: { templateId, level, awakenLevel, nickname } }` | body 传 `{ power }`；未实现时用占位对手 |
+| `POST /v2/battle/pve/result` | `{ success }` | body：`{ winner: 'player' \| 'enemy', turns, playerPetId }` |
 
 > 请求超时 **1500ms**：超过即视为接口未就绪并回落占位，页面不会卡住。
 > 若字段名与上表不一致，**只改 `adapter.ts` 里的 pick 函数**，页面无需改动。

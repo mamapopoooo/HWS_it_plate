@@ -9,6 +9,7 @@ import type {
   BoughtMap,
   CharacterState,
   CustomPetSubmission,
+  Opponent,
   OwnedMap,
   Profile,
   QuestProgress,
@@ -92,6 +93,14 @@ export const DEMO_CHARACTER: CharacterState = {
   gender: 'female',
   skinId: 'skin_base_f',
   ownedSkinIds: ['skin_base_f', 'skin_school_f'],
+}
+
+/** 斗法占位对手（匹配接口未就绪时使用） */
+export const DEMO_OPPONENT: Opponent = {
+  petId: 'pet_qinglong',
+  level: 7,
+  awakenLevel: 3,
+  nickname: '陪练的木人',
 }
 
 export const DEMO_SUBMISSIONS: CustomPetSubmission[] = [

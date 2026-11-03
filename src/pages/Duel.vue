@@ -6,9 +6,11 @@
  * 特效层目前用 CSS 实现，签名已按 docs/战斗引擎选型.md §5 预留，
  * 后续换 PixiJS / Rive 只替换特效层，不动本页流程。
  */
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { formName, tierName, trigramGlyphs, trigramLabel } from '@/config/gameConfig'
+import { calcPower, formName, tierName, trigramGlyphs, trigramLabel } from '@/config/gameConfig'
+import { fetchOpponent, reportBattle } from '@/api/adapter'
+import { DEMO_OPPONENT } from '@/api/demo'
 import {
   createFighter,
   endTurn,
@@ -21,8 +23,12 @@ import {
 
 const router = useRouter()
 
-const player = ref<DuelFighter>(createFighter('pet_baihu', 7, 3)!)
-const enemy = ref<DuelFighter>(createFighter('pet_qinglong', 7, 3)!)
+const PLAYER_PET = 'pet_baihu'
+const PLAYER_LEVEL = 7
+const PLAYER_AWAKEN = 3
+
+const player = ref<DuelFighter>(createFighter(PLAYER_PET, PLAYER_LEVEL, PLAYER_AWAKEN)!)
+const enemy = ref<DuelFighter>(createFighter(DEMO_OPPONENT.petId, DEMO_OPPONENT.level, DEMO_OPPONENT.awakenLevel)!)
 
 const turn = ref(1)
 const log = ref<DuelEvent[]>([])
@@ -81,15 +87,36 @@ async function runEvents(events: DuelEvent[]) {
   }
 }
 
+/** 对手参数：先按占位创建，匹配接口返回后替换 */
+const opponentSpec = ref({
+  petId: DEMO_OPPONENT.petId,
+  level: DEMO_OPPONENT.level,
+  awakenLevel: DEMO_OPPONENT.awakenLevel,
+})
+
+function makeEnemy(): DuelFighter {
+  const s = opponentSpec.value
+  return createFighter(s.petId, s.level, s.awakenLevel) ?? createFighter(DEMO_OPPONENT.petId, 7, 3)!
+}
+
+onMounted(async () => {
+  const myPower = calcPower(player.value.tier, player.value.level, player.value.awaken)
+  const opp = await fetchOpponent(myPower)
+  opponentSpec.value = { petId: opp.petId, level: opp.level, awakenLevel: opp.awakenLevel }
+  enemy.value = makeEnemy()
+})
+
 function checkOver() {
   if (enemy.value.hp <= 0) {
     over.value = true
     winner.value = 'player'
+    void reportBattle({ winner: 'player', turns: turn.value, playerPetId: PLAYER_PET })
     return true
   }
   if (player.value.hp <= 0) {
     over.value = true
     winner.value = 'enemy'
+    void reportBattle({ winner: 'enemy', turns: turn.value, playerPetId: PLAYER_PET })
     return true
   }
   return false
@@ -120,8 +147,8 @@ async function cast(skillCode: string) {
 }
 
 function restart() {
-  player.value = createFighter('pet_baihu', 7, 3)!
-  enemy.value = createFighter('pet_qinglong', 7, 3)!
+  player.value = createFighter(PLAYER_PET, PLAYER_LEVEL, PLAYER_AWAKEN)!
+  enemy.value = makeEnemy()
   turn.value = 1
   log.value = []
   floats.value = []

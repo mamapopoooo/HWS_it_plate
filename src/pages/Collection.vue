@@ -28,10 +28,25 @@ const canCreate = ref(false)
 
 const activeTier = ref(1)
 
+/** 筛选：风格 + 只看已获得 */
+const styleFilter = ref<'all' | 'meng' | 'jun' | 'ya' | 'qi'>('all')
+const onlyOwned = ref(false)
+
+const STYLE_FILTERS: Array<{ key: typeof styleFilter.value; name: string }> = [
+  { key: 'all', name: '全部风格' },
+  { key: 'meng', name: '萌系' },
+  { key: 'jun', name: '俊逸' },
+  { key: 'ya', name: '雅致' },
+  { key: 'qi', name: '奇诡' },
+]
+
 const tierList = computed(() => TIERS)
 
 const list = computed<PetTemplate[]>(() =>
-  PETS.filter((p) => p.tier === activeTier.value).sort((a, b) => a.sortOrder - b.sortOrder),
+  PETS.filter((p) => p.tier === activeTier.value)
+    .filter((p) => styleFilter.value === 'all' || p.style === styleFilter.value)
+    .filter((p) => !onlyOwned.value || Boolean(owned.value[p.id]))
+    .sort((a, b) => a.sortOrder - b.sortOrder),
 )
 
 function ownedLevel(id: string): number | undefined {
@@ -103,6 +118,23 @@ function onSelect(pet: PetTemplate) {
 
     <main class="col__body">
       <!-- 一至四阶：常规宫格 -->
+      <div v-if="activeTier !== 5" class="col__filters">
+        <button
+          v-for="f in STYLE_FILTERS"
+          :key="f.key"
+          class="col__filter"
+          :class="{ 'is-on': styleFilter === f.key }"
+          @click="styleFilter = f.key"
+        >
+          {{ f.name }}
+        </button>
+        <label class="col__owned">
+          <input v-model="onlyOwned" type="checkbox" />
+          只看已获得
+        </label>
+        <span class="col__count num">{{ list.length }} 只</span>
+      </div>
+
       <div v-if="activeTier !== 5" class="col__grid">
         <PetCard
           v-for="pet in list"
@@ -238,6 +270,48 @@ function onSelect(pet: PetTemplate) {
 }
 .col__tab.is-on .col__tab-name {
   color: var(--ink);
+}
+
+/* ---------- 筛选条 ---------- */
+.col__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.col__filter {
+  padding: 4px 12px;
+  font-family: var(--font-title);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+  background: linear-gradient(180deg, var(--paper-light), var(--paper-2));
+  border: 1px solid rgba(28, 28, 36, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.col__filter.is-on {
+  color: #f7efe0;
+  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  border-color: var(--cinnabar-d);
+}
+.col__owned {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.col__owned input {
+  accent-color: var(--cinnabar);
+}
+.col__count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink-3);
 }
 
 /* ---------- 宫格 ---------- */

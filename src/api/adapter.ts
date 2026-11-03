@@ -12,6 +12,7 @@ import { useAuth } from '@/composables/useAuth'
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHARACTER,
+  DEMO_OPPONENT,
   DEMO_OWNED,
   DEMO_PROFILE,
   DEMO_QUESTS,
@@ -20,10 +21,12 @@ import {
 } from './demo'
 import type {
   AchievementState,
+  BattleReport,
   CharacterState,
   CustomPetSubmission,
   GachaDrawn,
   Gender,
+  Opponent,
   OwnedMap,
   Profile,
   QuestProgress,
@@ -282,4 +285,29 @@ export async function drawOnServer(kind: 'single' | 'ten'): Promise<GachaDrawn[]
   } catch {
     return null
   }
+}
+
+/* ---------------- 斗法：匹配与结算 ---------------- */
+
+function pickOpponent(data: unknown): Opponent | null {
+  const t = asRecord(asRecord(data)?.opponent)
+  if (!t) return null
+  const petId = str(t.templateId, str(t.template_id, str(t.pet_id)))
+  if (!petId) return null
+  return {
+    petId,
+    level: num(t.level, 5),
+    awakenLevel: num(t.awakenLevel, num(t.awaken_level, 0)),
+    nickname: str(t.nickname) || undefined,
+  }
+}
+
+/** 按玩家战力匹配对手；接口未就绪时返回固定的占位对手 */
+export async function fetchOpponent(power: number): Promise<Opponent> {
+  return tryPost('/v2/battle/pvp/match', { power }, pickOpponent, DEMO_OPPONENT)
+}
+
+/** 结算上报（失败不影响本地显示，仅记账） */
+export async function reportBattle(report: BattleReport): Promise<boolean> {
+  return tryPost('/v2/battle/pve/result', report, (d) => Boolean(asRecord(d)?.success), false)
 }

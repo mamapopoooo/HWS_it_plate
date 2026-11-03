@@ -103,3 +103,19 @@ export interface CustomPetSubmission {
 
 /** 集市限购计数 */
 export type BoughtMap = Record<string, number>
+
+/** 斗法匹配到的对手 */
+export interface Opponent {
+  petId: string
+  level: number
+  awakenLevel: number
+  /** 对手昵称（AI 或真实玩家） */
+  nickname?: string
+}
+
+/** 一场斗法的结算（上报服务端） */
+export interface BattleReport {
+  winner: 'player' | 'enemy'
+  turns: number
+  playerPetId: string
+}
