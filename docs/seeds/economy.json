@@ -1,0 +1,63 @@
+{
+  "_comment": "配置层：经济参数。改价格只改这里，前端/后端都读它。所有价格单位为「积分」。",
+  "gacha": {
+    "single": 5,
+    "ten": 45,
+    "pityTier2": 20,
+    "pityTier3": 60,
+    "_comment": "pityTier2=20 抽内必出八卦及以上；pityTier3=60 抽内必出四象及以上；太极无保底"
+  },
+  "exchange": {
+    "tier1": 250,
+    "tier2": 450,
+    "tier3": 800,
+    "tier4": 900,
+    "tier5": null,
+    "_comment": "tier5（无极）不可兑换，只能造物；兑换每阶限购见 limits"
+  },
+  "limits": {
+    "exchangeTier1PerTerm": 2,
+    "exchangeTier2PerTerm": 1,
+    "exchangeTier3PerSeason": 1,
+    "exchangeTier4PerYear": 1
+  },
+  "awaken": {
+    "tier1": 30,
+    "tier2": 50,
+    "tier3": 80,
+    "tier4": 120,
+    "tier5": 160
+  },
+  "awakenBonus": [0, 0.1, 0.25, 0.5, 1.0, 1.5],
+  "fragment": {
+    "dupTier1": 20,
+    "dupTier2": 60,
+    "dupTier3": 200,
+    "dupTier4": 500,
+    "dupTier5": 0,
+    "payRatio": 0.5,
+    "_comment": "碎片最多抵扣觉醒费用的 50%"
+  },
+  "gradeCoef": {
+    "6": 1.0,
+    "7": 0.6
+  },
+  "character": {
+    "nicknameChange": 15,
+    "titleBuy": 40
+  },
+  "misc": {
+    "trigramReroll": 50,
+    "battleRefill": 3,
+    "battleFreePerDay": 3
+  },
+  "skin": {
+    "school": 60,
+    "hanfu": 120,
+    "season": 150,
+    "graduate": 0
+  },
+  "levelCoef": 0.05,
+  "levelCap": 7,
+  "powerBase": 100
+}

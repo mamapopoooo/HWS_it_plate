@@ -1,0 +1,20 @@
+{
+  "_comment": "内容层：角色皮肤（男/女各一版）。宠物皮肤已废弃，装饰一律走角色端。加一套皮肤 = 加两行 + 传两张图。",
+  "skins": [
+    { "id": "skin_base_m",      "name": "素衣·男",   "theme": "base",      "gender": "male",   "price": 0,   "image": "/pet-garden/characters/base_m.png",     "unlock": null, "sortOrder": 1 },
+    { "id": "skin_base_f",      "name": "素衣·女",   "theme": "base",      "gender": "female", "price": 0,   "image": "/pet-garden/characters/base_f.png",     "unlock": null, "sortOrder": 2 },
+    { "id": "skin_school_m",    "name": "宏文校服·男", "theme": "school",   "gender": "male",   "price": 60,  "image": "/pet-garden/characters/school_m.png",   "unlock": null, "sortOrder": 3 },
+    { "id": "skin_school_f",    "name": "宏文校服·女", "theme": "school",   "gender": "female", "price": 60,  "image": "/pet-garden/characters/school_f.png",   "unlock": null, "sortOrder": 4 },
+    { "id": "skin_hanfu_m",     "name": "云纹汉服·男", "theme": "hanfu",    "gender": "male",   "price": 120, "image": "/pet-garden/characters/hanfu_m.png",    "unlock": null, "sortOrder": 5 },
+    { "id": "skin_hanfu_f",     "name": "云纹汉服·女", "theme": "hanfu",    "gender": "female", "price": 120, "image": "/pet-garden/characters/hanfu_f.png",    "unlock": null, "sortOrder": 6 },
+    { "id": "skin_season_m",    "name": "节气·秋分·男", "theme": "season",  "gender": "male",   "price": 150, "image": "/pet-garden/characters/season_m.png",   "unlock": { "type": "season_rank", "value": 3 }, "sortOrder": 7 },
+    { "id": "skin_season_f",    "name": "节气·秋分·女", "theme": "season",  "gender": "female", "price": 150, "image": "/pet-garden/characters/season_f.png",   "unlock": { "type": "season_rank", "value": 3 }, "sortOrder": 8 },
+    { "id": "skin_graduate_m",  "name": "结业·男",   "theme": "graduate",  "gender": "male",   "price": 0,   "image": "/pet-garden/characters/graduate_m.png", "unlock": { "type": "grade_complete", "value": 6 }, "sortOrder": 9 },
+    { "id": "skin_graduate_f",  "name": "结业·女",   "theme": "graduate",  "gender": "female", "price": 0,   "image": "/pet-garden/characters/graduate_f.png", "unlock": { "type": "grade_complete", "value": 6 }, "sortOrder": 10 }
+  ],
+  "rankingConfig": [
+    { "id": "points",     "name": "积分榜", "metric": "points",          "scope": "grade", "resetCycle": "season", "topPose": 7, "sortOrder": 1 },
+    { "id": "power",      "name": "战力榜", "metric": "power",           "scope": "grade", "resetCycle": "never",  "topPose": 7, "sortOrder": 2 },
+    { "id": "collection", "name": "收集榜", "metric": "collection_rate", "scope": "grade", "resetCycle": "never",  "topPose": 7, "sortOrder": 3 }
+  ]
+}

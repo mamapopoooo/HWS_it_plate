@@ -1,0 +1,266 @@
+/**
+ * 国风游戏化样式层（v3）
+ * 只放「跨页面复用的视觉原语」：宣纸底 / 卷轴面板 / 印章按钮 / 太极盘 / 卦象环 / 云纹。
+ * 页面私有布局写在各自 SFC 的 scoped style 里。
+ */
+
+/* ========== 宣纸底 ========== */
+.gw-paper {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(200, 180, 140, 0.22), transparent 42%),
+    radial-gradient(circle at 82% 74%, rgba(176, 166, 148, 0.2), transparent 46%),
+    repeating-linear-gradient(0deg, rgba(120, 110, 90, 0.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(120, 110, 90, 0.025) 0 1px, transparent 1px 4px);
+}
+
+/* ========== 卷轴面板 ========== */
+.gw-scroll {
+  position: relative;
+  background: linear-gradient(180deg, var(--paper-light), #efe4cc);
+  border: 1px solid rgba(28, 28, 36, 0.26);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.75), var(--sh-paper);
+}
+/* 两端木轴 */
+.gw-scroll::before,
+.gw-scroll::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #8a6a4a, #5c4530);
+  box-shadow: 0 1px 2px rgba(28, 28, 36, 0.3);
+}
+.gw-scroll::before {
+  top: -3px;
+}
+.gw-scroll::after {
+  bottom: -3px;
+}
+
+.gw-scroll-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-title);
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(28, 28, 36, 0.16);
+}
+
+/* ========== 印章按钮 ========== */
+.gw-seal {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 22px;
+  font-family: var(--font-title);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--paper-light), #e3d6bb);
+  border: 1px solid rgba(28, 28, 36, 0.3);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-inset), 0 3px 8px rgba(28, 28, 36, 0.14);
+  cursor: pointer;
+  transition: transform var(--d-instant) var(--e-out), box-shadow var(--d-instant), filter var(--d-quick);
+}
+.gw-seal:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+/* 按压 = 盖印章 */
+.gw-seal:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: inset 0 2px 5px rgba(28, 28, 36, 0.22), 0 1px 2px rgba(28, 28, 36, 0.1);
+}
+.gw-seal:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+.gw-seal--primary {
+  color: #f7efe0;
+  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  border-color: var(--cinnabar-d);
+  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, 0.38), 0 4px 12px rgba(142, 42, 32, 0.32);
+}
+.gw-seal__hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0;
+  opacity: 0.75;
+}
+
+/* ========== 太极盘 ========== */
+.gw-taiji {
+  position: relative;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--ink) 50%, transparent 50%);
+  border: 1px solid rgba(28, 28, 36, 0.45);
+}
+.gw-taiji::before,
+.gw-taiji::after {
+  content: '';
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+}
+.gw-taiji::before {
+  top: 0;
+  background: var(--paper);
+  border: 1px solid rgba(28, 28, 36, 0.3);
+}
+.gw-taiji::after {
+  bottom: 0;
+  background: var(--ink);
+}
+
+/* ========== 卦象环 ========== */
+.gw-ring {
+  position: absolute;
+  border-radius: 50%;
+  animation: gw-spin 72s linear infinite;
+}
+.gw-ring__glyph {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-family: var(--font-title);
+  line-height: 1;
+  width: 1.2em;
+  margin: -0.6em 0 0 -0.6em;
+  text-align: center;
+  color: var(--ink-2);
+  opacity: 0.85;
+}
+
+/* ========== 金线台座 ========== */
+.gw-dais {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201, 162, 39, 0.55);
+  box-shadow: 0 0 24px rgba(201, 162, 39, 0.22), inset 0 0 24px rgba(201, 162, 39, 0.16);
+}
+.gw-dais::after {
+  content: '';
+  position: absolute;
+  inset: 14% 10%;
+  border-radius: 50%;
+  border: 1px dashed rgba(201, 162, 39, 0.4);
+}
+
+/* ========== 水墨晕开 ========== */
+.gw-ink-bloom {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  background: radial-gradient(circle, rgba(28, 28, 36, 0.55) 0%, rgba(28, 28, 36, 0.18) 42%, transparent 70%);
+  filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+}
+.gw-ink-bloom--on {
+  animation: gw-ink-spread 720ms var(--e-out);
+}
+
+/* ========== 云纹 ========== */
+.gw-cloud {
+  position: absolute;
+  width: 420px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 253, 246, 0.85), transparent 68%);
+  filter: blur(10px);
+  pointer-events: none;
+  animation: gw-drift 34s ease-in-out infinite alternate;
+}
+
+/* ========== 水墨远山 ========== */
+.gw-mountain {
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(28, 28, 36, 0.16), rgba(28, 28, 36, 0.04));
+  clip-path: polygon(0 100%, 0 62%, 9% 44%, 18% 58%, 27% 34%, 38% 52%, 47% 30%, 58% 50%, 68% 36%, 78% 54%, 88% 40%, 100% 58%, 100% 100%);
+  pointer-events: none;
+}
+.gw-mountain--near {
+  height: 30%;
+  background: linear-gradient(180deg, rgba(28, 28, 36, 0.22), rgba(28, 28, 36, 0.06));
+  clip-path: polygon(0 100%, 0 74%, 12% 58%, 24% 72%, 36% 50%, 50% 68%, 62% 54%, 74% 70%, 86% 56%, 100% 72%, 100% 100%);
+  filter: blur(0.6px);
+}
+
+/* ========== 关键帧 ========== */
+@keyframes gw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes gw-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+@keyframes gw-drift {
+  from {
+    transform: translateX(-30px);
+  }
+  to {
+    transform: translateX(40px);
+  }
+}
+@keyframes gw-ink-spread {
+  0% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(14);
+  }
+}
+@keyframes gw-sheen {
+  0% {
+    left: -60%;
+  }
+  55%,
+  100% {
+    left: 120%;
+  }
+}
+/* 摸头时的爱心 */
+@keyframes gw-heart {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) scale(1.1);
+  }
+}

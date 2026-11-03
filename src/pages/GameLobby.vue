@@ -1,0 +1,489 @@
+<script setup lang="ts">
+/**
+ * 学生端主界面 · 太极盘大厅（M1 视觉切片）
+ *
+ * 当前数据为种子/占位：M2 接 /api/v2/trainer/me 与 /api/v2/pets/my 后，
+ * 只需替换 buildDemoState 部分，模板与组件不动（00-总纲 P1）。
+ */
+import { computed, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import GameHud from '@/components/layout/GameHud.vue'
+import GameDock, { type DockItem } from '@/components/layout/GameDock.vue'
+import TaijiAltar from '@/components/pet/TaijiAltar.vue'
+import NamePlate from '@/components/pet/NamePlate.vue'
+import {
+  TIERS,
+  calcPower,
+  formName,
+  getTier,
+  tierName,
+  trigramGlyphs,
+  trigramLabel,
+} from '@/config/gameConfig'
+
+const router = useRouter()
+
+/* ---------------- 占位数据（M2 换接口） ---------------- */
+
+interface DemoPet {
+  id: string
+  name: string
+  tier: number
+  trigram: string
+  level: number
+  awaken: number
+  image: string
+}
+
+const DEMO_PETS: Record<number, DemoPet> = {
+  1: {
+    id: 'pet_jiuweihu',
+    name: '九尾狐',
+    tier: 1,
+    trigram: 'li',
+    level: 3,
+    awaken: 0,
+    image: '/pet-garden/pets/white-tiger/lv1.png',
+  },
+  2: {
+    id: 'pet_baize',
+    name: '白泽',
+    tier: 2,
+    trigram: 'qian',
+    level: 4,
+    awaken: 1,
+    image: '/pet-garden/pets/white-tiger/lv4.png',
+  },
+  3: {
+    id: 'pet_baihu',
+    name: '白虎·监兵',
+    tier: 3,
+    trigram: 'qian,dui',
+    level: 7,
+    awaken: 3,
+    image: '/pet-garden/pets/white-tiger/lv7.png',
+  },
+  4: {
+    id: 'pet_yinyu',
+    name: '阴鱼·太阴',
+    tier: 4,
+    trigram: 'all',
+    level: 7,
+    awaken: 4,
+    image: '/pet-garden/pets/white-tiger/lv8.png',
+  },
+}
+
+const dockItems: DockItem[] = [
+  { key: 'battle', label: '斗法', glyph: '战' },
+  { key: 'pets', label: '灵宠', glyph: '宠' },
+  { key: 'collection', label: '图鉴', glyph: '册' },
+  { key: 'shop', label: '集市', glyph: '市' },
+  { key: 'ranking', label: '封神榜', glyph: '榜' },
+]
+
+const quests = [
+  { text: '入馆签到', reward: '+5', done: true },
+  { text: '喂食一次', reward: '+20', done: true },
+  { text: '览封神榜', reward: '+10', done: true },
+  { text: '斗法三场（1/3）', reward: '+30', done: false },
+]
+
+/* ---------------- 交互状态 ---------------- */
+
+const activeTier = ref(3)
+const happy = ref(false)
+let happyTimer: ReturnType<typeof setTimeout> | undefined
+
+const current = computed<DemoPet | null>(() => DEMO_PETS[activeTier.value] ?? null)
+const currentTier = computed(() => getTier(activeTier.value))
+const accent = computed(() => currentTier.value?.bezelColor ?? '#c9a227')
+const aura = computed(() => Math.min(1, 0.2 + activeTier.value * 0.16))
+const power = computed(() =>
+  current.value ? calcPower(current.value.tier, current.value.level, current.value.awaken) : 0,
+)
+
+function selectTier(tier: number) {
+  activeTier.value = tier
+}
+
+function onTouch() {
+  happy.value = false
+  void requestAnimationFrame(() => {
+    happy.value = true
+    if (happyTimer) clearTimeout(happyTimer)
+    happyTimer = setTimeout(() => (happy.value = false), 1500)
+  })
+}
+
+function goBattle() {
+  void router.push('/battle')
+}
+
+onUnmounted(() => {
+  if (happyTimer) clearTimeout(happyTimer)
+})
+</script>
+
+<template>
+  <div class="lobby gw-paper">
+    <GameHud
+      display-name="李四"
+      :grade="6"
+      realm="筑基三层"
+      :level="12"
+      :points="1250"
+      :shards="12"
+      gender="female"
+      @settings="() => {}"
+    />
+
+    <div class="lobby__body">
+      <GameDock :items="dockItems" active="battle" @select="() => {}" />
+
+      <main class="stage">
+        <!-- 品阶切换（配置驱动，加第六阶会自动出现） -->
+        <div class="stage__tabs">
+          <button
+            v-for="tier in TIERS"
+            :key="tier.tier"
+            class="stage__tab"
+            :class="{ 'is-on': tier.tier === activeTier }"
+            @click="selectTier(tier.tier)"
+          >
+            {{ tier.name }}
+          </button>
+        </div>
+
+        <!-- 有宠物 -->
+        <template v-if="current">
+          <TaijiAltar
+            :image="current.image"
+            :alt="`${current.name} · ${formName(current.awaken + 1)}`"
+            :tier="current.tier"
+            :accent="accent"
+            :aura="aura"
+            :fallback-glyph="trigramGlyphs(current.trigram)"
+            :happy="happy"
+          />
+          <NamePlate
+            :name="current.name"
+            :tier-name="tierName(current.tier)"
+            :trigram-text="`${trigramGlyphs(current.trigram)} ${trigramLabel(current.trigram)}`"
+            :form-text="formName(current.awaken + 1)"
+            :level="current.level"
+            :accent="accent"
+          />
+          <div class="stage__meta">
+            <span class="stage__power num">战力 {{ power }}</span>
+            <button class="stage__touch" @click="onTouch">摸头</button>
+            <span class="stage__tip">立绘为占位素材，正式美术按 §7 规范出图</span>
+          </div>
+        </template>
+
+        <!-- 无极：尚未造物 -->
+        <template v-else>
+          <div class="stage__empty">
+            <div class="stage__empty-glyph">☯</div>
+            <p class="stage__empty-title">无极 · 尚待造物</p>
+            <p class="stage__empty-desc">
+              集齐阴鱼与阳鱼后，可开启「造物」，创作只属于你的一只神兽。
+            </p>
+            <button class="gw-seal gw-seal--primary" disabled>前往造物（待开放）</button>
+          </div>
+        </template>
+      </main>
+
+      <!-- 右侧卷轴 -->
+      <aside class="side">
+        <section class="gw-scroll side__panel">
+          <div class="gw-scroll-head">
+            <span>每日课业</span>
+            <em class="side__reset num">03:21</em>
+          </div>
+          <div
+            v-for="q in quests"
+            :key="q.text"
+            class="side__quest"
+            :class="{ 'is-done': q.done }"
+          >
+            <i class="side__dot" />
+            <span class="side__qtext">{{ q.text }}</span>
+            <span class="side__reward num">{{ q.reward }}</span>
+          </div>
+          <div class="side__bar"><i style="width: 75%" /></div>
+        </section>
+
+        <section class="gw-scroll side__panel">
+          <div class="gw-scroll-head"><span>节气榜文</span><em>第二赛季</em></div>
+          <p class="side__notice">
+            G6-1 班 反超 G6-2 班，现 <b class="num">280 : 265</b><br />
+            赛季余四日六时，周五双倍功名
+          </p>
+        </section>
+
+        <section class="gw-scroll side__panel side__panel--grow">
+          <div class="gw-scroll-head"><span>同道</span><em>在线 6</em></div>
+          <div class="side__quest"><i class="side__dot side__dot--green" /><span class="side__qtext">王小二 化相觉醒</span></div>
+          <div class="side__quest"><i class="side__dot side__dot--purple" /><span class="side__qtext">张三 求签得八卦</span></div>
+          <div class="side__quest"><i class="side__dot side__dot--blue" /><span class="side__qtext">赵六 升筑基五层</span></div>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="cta">
+      <button class="gw-seal gw-seal--primary" @click="goBattle">
+        斗法<span class="gw-seal__hint">耗 1 卦力</span>
+      </button>
+      <button class="gw-seal" disabled>求签<span class="gw-seal__hint">十连 45 灵石</span></button>
+      <button class="gw-seal" disabled>封神榜</button>
+    </footer>
+
+    <!-- 水墨远山压在最底层 -->
+    <div class="gw-mountain lobby__mt" aria-hidden="true" />
+    <div class="gw-mountain gw-mountain--near lobby__mt" aria-hidden="true" />
+  </div>
+</template>
+
+<style scoped>
+.lobby {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.lobby__mt {
+  z-index: 0;
+}
+
+.lobby__body {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--dock-w) 1fr var(--side-w);
+  min-height: 0;
+}
+
+/* ---------- 中央舞台 ---------- */
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 12px 18px;
+  min-width: 0;
+}
+
+.stage__tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 253, 246, 0.78);
+  border: 1px solid rgba(28, 28, 36, 0.18);
+  border-radius: 999px;
+  box-shadow: var(--sh-inset);
+}
+.stage__tab {
+  padding: 6px 15px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--d-quick), background var(--d-quick), box-shadow var(--d-quick);
+}
+.stage__tab:hover {
+  color: var(--ink);
+}
+.stage__tab.is-on {
+  color: #f7efe0;
+  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  box-shadow: 0 2px 6px rgba(142, 42, 32, 0.3);
+}
+
+.stage__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.stage__power {
+  font-size: 13px;
+  color: var(--cinnabar);
+  font-weight: 700;
+}
+.stage__touch {
+  padding: 5px 14px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--paper-light), var(--paper-2));
+  border: 1px solid rgba(28, 28, 36, 0.22);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: transform var(--d-instant) var(--e-out);
+}
+.stage__touch:active {
+  transform: scale(0.96);
+}
+.stage__tip {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/* 无极空位 */
+.stage__empty {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.stage__empty-glyph {
+  font-size: 76px;
+  line-height: 1;
+  color: rgba(28, 28, 36, 0.18);
+  animation: gw-float 4.2s ease-in-out infinite;
+}
+.stage__empty-title {
+  font-family: var(--font-title);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+.stage__empty-desc {
+  max-width: 300px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* ---------- 右栏 ---------- */
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px 18px 0;
+  min-width: 0;
+}
+.side__panel {
+  padding: 10px 12px;
+}
+.side__panel--grow {
+  flex: 1;
+}
+.side__reset {
+  font-style: normal;
+  font-family: var(--font-num);
+  font-size: 12px;
+  color: var(--cinnabar);
+}
+.side__quest {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.side__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(28, 28, 36, 0.35);
+}
+.side__quest.is-done .side__dot {
+  background: var(--stone-green);
+  border-color: var(--stone-green);
+}
+.side__dot--green {
+  background: var(--stone-green);
+}
+.side__dot--purple {
+  background: var(--trigram-zhen);
+}
+.side__dot--blue {
+  background: var(--stone-blue);
+}
+.side__qtext {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.side__quest.is-done .side__qtext {
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+.side__reward {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cinnabar);
+}
+.side__bar {
+  height: 5px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgba(28, 28, 36, 0.12);
+  overflow: hidden;
+}
+.side__bar > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--stone-green), var(--jade));
+}
+.side__notice {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.side__notice b {
+  color: var(--cinnabar);
+}
+
+/* ---------- 底部 ---------- */
+.cta {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 18px;
+  background: linear-gradient(0deg, rgba(232, 220, 194, 0.96), rgba(242, 232, 213, 0.4));
+  border-top: 1px solid rgba(28, 28, 36, 0.16);
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 900px) {
+  .lobby__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .side {
+    display: none;
+  }
+  .cta {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px 14px;
+  }
+  .cta .gw-seal {
+    width: 100%;
+  }
+  .stage__tip {
+    display: none;
+  }
+}
+</style>

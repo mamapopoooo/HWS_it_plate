@@ -1,0 +1,60 @@
+{
+  "_comment": "内容层：38 只官方宠物（24 万象 + 8 八卦 + 4 四象 + 2 太极）。无极由学生自造，不在此表。图片路径按 id 去前缀命名，缺图由回落链降级，不报错。",
+  "_imageConvention": "/pet-garden/pets/{id 去 pet_ 前缀}/form{N}.png",
+  "pets": [
+    { "id": "pet_luwu",        "name": "陆吾",     "tier": 1, "trigram": "qian", "source": "西次三经", "role": "守卫", "description": "昆仑之守，人面虎身九尾，司天之九部。", "sortOrder": 1 },
+    { "id": "pet_kaimingshou", "name": "开明兽",   "tier": 1, "trigram": "qian", "source": "海内西经", "role": "守卫", "description": "昆仑门神，九首人面，虎身而立。", "sortOrder": 2 },
+    { "id": "pet_yingzhao",    "name": "英招",     "tier": 1, "trigram": "qian", "source": "西次三经", "role": "速攻", "description": "马身人面，虎纹鸟翼，司天帝之苑。", "sortOrder": 3 },
+
+    { "id": "pet_zheng",       "name": "狰",       "tier": 1, "trigram": "kun",  "source": "西山经",   "role": "输出", "description": "章莪之山，五尾一角，其音如击石。", "sortOrder": 4 },
+    { "id": "pet_huan",        "name": "讙",       "tier": 1, "trigram": "kun",  "source": "西次三经", "role": "控制", "description": "翼望之山，一目三尾，善御凶。", "sortOrder": 5 },
+    { "id": "pet_bo",          "name": "驳",       "tier": 1, "trigram": "kun",  "source": "西次四经", "role": "坦克", "description": "中曲之山，马身一角，虎爪锯齿，食虎豹。", "sortOrder": 6 },
+
+    { "id": "pet_tiangou",     "name": "天狗",     "tier": 1, "trigram": "zhen", "source": "西次三经", "role": "速攻", "description": "阴山有兽，状如狸而白首，可以御凶。", "sortOrder": 7 },
+    { "id": "pet_lei",         "name": "鸓",       "tier": 1, "trigram": "zhen", "source": "西次二经", "role": "输出", "description": "状如鹊，赤黑二首四足，可以御火。", "sortOrder": 8 },
+    { "id": "pet_zhuru",       "name": "朱獳",     "tier": 1, "trigram": "zhen", "source": "东山经",   "role": "控制", "description": "状如狐而鱼翼，见则其国大旱。", "sortOrder": 9 },
+
+    { "id": "pet_boshi",       "name": "猼訑",     "tier": 1, "trigram": "xun",  "source": "南山经",   "role": "闪避", "description": "基山有兽，羊身九尾四耳，目在背上。", "sortOrder": 10 },
+    { "id": "pet_mengji",      "name": "孟极",     "tier": 1, "trigram": "xun",  "source": "北山经",   "role": "速攻", "description": "状如豹而文题白身，善伏。", "sortOrder": 11 },
+    { "id": "pet_qitu",        "name": "鵸鵌",     "tier": 1, "trigram": "xun",  "source": "西次三经", "role": "辅助", "description": "翼望之山，三首六尾，善笑，可以御凶。", "sortOrder": 12 },
+
+    { "id": "pet_heluoyu",     "name": "何罗鱼",   "tier": 1, "trigram": "kan",  "source": "北山经",   "role": "坦克", "description": "一首十身，其音如吠犬，食之已痈。", "sortOrder": 13 },
+    { "id": "pet_luoyu",       "name": "蠃鱼",     "tier": 1, "trigram": "kan",  "source": "西山经",   "role": "辅助", "description": "鱼身而鸟翼，见则其邑大水。", "sortOrder": 14 },
+    { "id": "pet_ranyiyu",     "name": "冉遗鱼",   "tier": 1, "trigram": "kan",  "source": "北山经",   "role": "输出", "description": "鱼身蛇首六足，食之使人不眯。", "sortOrder": 15 },
+
+    { "id": "pet_jiuweihu",    "name": "九尾狐",   "tier": 1, "trigram": "li",   "source": "南山经",   "role": "输出", "description": "青丘之山，状如狐而九尾，其音如婴儿。", "sortOrder": 16 },
+    { "id": "pet_chiru",       "name": "赤鱬",     "tier": 1, "trigram": "li",   "source": "南山经",   "role": "治疗", "description": "人面鱼身，其音如鸳鸯，食之不疥。", "sortOrder": 17 },
+    { "id": "pet_zhu",         "name": "鴸",       "tier": 1, "trigram": "li",   "source": "南山经",   "role": "控制", "description": "状如鸱而人手，其鸣自号，见则多放士。", "sortOrder": 18 },
+
+    { "id": "pet_xiqu",        "name": "犀渠",     "tier": 1, "trigram": "gen",  "source": "中山经",   "role": "坦克", "description": "状如牛，苍身，其音如婴儿，食人。", "sortOrder": 19 },
+    { "id": "pet_qianyang",    "name": "羬羊",     "tier": 1, "trigram": "gen",  "source": "西山经",   "role": "防御", "description": "状如羊而马尾，其脂可以已腊。", "sortOrder": 20 },
+    { "id": "pet_taotie",      "name": "饕餮",     "tier": 1, "trigram": "gen",  "source": "北山经",   "role": "输出", "description": "钩吾之山，羊身人面，虎齿人爪，贪食无厌。", "sortOrder": 21 },
+
+    { "id": "pet_changyou",    "name": "长右",     "tier": 1, "trigram": "dui",  "source": "南山经",   "role": "控制", "description": "状如禺而四耳，见则郡县大水。", "sortOrder": 22 },
+    { "id": "pet_lu",          "name": "鯥",       "tier": 1, "trigram": "dui",  "source": "南山经",   "role": "辅助", "description": "牛形蛇尾有翼，冬死夏生，食之不肿。", "sortOrder": 23 },
+    { "id": "pet_wenyaoyu",    "name": "文鳐鱼",   "tier": 1, "trigram": "dui",  "source": "西山经",   "role": "输出", "description": "状如鲤鱼而有翼，夜飞，见则大穰。", "sortOrder": 24 },
+
+    { "id": "pet_baize",       "name": "白泽",     "tier": 2, "trigram": "qian", "source": "海外经",   "role": "辅助", "description": "通万物之情，知万物之状，王者有德则至。", "sortOrder": 25 },
+    { "id": "pet_tulou",       "name": "土蝼",     "tier": 2, "trigram": "kun",  "source": "西山经",   "role": "坦克", "description": "昆仑之丘，状如羊而四角，食人。", "sortOrder": 26 },
+    { "id": "pet_kui",         "name": "夔",       "tier": 2, "trigram": "zhen", "source": "中山经",   "role": "输出", "description": "东海流波之山，状如牛，苍身无角，一足，声如雷。", "sortOrder": 27 },
+    { "id": "pet_lushu",       "name": "鹿蜀",     "tier": 2, "trigram": "xun",  "source": "南山经",   "role": "速攻", "description": "杻阳之山，马身虎纹，其音如谣，佩之宜子孙。", "sortOrder": 28 },
+    { "id": "pet_fuzhu",       "name": "夫诸",     "tier": 2, "trigram": "kan",  "source": "中山经",   "role": "治疗", "description": "状如白鹿而四角，见则其邑大水。", "sortOrder": 29 },
+    { "id": "pet_bifang",      "name": "毕方",     "tier": 2, "trigram": "li",   "source": "西山经",   "role": "爆发", "description": "状如鹤而一足，赤文青质，见则其邑有讹火。", "sortOrder": 30 },
+    { "id": "pet_diting",      "name": "谛听",     "tier": 2, "trigram": "gen",  "source": "传说·九华", "role": "守卫", "description": "伏于地可听人心，能辨善恶真伪。", "sortOrder": 31 },
+    { "id": "pet_huashe",      "name": "化蛇",     "tier": 2, "trigram": "dui",  "source": "中山经",   "role": "控制", "description": "人面豺身，鸟翼蛇行，其音如叱呼，见则大水。", "sortOrder": 32 },
+
+    { "id": "pet_qinglong",    "name": "青龙·孟章", "tier": 3, "trigram": "zhen,xun", "source": "四象·东", "role": "输出", "description": "东方七宿之灵，鳞身鹿角，五爪腾云，主春生。", "sortOrder": 33 },
+    { "id": "pet_baihu",       "name": "白虎·监兵", "tier": 3, "trigram": "qian,dui", "source": "四象·西", "role": "速攻", "description": "西方七宿之灵，银毛黑纹，金瞳踏风，主秋杀。", "sortOrder": 34 },
+    { "id": "pet_zhuque",      "name": "朱雀·陵光", "tier": 3, "trigram": "li",      "source": "四象·南", "role": "爆发", "description": "南方七宿之灵，朱羽金冠，口衔火珠，主夏长。", "sortOrder": 35 },
+    { "id": "pet_xuanwu",      "name": "玄武·执明", "tier": 3, "trigram": "kan",     "source": "四象·北", "role": "坦克", "description": "北方七宿之灵，龟蛇相缠，背负玄碑，主冬藏。", "sortOrder": 36 },
+
+    { "id": "pet_yinyu",       "name": "阴鱼·太阴", "tier": 4, "trigram": "all",     "source": "太极·阴", "role": "控制", "description": "两仪之阴，静极生动，主收摄与沉潜。", "sortOrder": 37 },
+    { "id": "pet_yangyu",      "name": "阳鱼·太阳", "tier": 4, "trigram": "all",     "source": "太极·阳", "role": "输出", "description": "两仪之阳，动极生静，主照临与开辟。", "sortOrder": 38 }
+  ],
+  "hidden": {
+    "tier": 5,
+    "unlock": { "requires": ["pet_yinyu", "pet_yangyu"] },
+    "mode": "custom",
+    "_comment": "无极由学生造物产生，不入 pets_template；教师审核通过后写入 custom_pets。"
+  }
+}

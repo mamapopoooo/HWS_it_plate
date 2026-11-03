@@ -1,0 +1,76 @@
+{
+  "_comment": "配置层：五阶。加第六阶 = 在此文件加一项，不改代码。",
+  "tiers": [
+    {
+      "tier": 1,
+      "code": "wanxiang",
+      "name": "万象",
+      "subtitle": "山海异兽",
+      "powerCoef": 1.0,
+      "formCount": 2,
+      "awakenCap": 1,
+      "skillSlots": 2,
+      "gachaRate": 0.7,
+      "bezelColor": "#8A8577",
+      "isGacha": true,
+      "sortOrder": 1
+    },
+    {
+      "tier": 2,
+      "code": "bagua",
+      "name": "八卦",
+      "subtitle": "八属之灵",
+      "powerCoef": 1.12,
+      "formCount": 3,
+      "awakenCap": 2,
+      "skillSlots": 3,
+      "gachaRate": 0.22,
+      "bezelColor": "#3E7C59",
+      "isGacha": true,
+      "sortOrder": 2
+    },
+    {
+      "tier": 3,
+      "code": "sixiang",
+      "name": "四象",
+      "subtitle": "四方神兽",
+      "powerCoef": 1.25,
+      "formCount": 4,
+      "awakenCap": 3,
+      "skillSlots": 4,
+      "gachaRate": 0.065,
+      "bezelColor": "#C9A227",
+      "isGacha": true,
+      "sortOrder": 3
+    },
+    {
+      "tier": 4,
+      "code": "taiji",
+      "name": "太极",
+      "subtitle": "阴阳之鱼",
+      "powerCoef": 1.4,
+      "formCount": 5,
+      "awakenCap": 4,
+      "skillSlots": 5,
+      "gachaRate": 0.015,
+      "bezelColor": "#2E5C8A",
+      "isGacha": true,
+      "sortOrder": 4
+    },
+    {
+      "tier": 5,
+      "code": "wuji",
+      "name": "无极",
+      "subtitle": "造物",
+      "powerCoef": 1.57,
+      "formCount": 6,
+      "awakenCap": 5,
+      "skillSlots": 6,
+      "gachaRate": 0,
+      "bezelColor": "#6B5B2E",
+      "isGacha": false,
+      "isCustom": true,
+      "sortOrder": 5
+    }
+  ]
+}

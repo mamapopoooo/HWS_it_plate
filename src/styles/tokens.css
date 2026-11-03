@@ -1,0 +1,97 @@
+/**
+ * 国风设计令牌（v3）
+ * 原则：所有颜色/圆角/动效都从这里取，组件里不写死色值（00-总纲 P2）。
+ * 数据来源：docs/seeds/trigrams.json 与 tiers.json 的色值需与本文件保持一致。
+ */
+
+:root {
+  /* ---------- 宣纸与墨 ---------- */
+  --paper: #f2e8d5;
+  --paper-2: #e8dcc2;
+  --paper-3: #dccdae;
+  --paper-light: #fbf5e8;
+  --ink: #1c1c24;
+  --ink-2: #4a4a5a;
+  --ink-3: #8a8577;
+
+  /* ---------- 国风强调色 ---------- */
+  --cinnabar: #c0392b;
+  --cinnabar-d: #8e2a20;
+  --gold: #c9a227;
+  --jade: #7fa88a;
+  --gamboge: #e8b33a;
+  --stone-blue: #2e5c8a;
+  --stone-green: #3e7c59;
+
+  /* ---------- 八卦八色（与 trigrams.json 一致） ---------- */
+  --trigram-qian: #2e5c8a;
+  --trigram-kun: #c8a165;
+  --trigram-zhen: #6d4c9f;
+  --trigram-xun: #3e7c59;
+  --trigram-kan: #1f4e79;
+  --trigram-li: #c0392b;
+  --trigram-gen: #8c6239;
+  --trigram-dui: #3e9e8f;
+
+  /* ---------- 四象四色 ---------- */
+  --sx-qinglong: #2e7d6b;
+  --sx-baihu: #b8b8a8;
+  --sx-zhuque: #c1392b;
+  --sx-xuanwu: #2a3b5c;
+
+  /* ---------- 五阶外框（与 tiers.json bezelColor 一致） ---------- */
+  --tier-1: #8a8577;
+  --tier-2: #3e7c59;
+  --tier-3: #c9a227;
+  --tier-4: #2e5c8a;
+  --tier-5: #6b5b2e;
+
+  /* ---------- 语义 ---------- */
+  --ok: #3e7c59;
+  --warn: #e8b33a;
+  --bad: #c0392b;
+
+  /* ---------- 字体 ---------- */
+  --font-title: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Songti SC', 'SimSun', serif;
+  --font-body: 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', Georgia, serif;
+  --font-num: 'Georgia', 'Times New Roman', serif;
+
+  /* ---------- 圆角 / 阴影 ---------- */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --sh-paper: 0 2px 6px rgba(28, 28, 36, 0.08);
+  --sh-lift: 0 5px 14px rgba(28, 28, 36, 0.16);
+  --sh-inset: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+  /* ---------- 动效 ---------- */
+  --d-instant: 120ms;
+  --d-quick: 200ms;
+  --d-base: 300ms;
+  --d-slow: 600ms;
+  --e-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---------- 布局 ---------- */
+  --hud-h: 64px;
+  --dock-w: 84px;
+  --side-w: 300px;
+}
+
+/* 数字统一等宽，避免跳动 */
+.num,
+[data-num] {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 系统降级：关闭旋转/粒子/闪烁，保留静态光效 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

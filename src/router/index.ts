@@ -11,6 +11,9 @@ const router = createRouter({
     { path: '/preview', name: 'preview', component: PetPreview },
     { path: '/battle', name: 'battle', component: Battle },
 
+    // v3.0 学生端主界面（太极盘大厅）
+    { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue') },
+
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },
 

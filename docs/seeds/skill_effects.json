@@ -1,0 +1,73 @@
+{
+  "_comment": "内容层：技能效果池。学生造物只能从这里挑效果，不能填数值（防超模）。新增效果类型才需要写 handler。",
+  "effects": [
+    {
+      "code": "damage_single",
+      "name": "单体伤害",
+      "cost": 40,
+      "impl": "damage",
+      "params": { "power": { "min": 60, "max": 120, "step": 10, "default": 100 } },
+      "description": "对单个目标造成攻击力 × 威力% 的伤害"
+    },
+    {
+      "code": "damage_burn",
+      "name": "灼烧斩",
+      "cost": 45,
+      "impl": "damage_with_status",
+      "params": { "power": { "min": 60, "max": 80, "step": 10, "default": 70 }, "status": "burn", "turns": 2 },
+      "description": "造成 70% 伤害，并附加灼烧 2 回合"
+    },
+    {
+      "code": "damage_aoe",
+      "name": "群伤",
+      "cost": 50,
+      "impl": "damage_aoe",
+      "params": { "power": { "min": 45, "max": 70, "step": 5, "default": 60 }, "targets": 2 },
+      "description": "对 2 个目标各造成 60% 伤害"
+    },
+    {
+      "code": "heal_pct",
+      "name": "治疗",
+      "cost": 30,
+      "impl": "heal",
+      "params": { "ratio": { "min": 15, "max": 35, "step": 5, "default": 25 } },
+      "description": "为自身或队友恢复最大生命 25%"
+    },
+    {
+      "code": "shield_pct",
+      "name": "护盾",
+      "cost": 30,
+      "impl": "shield",
+      "params": { "ratio": { "min": 10, "max": 30, "step": 5, "default": 20 }, "turns": 2 },
+      "description": "获得最大生命 20% 的护盾，持续 2 回合"
+    },
+    {
+      "code": "buff_stat",
+      "name": "增益",
+      "cost": 25,
+      "impl": "buff",
+      "params": { "stat": "atk", "ratio": 20, "turns": 2 },
+      "description": "攻击或防御提升 20%，持续 2 回合"
+    },
+    {
+      "code": "stun",
+      "name": "眩晕",
+      "cost": 35,
+      "impl": "control",
+      "params": { "turns": 1, "chance": 60 },
+      "description": "60% 概率使目标跳过 1 回合"
+    },
+    {
+      "code": "first_strike",
+      "name": "先制",
+      "cost": 20,
+      "impl": "priority",
+      "params": { "priority": 1 },
+      "description": "本回合无视速度先手"
+    }
+  ],
+  "customBudget": 120,
+  "customSkillCount": 3,
+  "nameMaxLength": 6,
+  "descMaxLength": 40
+}
