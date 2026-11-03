@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>王宠课堂 2.0 · 品阶体系与中国风主界面 v3（DSH）</title>
+<style>
+/* ==========================================================================
+   王宠课堂 2.0 — v3 中国风视觉稿
+   体系：无极（隐藏）> 太极（阴阳鱼）> 四象（四方神兽）> 八卦（八属之灵）> 万象（山海异兽）
+   作者：DSH · 2026-11-02
+   说明：视觉提案，非生产代码。立绘暂用仓库 white-tiger 的 lv1/4/7/8 演示形态递进。
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+:root {
+  /* 国风基础色 */
+  --paper: #F2E8D5;
+  --paper-2: #E8DCC2;
+  --paper-3: #DCCDAE;
+  --ink: #1C1C24;
+  --ink-2: #4A4A5A;
+  --ink-3: #8A8577;
+  --cinnabar: #C0392B;
+  --cinnabar-d: #8E2A20;
+  --gold: #C9A227;
+  --jade: #7FA88A;
+  --stone-blue: #2E5C8A;
+  --stone-green: #3E7C59;
+  --gamboge: #E8B33A;
+
+  --font-title: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Songti SC', 'SimSun', serif;
+  --font-body: 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', Georgia, serif;
+
+  --e-out: cubic-bezier(.22, 1, .36, 1);
+  --e-back: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+body {
+  margin: 0;
+  background: #EDE3CE;
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1240px; margin: 0 auto; padding: 28px 18px 90px; }
+
+/* ---------- 页头（竖排标题 + 落款印） ---------- */
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(28, 28, 36, .18);
+}
+.page-head h1 {
+  font-family: var(--font-title);
+  font-size: 30px; margin: 0; letter-spacing: .1em; color: var(--ink);
+}
+.page-head h1 em { font-style: normal; color: var(--cinnabar); }
+.page-head p { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
+.page-head code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; background: rgba(28,28,36,.07); padding: 1px 6px; border-radius: 3px; }
+.seal-logo {
+  flex: none; width: 62px; height: 62px;
+  background: var(--cinnabar); color: #F7EFE0;
+  border-radius: 6px;
+  display: grid; place-items: center;
+  font-family: var(--font-title); font-size: 26px; line-height: 1;
+  letter-spacing: .05em; text-align: center;
+  transform: rotate(-4deg);
+  box-shadow: 0 3px 10px rgba(142, 42, 32, .35), inset 0 0 0 2px rgba(247, 239, 224, .45);
+}
+
+/* ---------- 设备框 ---------- */
+.device {
+  border-radius: 18px; padding: 10px;
+  background: linear-gradient(160deg, #3A3A44, #22222A);
+  box-shadow: 0 22px 60px rgba(28, 28, 36, .34), inset 0 1px 0 rgba(255,255,255,.12);
+  margin-bottom: 12px;
+}
+.device-bar { display: flex; align-items: center; gap: 8px; padding: 2px 6px 10px; font-size: 11px; color: #A8A8B4; }
+.device-bar i { width: 8px; height: 8px; border-radius: 50%; background: #4A4A5A; }
+.device-bar i:nth-child(1) { background: #C0392B; }
+.device-bar i:nth-child(2) { background: #C9A227; }
+.device-bar i:nth-child(3) { background: #7FA88A; }
+
+/* ==========================================================================
+   游戏屏幕（容器查询单位：宽度变化时等比缩放）
+   ========================================================================== */
+.screen {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(200, 180, 140, .22), transparent 42%),
+    radial-gradient(circle at 82% 74%, rgba(176, 166, 148, .2), transparent 46%),
+    repeating-linear-gradient(0deg, rgba(120, 110, 90, .035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(120, 110, 90, .025) 0 1px, transparent 1px 4px);
+  display: grid;
+  grid-template-columns: 7.6cqw 1fr 25cqw;
+  grid-template-rows: 8.8cqw 1fr 10.6cqw;
+  grid-template-areas:
+    "hud   hud   hud"
+    "dock  stage side"
+    "cta   cta   cta";
+  isolation: isolate;
+}
+
+/* ---------- 水墨远山 / 云雾 ---------- */
+.mountain, .cloud, .mist { position: absolute; pointer-events: none; }
+.mountain {
+  left: -6%; right: -6%; bottom: 0; height: 42%;
+  background: linear-gradient(180deg, rgba(28, 28, 36, .16), rgba(28, 28, 36, .04));
+  clip-path: polygon(0 100%, 0 62%, 9% 44%, 18% 58%, 27% 34%, 38% 52%, 47% 30%, 58% 50%, 68% 36%, 78% 54%, 88% 40%, 100% 58%, 100% 100%);
+  z-index: 0;
+}
+.mountain.m2 {
+  height: 30%; bottom: 0;
+  background: linear-gradient(180deg, rgba(28, 28, 36, .22), rgba(28, 28, 36, .06));
+  clip-path: polygon(0 100%, 0 74%, 12% 58%, 24% 72%, 36% 50%, 50% 68%, 62% 54%, 74% 70%, 86% 56%, 100% 72%, 100% 100%);
+  filter: blur(.6px);
+  z-index: 0;
+}
+.cloud {
+  width: 42cqw; height: 10cqw;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 253, 246, .85), transparent 68%);
+  filter: blur(10px);
+  z-index: 1;
+  animation: drift 34s ease-in-out infinite alternate;
+}
+.cloud.c1 { left: 6%; top: 22%; opacity: .7; }
+.cloud.c2 { right: 8%; top: 44%; opacity: .55; animation-duration: 46s; animation-direction: alternate-reverse; }
+@keyframes drift {
+  from { transform: translateX(-3cqw); }
+  to   { transform: translateX(4cqw); }
+}
+
+/* ---------- 顶部 HUD（横卷） ---------- */
+.hud {
+  grid-area: hud; z-index: 6;
+  display: flex; align-items: center; gap: 1.4cqw;
+  padding: 1cqw 1.6cqw;
+  background: linear-gradient(180deg, rgba(242, 232, 213, .96), rgba(232, 220, 194, .82));
+  border-bottom: 1px solid rgba(28, 28, 36, .18);
+  box-shadow: 0 2px 10px rgba(28, 28, 36, .07);
+}
+.avatar-seal {
+  position: relative; flex: none;
+  width: 4.6cqw; height: 4.6cqw;
+  border-radius: 5px;
+  background: linear-gradient(160deg, #CE4436, var(--cinnabar-d));
+  color: #F7EFE0;
+  display: grid; place-items: center;
+  font-family: var(--font-title); font-size: 2.2cqw; line-height: 1;
+  box-shadow: inset 0 0 0 2px rgba(247, 239, 224, .4), 0 2px 6px rgba(142, 42, 32, .3);
+  transform: rotate(-3deg);
+}
+.avatar-seal b {
+  position: absolute; right: -18%; bottom: -16%;
+  font-family: var(--font-body); font-size: .78cqw; font-weight: 700;
+  background: var(--gold); color: #2A1F00;
+  border-radius: 999px; padding: .1cqw .45cqw;
+  border: 1px solid rgba(255, 255, 255, .55);
+}
+.who { display: flex; flex-direction: column; gap: .05cqw; min-width: 0; }
+.who .n {
+  font-family: var(--font-title); font-size: 1.35cqw; letter-spacing: .08em; color: var(--ink);
+}
+.who .n span { color: var(--cinnabar); }
+.who .s { font-size: .85cqw; color: var(--ink-2); }
+.who .s em { font-style: normal; color: var(--stone-green); }
+
+.hud-spacer { flex: 1; }
+
+.stats { display: flex; gap: .6cqw; }
+.stat {
+  display: flex; align-items: center; gap: .38cqw;
+  padding: .42cqw .8cqw;
+  background: rgba(255, 253, 246, .72);
+  border: 1px solid rgba(28, 28, 36, .16);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
+  font-size: .95cqw; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.stat b { font-weight: 700; }
+.stat i { font-style: normal; font-size: 1cqw; }
+.stat.gold { color: #8A6A0B; border-color: rgba(201, 162, 39, .45); background: rgba(201, 162, 39, .1); }
+.icon-seal {
+  width: 2.8cqw; height: 2.8cqw; flex: none;
+  display: grid; place-items: center;
+  border-radius: 4px; cursor: pointer;
+  border: 1px solid rgba(28, 28, 36, .2);
+  background: rgba(255, 253, 246, .72);
+  font-size: 1.2cqw;
+  transition: transform .15s var(--e-out), box-shadow .2s;
+}
+.icon-seal:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(28, 28, 36, .18); }
+
+/* ---------- 左侧木轴功能栏 ---------- */
+.dock {
+  grid-area: dock; z-index: 5;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.1cqw; padding: 1.1cqw 0;
+  background: linear-gradient(90deg, rgba(232, 220, 194, .95), rgba(242, 232, 213, .35));
+  border-right: 1px solid rgba(28, 28, 36, .14);
+}
+.dock-btn {
+  position: relative;
+  width: 4.5cqw; height: 5.2cqw;
+  display: grid; place-items: center;
+  font-family: var(--font-title); font-size: 1.85cqw; line-height: 1;
+  color: var(--ink-2);
+  background: linear-gradient(180deg, #FBF5E8, #E8DCC2);
+  border: 1px solid rgba(28, 28, 36, .22);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 2px 5px rgba(28, 28, 36, .1);
+  cursor: pointer;
+  transition: transform .2s var(--e-out), color .2s, box-shadow .2s, border-color .2s;
+}
+.dock-btn:hover { transform: translateY(-3px); color: var(--ink); box-shadow: 0 5px 12px rgba(28, 28, 36, .18); }
+.dock-btn.is-on {
+  color: #F7EFE0;
+  background: linear-gradient(180deg, #CE4436, var(--cinnabar-d));
+  border-color: var(--cinnabar-d);
+  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, .35), 0 3px 10px rgba(142, 42, 32, .35);
+}
+
+/* ---------- 中央：太极盘 + 立绘 ---------- */
+.stage {
+  grid-area: stage; z-index: 3;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 1cqw;
+  min-width: 0;
+}
+
+/* 品阶 tab（用于演示五阶外框变化） */
+.tier-tabs {
+  position: relative; z-index: 9;
+  display: flex; gap: .35cqw;
+  padding: .35cqw;
+  border-radius: 999px;
+  background: rgba(255, 253, 246, .78);
+  border: 1px solid rgba(28, 28, 36, .18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+.tier-tabs button {
+  font-family: var(--font-title); font-size: .95cqw; letter-spacing: .1em;
+  color: var(--ink-2); cursor: pointer;
+  padding: .36cqw .95cqw;
+  border: 0; border-radius: 999px; background: transparent;
+  transition: color .2s, background .2s, box-shadow .2s;
+}
+.tier-tabs button:hover { color: var(--ink); }
+.tier-tabs button.on {
+  color: #F7EFE0;
+  background: linear-gradient(180deg, #CE4436, var(--cinnabar-d));
+  box-shadow: 0 .2cqw .6cqw rgba(142, 42, 32, .3);
+}
+
+.altar {
+  position: relative;
+  flex: 1; width: 100%;
+  display: grid; place-items: end center;
+  min-height: 0;
+}
+/* 太极盘底纹 */
+.taiji-disc {
+  position: absolute; left: 50%; bottom: 2%;
+  width: 30cqw; height: 30cqw;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: .14;
+  background: linear-gradient(90deg, var(--ink) 50%, transparent 50%);
+  border: 1px solid rgba(28, 28, 36, .5);
+}
+.taiji-disc::before, .taiji-disc::after {
+  content: ''; position: absolute; left: 25%; width: 50%; height: 50%; border-radius: 50%;
+}
+.taiji-disc::before { top: 0; background: var(--paper); border: 1px solid rgba(28, 28, 36, .35); }
+.taiji-disc::after { bottom: 0; background: var(--ink); }
+
+/* 八卦方位环 */
+.trigram-ring {
+  position: absolute; left: 50%; bottom: 4%;
+  width: 34cqw; height: 34cqw;
+  transform: translateX(-50%);
+  z-index: 1;
+  animation: ringSpin 72s linear infinite;
+  opacity: .82;
+}
+@keyframes ringSpin { to { transform: translateX(-50%) rotate(360deg); } }
+.trigram-ring span {
+  position: absolute; left: 50%; top: 50%;
+  font-family: var(--font-title);
+  font-size: 1.5cqw; line-height: 1;
+  color: var(--ink-2);
+  transform:
+    rotate(var(--a)) translateY(-16cqw) rotate(calc(-1 * var(--a)));
+  margin: -.75cqw 0 0 -.75cqw;
+  width: 1.5cqw; text-align: center;
+  opacity: .85;
+}
+/* 外圈金线 */
+.gold-ring {
+  position: absolute; left: 50%; bottom: 3.4%;
+  width: 25cqw; height: 7cqw;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(201, 162, 39, .55);
+  box-shadow: 0 0 2cqw rgba(201, 162, 39, .22), inset 0 0 2cqw rgba(201, 162, 39, .16);
+  z-index: 2;
+}
+.gold-ring::after {
+  content: ''; position: absolute; inset: 14% 10%;
+  border-radius: 50%;
+  border: 1px dashed rgba(201, 162, 39, .4);
+}
+
+/* 立绘 */
+.pet-holder {
+  position: absolute; inset: 0 0 11% 0;
+  display: grid; place-items: end center;
+  z-index: 4; pointer-events: none;
+  animation: floaty 4.2s ease-in-out infinite;
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-.7cqw); }
+}
+.pet-img {
+  height: 100%; width: auto; max-width: 100%;
+  object-fit: contain;
+  -webkit-mask-image: radial-gradient(ellipse 60% 62% at 50% 48%, #000 56%, transparent 82%);
+  mask-image: radial-gradient(ellipse 60% 62% at 50% 48%, #000 56%, transparent 82%);
+  filter: drop-shadow(0 .6cqw 1.2cqw rgba(28, 28, 36, .28))
+          drop-shadow(0 0 calc(var(--aura, .4) * 2.6cqw) rgba(201, 162, 39, .5));
+  transition: filter .6s var(--e-out), opacity .3s var(--e-out), transform .5s var(--e-back);
+}
+
+/* 水墨晕开（换品阶/形态时） */
+.ink-bloom {
+  position: absolute; left: 50%; top: 46%;
+  width: 2cqw; height: 2cqw;
+  transform: translate(-50%, -50%) scale(1);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28, 28, 36, .55) 0%, rgba(28, 28, 36, .18) 42%, transparent 70%);
+  opacity: 0; pointer-events: none; z-index: 6;
+  filter: blur(6px);
+}
+.ink-bloom.on { animation: inkSpread 720ms var(--e-out); }
+@keyframes inkSpread {
+  0%   { opacity: .85; transform: translate(-50%, -50%) scale(.2); }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(14); }
+}
+
+/* 名称牌（挂轴） */
+.nameplate {
+  position: relative; z-index: 8;
+  margin-top: -1cqw;
+  display: flex; align-items: center; gap: .8cqw;
+  padding: .5cqw 1.5cqw;
+  background: linear-gradient(180deg, #FBF5E8, #E8DCC2);
+  border: 1px solid rgba(28, 28, 36, .3);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, .8), 0 3px 10px rgba(28, 28, 36, .14);
+}
+.nameplate::before, .nameplate::after {
+  content: ''; position: absolute; top: 18%; bottom: 18%; width: 2px;
+  background: rgba(28, 28, 36, .18);
+}
+.nameplate::before { left: .5cqw; }
+.nameplate::after { right: .5cqw; }
+.nameplate .nm {
+  font-family: var(--font-title); font-size: 1.5cqw; letter-spacing: .12em;
+  color: var(--ink);
+}
+.nameplate .tier-tag {
+  font-family: var(--font-title); font-size: .82cqw; letter-spacing: .1em;
+  color: #F7EFE0;
+  padding: .14cqw .5cqw; border-radius: 2px;
+  background: var(--accent, var(--cinnabar));
+}
+.nameplate .tri {
+  font-family: var(--font-title); font-size: 1.05cqw;
+  color: var(--accent, var(--stone-green));
+}
+.nameplate .form { font-size: .85cqw; color: var(--ink-2); }
+.nameplate .lv { font-size: .85cqw; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* 品阶主题：换外框/光晕/强调色 */
+.screen[data-tier="1"] { --accent: #8A8577; --aura: .25; }
+.screen[data-tier="2"] { --accent: #3E7C59; --aura: .45; }
+.screen[data-tier="3"] { --accent: #C9A227; --aura: .65; }
+.screen[data-tier="4"] { --accent: #2E5C8A; --aura: .85; }
+.screen[data-tier="5"] { --accent: #6B5B2E; --aura: 1; }
+
+/* ---------- 右侧卷轴 ---------- */
+.side {
+  grid-area: side; z-index: 5;
+  display: flex; flex-direction: column; gap: .7cqw;
+  padding: 1cqw 1cqw 1cqw 0;
+  min-width: 0;
+}
+.scroll {
+  position: relative;
+  background: linear-gradient(180deg, #FBF5E8, #EFE4CC);
+  border: 1px solid rgba(28, 28, 36, .26);
+  border-radius: 3px;
+  padding: .8cqw .9cqw;
+  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, .75), 0 3px 10px rgba(28, 28, 36, .1);
+}
+/* 卷轴两端木轴 */
+.scroll::before, .scroll::after {
+  content: ''; position: absolute; left: -4px; right: -4px; height: 5px;
+  background: linear-gradient(180deg, #8A6A4A, #5C4530);
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(28, 28, 36, .3);
+}
+.scroll::before { top: -3px; }
+.scroll::after { bottom: -3px; }
+
+.scroll-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-title); font-size: .95cqw; letter-spacing: .1em;
+  color: var(--ink);
+  padding-bottom: .45cqw; margin-bottom: .45cqw;
+  border-bottom: 1px solid rgba(28, 28, 36, .16);
+}
+.scroll-head em {
+  font-style: normal; font-family: var(--font-body);
+  font-size: .78cqw; color: var(--cinnabar); font-variant-numeric: tabular-nums;
+}
+.task { display: flex; align-items: center; gap: .45cqw; padding: .22cqw 0; font-size: .86cqw; color: var(--ink-2); }
+.task .dot {
+  flex: none; width: .5cqw; height: .5cqw; border-radius: 50%;
+  border: 1px solid rgba(28, 28, 36, .35); background: transparent;
+}
+.task.done .dot { background: var(--stone-green); border-color: var(--stone-green); box-shadow: 0 0 .4cqw rgba(62, 124, 89, .5); }
+.task .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task .p { font-size: .78cqw; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.task .r { font-size: .8cqw; color: var(--cinnabar); font-weight: 700; }
+.task.done .t { color: var(--ink-3); text-decoration: line-through; }
+
+.ink-line { height: .38cqw; border-radius: 999px; background: rgba(28, 28, 36, .12); overflow: hidden; margin-top: .45cqw; }
+.ink-line > i { display: block; height: 100%; background: linear-gradient(90deg, var(--stone-green), var(--jade)); }
+
+.notice { font-size: .84cqw; color: var(--ink-2); line-height: 1.6; }
+.notice b { color: var(--cinnabar); }
+.notice u { color: var(--stone-blue); text-decoration: none; border-bottom: 1px dotted rgba(46, 92, 138, .5); }
+
+/* ---------- 底部印章按钮 ---------- */
+.cta {
+  grid-area: cta; z-index: 6;
+  display: flex; align-items: center; justify-content: center; gap: 1.2cqw;
+  padding: 1cqw 1.6cqw;
+  background: linear-gradient(0deg, rgba(232, 220, 194, .96), rgba(242, 232, 213, .4));
+  border-top: 1px solid rgba(28, 28, 36, .16);
+}
+.seal-btn {
+  position: relative; overflow: hidden;
+  font-family: var(--font-title); letter-spacing: .14em;
+  border-radius: 4px; cursor: pointer;
+  display: flex; align-items: center; gap: .5cqw;
+  padding: .95cqw 2.2cqw; font-size: 1.15cqw;
+  min-height: 44px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #FBF5E8, #E3D6BB);
+  border: 1px solid rgba(28, 28, 36, .3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 3px 8px rgba(28, 28, 36, .14);
+  transition: transform .12s var(--e-out), box-shadow .12s, filter .2s;
+}
+.seal-btn:hover { filter: brightness(1.03); }
+.seal-btn:active {
+  transform: translateY(1px) scale(.985);
+  box-shadow: inset 0 2px 5px rgba(28, 28, 36, .22), 0 1px 2px rgba(28, 28, 36, .1);
+}
+.seal-btn--main {
+  color: #F7EFE0;
+  background: linear-gradient(180deg, #CE4436, var(--cinnabar-d));
+  border-color: var(--cinnabar-d);
+  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, .38), 0 4px 12px rgba(142, 42, 32, .32);
+  padding: .95cqw 3.2cqw; font-size: 1.3cqw;
+}
+.seal-btn .k { font-family: var(--font-body); font-size: .82cqw; opacity: .75; letter-spacing: 0; }
+
+/* ---------- 窄屏 ---------- */
+@container (max-width: 720px) {
+  .screen {
+    aspect-ratio: 9 / 16;
+    grid-template-columns: 1fr;
+    grid-template-rows: 12cqw 1fr auto auto;
+    grid-template-areas: "hud" "stage" "dock" "cta";
+  }
+  .hud { padding: 2cqw 3cqw; gap: 2.2cqw; }
+  .avatar-seal { width: 9.5cqw; height: 9.5cqw; font-size: 4.4cqw; }
+  .avatar-seal b { font-size: 2.2cqw; padding: .3cqw 1.2cqw; }
+  .who .n { font-size: 3.8cqw; }
+  .who .s { font-size: 2.5cqw; }
+  .stat { font-size: 2.8cqw; padding: 1.1cqw 2cqw; gap: 1cqw; }
+  .stat i { font-size: 3cqw; }
+  .icon-seal { width: 7.5cqw; height: 7.5cqw; font-size: 3.4cqw; }
+
+  .tier-tabs { padding: 1cqw; gap: 1cqw; margin-top: 1.2cqw; }
+  .tier-tabs button { font-size: 2.8cqw; padding: 1.1cqw 2.6cqw; }
+
+  .taiji-disc { width: 76cqw; height: 76cqw; }
+  .trigram-ring { width: 86cqw; height: 86cqw; }
+  .trigram-ring span { font-size: 4.4cqw; width: 4.4cqw; margin: -2.2cqw 0 0 -2.2cqw; transform: rotate(var(--a)) translateY(-40cqw) rotate(calc(-1 * var(--a))); }
+  .gold-ring { width: 68cqw; height: 18cqw; }
+  .pet-holder { inset: 0 0 20cqw 0; height: 76cqw; }
+  .nameplate { padding: 1.2cqw 4cqw; gap: 1.8cqw; margin-top: 0; }
+  .nameplate .nm { font-size: 4.4cqw; }
+  .nameplate .tier-tag { font-size: 2.5cqw; padding: .35cqw 1.4cqw; }
+  .nameplate .tri { font-size: 3.2cqw; }
+  .nameplate .form, .nameplate .lv { font-size: 2.6cqw; }
+
+  .side { display: none; }
+  .dock {
+    flex-direction: row; justify-content: space-around;
+    padding: 1.4cqw 1.2cqw 1.6cqw;
+    border-right: 0; border-top: 1px solid rgba(28, 28, 36, .14);
+    background: linear-gradient(0deg, rgba(232, 220, 194, .9), rgba(242, 232, 213, .4));
+  }
+  .dock-btn { width: 12cqw; height: 13cqw; font-size: 5.2cqw; }
+
+  .cta { flex-direction: column; gap: 1.8cqw; padding: 2.2cqw 3cqw 2.8cqw; }
+  .seal-btn { width: 100%; justify-content: center; font-size: 3.6cqw; padding: 3cqw; }
+  .seal-btn--main { font-size: 4cqw; }
+  .seal-btn .k { font-size: 2.6cqw; }
+  .cloud { display: none; }
+}
+
+/* ==========================================================================
+   页面其余部分
+   ========================================================================== */
+h2.sec {
+  font-family: var(--font-title); font-size: 20px; letter-spacing: .1em;
+  margin: 46px 0 6px; color: var(--ink);
+  padding-left: 12px; border-left: 4px solid var(--cinnabar);
+}
+h2.sec span { font-family: var(--font-body); font-size: 12px; font-weight: 400; color: var(--ink-3); margin-left: 10px; letter-spacing: 0; }
+p.sec-desc { margin: 0 0 16px; font-size: 13px; color: var(--ink-2); }
+p.sec-desc b { color: var(--ink); }
+
+/* 品阶阶梯 */
+.tiers { display: grid; gap: 10px; }
+.tier-row {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  gap: 14px; align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #FBF5E8, #EFE4CC);
+  border: 1px solid rgba(28, 28, 36, .2);
+  border-left: 5px solid var(--tc, var(--ink-3));
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(28, 28, 36, .07);
+}
+.tier-row .ord {
+  font-family: var(--font-title); font-size: 12px; color: var(--ink-3);
+  writing-mode: vertical-rl; letter-spacing: .2em; text-align: center;
+}
+.tier-row .main h3 {
+  font-family: var(--font-title); font-size: 16px; letter-spacing: .1em;
+  margin: 0 0 2px; color: var(--ink);
+}
+.tier-row .main h3 em { font-style: normal; color: var(--tc, var(--cinnabar)); font-size: 13px; margin-left: 8px; }
+.tier-row .main p { margin: 0; font-size: 12px; color: var(--ink-2); }
+.tier-row .main p code { font-family: ui-monospace, Consolas, monospace; background: rgba(28,28,36,.07); padding: 1px 5px; border-radius: 3px; }
+.tier-row .rate {
+  font-family: var(--font-title); font-size: 13px; color: var(--ink);
+  text-align: right; white-space: nowrap;
+}
+.tier-row .rate small { display: block; font-family: var(--font-body); font-size: 11px; color: var(--ink-3); }
+
+/* 八卦九宫 */
+.bagua { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 560px) { .bagua { grid-template-columns: repeat(2, 1fr); } }
+.gua {
+  position: relative;
+  padding: 12px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #FBF5E8, #EFE4CC);
+  border: 1px solid rgba(28, 28, 36, .18);
+  border-top: 4px solid var(--gc, #8A8577);
+  box-shadow: 0 2px 6px rgba(28, 28, 36, .07);
+}
+.gua .sym {
+  font-size: 26px; line-height: 1.1; color: var(--gc, var(--ink));
+  text-align: center; letter-spacing: 0;
+}
+.gua .nm {
+  font-family: var(--font-title); font-size: 15px; letter-spacing: .1em;
+  text-align: center; margin-top: 2px; color: var(--ink);
+}
+.gua .nm b { color: var(--gc, var(--ink)); font-size: 13px; margin-left: 4px; }
+.gua .foe { font-size: 11px; color: var(--ink-3); text-align: center; margin-top: 2px; }
+.gua .foe em { font-style: normal; color: var(--cinnabar); }
+
+/* 手法演示 */
+.tricks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.trick {
+  background: linear-gradient(180deg, #FBF5E8, #EFE4CC);
+  border: 1px solid rgba(28, 28, 36, .18);
+  border-radius: 5px; padding: 14px; text-align: center;
+}
+.trick .demo { height: 74px; display: grid; place-items: center; margin-bottom: 8px; }
+.trick .cap { font-size: 12px; color: var(--ink-2); }
+.trick .cap b { display: block; font-family: var(--font-title); font-size: 13px; color: var(--ink); letter-spacing: .08em; }
+
+.demo-taiji {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(90deg, var(--ink) 50%, var(--paper) 50%);
+  border: 1px solid rgba(28, 28, 36, .5);
+  position: relative;
+}
+.demo-taiji::before, .demo-taiji::after {
+  content: ''; position: absolute; left: 25%; width: 50%; height: 50%; border-radius: 50%;
+}
+.demo-taiji::before { top: 0; background: var(--paper); border: 1px solid rgba(28, 28, 36, .35); }
+.demo-taiji::after { bottom: 0; background: var(--ink); }
+.demo-seal {
+  font-family: var(--font-title); font-size: 15px; letter-spacing: .1em;
+  color: #F7EFE0; background: var(--cinnabar);
+  padding: 8px 12px; border-radius: 4px;
+  transform: rotate(-4deg);
+  box-shadow: inset 0 0 0 2px rgba(247, 239, 224, .45), 0 3px 8px rgba(142, 42, 32, .3);
+}
+.demo-scroll {
+  font-family: var(--font-title); font-size: 13px; letter-spacing: .1em; color: var(--ink);
+  padding: 10px 20px; background: linear-gradient(180deg, #FBF5E8, #E8DCC2);
+  border-left: 3px solid #5C4530; border-right: 3px solid #5C4530;
+  box-shadow: 0 2px 6px rgba(28, 28, 36, .12);
+}
+.demo-cloud {
+  width: 86px; height: 34px;
+  background:
+    radial-gradient(circle at 22% 62%, rgba(28,28,36,.22) 0 34%, transparent 36%),
+    radial-gradient(circle at 44% 44%, rgba(28,28,36,.2) 0 40%, transparent 42%),
+    radial-gradient(circle at 68% 58%, rgba(28,28,36,.22) 0 34%, transparent 36%);
+  filter: blur(.4px);
+}
+.demo-btn {
+  font-family: var(--font-title); font-size: 13px; letter-spacing: .14em;
+  color: #F7EFE0; padding: 9px 20px; border-radius: 4px;
+  background: linear-gradient(180deg, #CE4436, var(--cinnabar-d));
+  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, .38), 0 4px 10px rgba(142, 42, 32, .3);
+}
+
+.note {
+  margin-top: 18px; padding: 14px 18px;
+  background: linear-gradient(180deg, #FBF5E8, #EDE1C8);
+  border-left: 4px solid var(--gold);
+  border-radius: 4px;
+  font-size: 13px; color: var(--ink-2);
+  box-shadow: 0 2px 8px rgba(28, 28, 36, .08);
+}
+.note b { color: var(--ink); }
+.note code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; background: rgba(28,28,36,.07); padding: 1px 6px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div>
+      <h1>品阶体系 · <em>中国风重设计</em> v3</h1>
+      <p>DSH · 2026-11-02 · 分支 <code>dev-dsh</code> · 无极 &gt; 太极 &gt; 四象 &gt; 八卦 &gt; 万象</p>
+      <p>立绘暂用仓库 <code>white-tiger</code> 的 lv1 / lv4 / lv7 / lv8 演示形态递进，正式美术按《品阶体系-v3》§7 出图。</p>
+    </div>
+    <div class="seal-logo">王宠<br>课堂</div>
+  </header>
+
+  <div class="device">
+    <div class="device-bar"><i></i><i></i><i></i><span style="margin-left:6px">学生端 · 太极盘大厅 · 1280×720</span></div>
+
+    <div class="screen" id="screen" data-tier="3">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="mountain"></div>
+      <div class="mountain m2"></div>
+
+      <!-- 顶部 HUD -->
+      <header class="hud">
+        <div class="avatar-seal">李<b>42</b></div>
+        <div class="who">
+          <div class="n">李四 · <span>G6-1 班</span></div>
+          <div class="s">修行境界 <em>筑基三层</em> · 今日功名 +38</div>
+        </div>
+        <div class="hud-spacer"></div>
+        <div class="stats">
+          <div class="stat gold"><i>⛁</i><b id="points">1,250</b> 灵石</div>
+          <div class="stat"><i>◈</i>玉简 12</div>
+          <div class="stat"><i>✧</i>卦力 5/5</div>
+        </div>
+        <div class="icon-seal" title="设置">⚙</div>
+      </header>
+
+      <!-- 左侧木轴功能栏 -->
+      <aside class="dock">
+        <button class="dock-btn is-on" title="斗法">战</button>
+        <button class="dock-btn" title="灵宠">宠</button>
+        <button class="dock-btn" title="图鉴">册</button>
+        <button class="dock-btn" title="集市">市</button>
+        <button class="dock-btn" title="封神榜">榜</button>
+      </aside>
+
+      <!-- 中央太极盘 -->
+      <main class="stage">
+        <div class="tier-tabs" id="tierTabs">
+          <button data-tier="1">万象</button>
+          <button data-tier="2">八卦</button>
+          <button class="on" data-tier="3">四象</button>
+          <button data-tier="4">太极</button>
+          <button data-tier="5">无极</button>
+        </div>
+
+        <div class="altar">
+          <div class="taiji-disc"></div>
+          <div class="trigram-ring" id="ring">
+            <span style="--a:0deg">☰</span>
+            <span style="--a:45deg">☱</span>
+            <span style="--a:90deg">☲</span>
+            <span style="--a:135deg">☳</span>
+            <span style="--a:180deg">☷</span>
+            <span style="--a:225deg">☶</span>
+            <span style="--a:270deg">☵</span>
+            <span style="--a:315deg">☴</span>
+          </div>
+          <div class="gold-ring"></div>
+          <div class="pet-holder">
+            <img class="pet-img" id="petImg" src="../public/pets/white-tiger/lv7.png" alt="白虎 法相" />
+          </div>
+          <div class="ink-bloom" id="inkBloom"></div>
+        </div>
+
+        <div class="nameplate">
+          <span class="nm" id="petName">白虎 · 监兵</span>
+          <span class="tier-tag" id="tierTag">四象</span>
+          <span class="tri" id="triTag">☰ 乾 / ☱ 兑</span>
+          <span class="form" id="formTag">法相</span>
+          <span class="lv">Lv.7</span>
+        </div>
+      </main>
+
+      <!-- 右侧卷轴 -->
+      <aside class="side">
+        <div class="scroll">
+          <div class="scroll-head">每日课业 <em>03:21</em></div>
+          <div class="task done"><span class="dot"></span><span class="t">入馆签到</span><span class="r">+5</span></div>
+          <div class="task done"><span class="dot"></span><span class="t">喂食一次</span><span class="r">+20</span></div>
+          <div class="task done"><span class="dot"></span><span class="t">览封神榜</span><span class="r">+10</span></div>
+          <div class="task"><span class="dot"></span><span class="t">斗法三场</span><span class="p">1/3</span><span class="r">+30</span></div>
+          <div class="ink-line"><i style="width:75%"></i></div>
+        </div>
+
+        <div class="scroll">
+          <div class="scroll-head">节气榜文 <em>第二赛季</em></div>
+          <div class="notice">
+            <b>G6-1 班</b> 反超 <b>G6-2 班</b>，现 <u>280 : 265</u><br>
+            赛季余 <b>四日六时</b>，周五双倍功名
+          </div>
+        </div>
+
+        <div class="scroll" style="flex:1">
+          <div class="scroll-head">同道 <em>在线 6</em></div>
+          <div class="task"><span class="dot" style="background:#3E7C59;border-color:#3E7C59"></span><span class="t">王小二 化相觉醒</span></div>
+          <div class="task"><span class="dot" style="background:#6D4C9F;border-color:#6D4C9F"></span><span class="t">张三 求签得八卦</span></div>
+          <div class="task"><span class="dot" style="background:#2E5C8A;border-color:#2E5C8A"></span><span class="t">赵六 升筑基五层</span></div>
+        </div>
+      </aside>
+
+      <!-- 底部印章按钮 -->
+      <footer class="cta">
+        <button class="seal-btn seal-btn--main">斗法<span class="k">耗 1 卦力</span></button>
+        <button class="seal-btn">求签<span class="k">十连 1000 灵石</span></button>
+        <button class="seal-btn">封神榜</button>
+      </footer>
+    </div>
+  </div>
+
+  <p class="sec-desc" style="margin-top:14px">
+    点上方 <b>万象 / 八卦 / 四象 / 太极 / 无极</b> 切品阶 —— 立绘递进、外框与强调色随品阶变化，切换时有一圈<b>水墨晕开</b>。
+    把窗口拉窄到手机宽度会切成竖屏（功能栏变底栏、卷轴收起）。
+  </p>
+
+  <!-- ============ 五阶阶梯 ============ -->
+  <h2 class="sec">五阶品阶 <span>品阶定物种，形态定成长，两者正交</span></h2>
+  <p class="sec-desc">易学链条正好对上：<b>无极 → 太极 → 两仪（阴阳鱼）→ 四象 → 八卦 → 万物</b>。所以"收集品阶"本身就是"推演天地"，不需要为了玩法改文化逻辑。</p>
+
+  <div class="tiers">
+    <div class="tier-row" style="--tc:#8A8577">
+      <div class="ord">一阶</div>
+      <div class="main">
+        <h3>万象 · 山海异兽 <em>24–32 只</em></h3>
+        <p>山海经一般生物：九尾狐、毕方、夫诸、鹿蜀、穷奇…… 初始赠送 / 抽卡 / 兑换</p>
+      </div>
+      <div class="rate">×1.0<small>技能 2 · 形态 1</small></div>
+    </div>
+
+    <div class="tier-row" style="--tc:#3E7C59">
+      <div class="ord">二阶</div>
+      <div class="main">
+        <h3>八卦 · 八属之灵 <em>8 只</em></h3>
+        <p>乾、坤、震、巽、坎、离、艮、兑 各一：白泽、土蝼、夔、鹿蜀、夫诸、毕方、谛听、化蛇</p>
+      </div>
+      <div class="rate">×1.8<small>技能 3 · 形态 2</small></div>
+    </div>
+
+    <div class="tier-row" style="--tc:#C9A227">
+      <div class="ord">三阶</div>
+      <div class="main">
+        <h3>四象 · 四方神兽 <em>4 只</em></h3>
+        <p>青龙·孟章（震+巽）/ 白虎·监兵（乾+兑）/ 朱雀·陵光（离）/ 玄武·执明（坎）</p>
+      </div>
+      <div class="rate">×3.0<small>技能 4 · 形态 3</small></div>
+    </div>
+
+    <div class="tier-row" style="--tc:#2E5C8A">
+      <div class="ord">四阶</div>
+      <div class="main">
+        <h3>太极 · 阴阳之鱼 <em>2 只</em></h3>
+        <p>阴鱼·太阴 / 阳鱼·太阳。全八属性、不受克制，自带 15% 常驻减伤</p>
+      </div>
+      <div class="rate">×6.0<small>技能 5 · 形态 3</small></div>
+    </div>
+
+    <div class="tier-row" style="--tc:#6B5B2E">
+      <div class="ord">五阶</div>
+      <div class="main">
+        <h3>无极 · 太一 <em>隐藏 1 只</em></h3>
+        <p>同时拥有阴鱼 + 阳鱼时自动觉醒，绝不进抽卡池；图鉴默认剪影 + “?”</p>
+      </div>
+      <div class="rate">×10.0<small>技能 6 · 形态 3</small></div>
+    </div>
+  </div>
+
+  <!-- ============ 八卦八属性 ============ -->
+  <h2 class="sec">八卦即八属性 <span>克制用「对宫相冲」，不是五行</span></h2>
+  <p class="sec-desc">先天八卦对宫天然成四对，正好当克制表：<b>乾↔坤、震↔巽、坎↔离、艮↔兑</b>（克 ×1.3 / 被克 ×0.77 / 其余 ×1.0）。五行只有 5 个属性，凑不出 8 个，硬套会出现两个属性没有克制关系。</p>
+
+  <div class="bagua">
+    <div class="gua" style="--gc:#2E5C8A"><div class="sym">☰</div><div class="nm">乾<b>天</b></div><div class="foe">克 <em>坤</em></div></div>
+    <div class="gua" style="--gc:#C8A165"><div class="sym">☷</div><div class="nm">坤<b>地</b></div><div class="foe">克 <em>乾</em></div></div>
+    <div class="gua" style="--gc:#6D4C9F"><div class="sym">☳</div><div class="nm">震<b>雷</b></div><div class="foe">克 <em>巽</em></div></div>
+    <div class="gua" style="--gc:#3E7C59"><div class="sym">☴</div><div class="nm">巽<b>风</b></div><div class="foe">克 <em>震</em></div></div>
+    <div class="gua" style="--gc:#1F4E79"><div class="sym">☵</div><div class="nm">坎<b>水</b></div><div class="foe">克 <em>离</em></div></div>
+    <div class="gua" style="--gc:#C0392B"><div class="sym">☲</div><div class="nm">离<b>火</b></div><div class="foe">克 <em>坎</em></div></div>
+    <div class="gua" style="--gc:#8C6239"><div class="sym">☶</div><div class="nm">艮<b>山</b></div><div class="foe">克 <em>兑</em></div></div>
+    <div class="gua" style="--gc:#3E9E8F"><div class="sym">☱</div><div class="nm">兑<b>泽</b></div><div class="foe">克 <em>艮</em></div></div>
+  </div>
+
+  <!-- ============ 国风手法 ============ -->
+  <h2 class="sec">国风是怎么做出来的 <span>全部纯 CSS，无图片依赖</span></h2>
+  <div class="tricks">
+    <div class="trick"><div class="demo"><div class="demo-taiji"></div></div><div class="cap"><b>太极盘</b>两半圆 + 两个小圆</div></div>
+    <div class="trick"><div class="demo"><div class="demo-seal">朱砂</div></div><div class="cap"><b>落款印章</b>方章 + 旋转 -4°</div></div>
+    <div class="trick"><div class="demo"><div class="demo-scroll">卷轴</div></div><div class="cap"><b>卷轴</b>两端木轴 + 双层描边</div></div>
+    <div class="trick"><div class="demo"><div class="demo-cloud"></div></div><div class="cap"><b>如意云纹</b>三重径向渐变</div></div>
+    <div class="trick"><div class="demo"><div class="demo-btn">斗法</div></div><div class="cap"><b>漆章按钮</b>内描金边 + 按压下沉</div></div>
+  </div>
+
+  <div class="note">
+    <b>下一步：</b>这份 v3 稿定稿后会同步进 <code>docs/品阶体系-v3-中国风设计规范.md</code> 与 <code>docs/品阶体系改造-各Agent同步清单.md</code>，
+    你再上传 git，KIMI 改数值与克制、Qoder 改库表与接口、我改 UI。四个待定项（Q1–Q4）确认后我就冻结基线。
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* 品阶数据：立绘递进 + 名称牌文案 */
+  var TIERS = {
+    1: { name: '白泽 · 幼兽', tier: '万象', tri: '☰ 乾', form: '初相', lv: 'Lv.1', img: '../public/pets/white-tiger/lv1.png', alt: '万象 初相' },
+    2: { name: '白虎 · 化', tier: '八卦', tri: '☰ 乾 / ☱ 兑', form: '化相', lv: 'Lv.4', img: '../public/pets/white-tiger/lv4.png', alt: '八卦 化相' },
+    3: { name: '白虎 · 监兵', tier: '四象', tri: '☰ 乾 / ☱ 兑', form: '法相', lv: 'Lv.7', img: '../public/pets/white-tiger/lv7.png', alt: '四象 法相' },
+    4: { name: '阴鱼 · 太阴', tier: '太极', tri: '☵ 坎（全属）', form: '法相', lv: 'Lv.8', img: '../public/pets/white-tiger/lv8.png', alt: '太极 阴阳鱼' },
+    5: { name: '太一 · 混沌', tier: '无极', tri: '☯ 全属', form: '真形', lv: 'Lv.∞', img: '../public/pets/white-tiger/lv8.png', alt: '无极 太一' }
+  };
+
+  var screenEl = document.getElementById('screen');
+  var imgEl = document.getElementById('petImg');
+  var nameEl = document.getElementById('petName');
+  var tierEl = document.getElementById('tierTag');
+  var triEl = document.getElementById('triTag');
+  var formEl = document.getElementById('formTag');
+  var lvEl = document.querySelector('.nameplate .lv');
+  var bloomEl = document.getElementById('inkBloom');
+  var tabs = document.getElementById('tierTabs').querySelectorAll('button');
+  var busy = false;
+
+  function setTier(n) {
+    var d = TIERS[n];
+    if (!d || busy) return;
+    busy = true;
+
+    /* 1) 水墨晕开 */
+    bloomEl.classList.remove('on');
+    void bloomEl.offsetWidth;
+    bloomEl.classList.add('on');
+
+    /* 2) 旧图淡出 → 换图 → 新图淡入 */
+    imgEl.style.opacity = '0';
+    setTimeout(function () {
+      imgEl.src = d.img;
+      imgEl.alt = d.alt;
+      screenEl.dataset.tier = String(n);
+      nameEl.textContent = d.name;
+      tierEl.textContent = d.tier;
+      triEl.textContent = d.tri;
+      formEl.textContent = d.form;
+      lvEl.textContent = d.lv;
+      imgEl.style.opacity = '1';
+    }, 220);
+
+    tabs.forEach(function (b) { b.classList.toggle('on', b.dataset.tier === String(n)); });
+    setTimeout(function () { busy = false; }, 760);
+  }
+
+  tabs.forEach(function (btn) {
+    btn.addEventListener('click', function () { setTier(Number(btn.dataset.tier)); });
+  });
+
+  /* 键盘 1-5 切品阶 */
+  document.addEventListener('keydown', function (e) {
+    if (e.key >= '1' && e.key <= '5') setTier(Number(e.key));
+  });
+})();
+</script>
+</body>
+</html>

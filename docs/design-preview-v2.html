@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>王宠课堂 2.0 · 游戏主界面设计稿 v2（DSH）</title>
+<style>
+/* ==========================================================================
+   王宠课堂 2.0 — 主界面设计稿 v2（赛尔号式游戏大厅 + 三形态觉醒）
+   DSH · 2026-11-02
+   说明：本文件为视觉提案，不是生产代码。宠物立绘暂用仓库现有老虎三段图
+        （lv1 幼崽 / lv4 壮虎 / lv7 星空神虎）演示三形态，正式版替换为 AI 出图。
+   ========================================================================== */
+
+* { box-sizing: border-box; }
+
+:root {
+  /* 深空底 */
+  --sky-0: #05070F;
+  --sky-1: #0A0E1A;
+  --sky-2: #16112B;
+  --nebula-1: #3B1A63;
+  --nebula-2: #0E3B5C;
+
+  /* 面板与描边 */
+  --panel: rgba(15, 23, 42, .93);
+  --panel-2: rgba(20, 30, 52, .96);
+  --line: rgba(125, 211, 252, .35);
+  --line-soft: rgba(125, 211, 252, .16);
+
+  /* 文字 */
+  --txt: #F8FAFC;
+  --txt-2: #94A3B8;
+  --txt-3: #64748B;
+
+  /* 语义 */
+  --primary: #FF9F43;
+  --primary-2: #FF7A1A;
+  --ok: #26DE81;
+  --warn: #F59E0B;
+  --bad: #EF4444;
+  --gold: #FFD700;
+  --purple: #C084FC;
+  --cyan: #7DD3FC;
+
+  --r: 12px;
+  --e-out: cubic-bezier(.22, 1, .36, 1);
+  --e-back: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+body {
+  margin: 0;
+  background: #0E1117;
+  color: #E2E8F0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 28px 18px 80px; }
+
+/* ---------- 页头 ---------- */
+.page-head { margin-bottom: 20px; }
+.page-head h1 { font-size: 24px; margin: 0 0 6px; color: #fff; }
+.page-head h1 span { color: var(--primary); }
+.page-head p { margin: 3px 0; font-size: 13px; color: var(--txt-2); }
+.page-head code { color: var(--cyan); background: rgba(125, 211, 252, .1); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+/* ---------- 手机边框（电脑上看像一台横屏设备） ---------- */
+.device {
+  border-radius: 20px;
+  padding: 10px;
+  background: linear-gradient(160deg, #1E293B, #0B1120);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06);
+  margin-bottom: 10px;
+}
+.device-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 2px 6px 10px; font-size: 11px; color: var(--txt-3);
+}
+.device-bar i { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+.device-bar i:nth-child(1) { background: #F87171; }
+.device-bar i:nth-child(2) { background: #FBBF24; }
+.device-bar i:nth-child(3) { background: #34D399; }
+
+/* 手机上的浮动任务按钮：桌面端隐藏，窄屏才出现 */
+.float-quest { display: none; }
+
+/* ==========================================================================
+   游戏屏幕：容器查询单位，宽度变化时整套 UI 等比缩放
+   ========================================================================== */
+.screen {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, var(--sky-2) 0%, var(--sky-1) 45%, var(--sky-0) 100%);
+  display: grid;
+  grid-template-columns: 8.4cqw 1fr 24cqw;
+  grid-template-rows: 9.4cqw 1fr 11.4cqw;
+  grid-template-areas:
+    "hud   hud   hud"
+    "dock  stage side"
+    "cta   cta   cta";
+  isolation: isolate;
+}
+
+/* ---------- 星空 + 星云 ---------- */
+.sky, .stars, .nebula { position: absolute; inset: 0; pointer-events: none; }
+.stars { z-index: 0; }
+.stars i {
+  position: absolute; display: block;
+  background: #fff; border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  opacity: .2;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: .15; transform: scale(.8); }
+  50%      { opacity: 1; transform: scale(1.25); }
+}
+.nebula { z-index: 0; filter: blur(48px); opacity: .75; }
+.nebula.n1 {
+  inset: -10% 40% 55% -20%;
+  background: radial-gradient(circle, var(--nebula-1) 0%, transparent 68%);
+}
+.nebula.n2 {
+  inset: 45% -15% -25% 50%;
+  background: radial-gradient(circle, var(--nebula-2) 0%, transparent 66%);
+}
+/* 底部地平线光 */
+.horizon {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 26%;
+  background: linear-gradient(to top, rgba(125, 211, 252, .13), transparent 75%);
+  z-index: 1; pointer-events: none;
+}
+
+/* ---------- 顶部 HUD ---------- */
+.hud {
+  grid-area: hud; z-index: 6;
+  display: flex; align-items: center; gap: 1.6cqw;
+  padding: 1.2cqw 1.8cqw;
+  background: linear-gradient(180deg, rgba(6, 10, 22, .92), rgba(10, 16, 32, .55));
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(6px);
+}
+.avatar {
+  position: relative; width: 5.4cqw; aspect-ratio: 1; flex: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFD9A8, #FF9F43 60%, #C2410C 100%);
+  border: 2px solid rgba(255, 215, 0, .75);
+  box-shadow: 0 0 14px rgba(255, 159, 67, .55), inset 0 1px 3px rgba(255, 255, 255, .5);
+  display: grid; place-items: center;
+  font-size: 2.2cqw;
+}
+.avatar b {
+  position: absolute; bottom: -8%; right: -14%;
+  font-size: .85cqw; line-height: 1;
+  background: linear-gradient(180deg, #FFE9A8, #FFB020);
+  color: #3B1C00; border-radius: 999px;
+  padding: .28cqw .5cqw; border: 1px solid rgba(255, 255, 255, .55);
+  font-weight: 800;
+}
+.who { display: flex; flex-direction: column; gap: .1cqw; min-width: 0; }
+.who .n { font-size: 1.35cqw; font-weight: 800; color: #fff; letter-spacing: .04cqw; }
+.who .s { font-size: .85cqw; color: var(--txt-2); }
+.who .s em { font-style: normal; color: var(--gold); }
+
+.hud-spacer { flex: 1; }
+
+.chips { display: flex; gap: .7cqw; }
+.chip {
+  display: flex; align-items: center; gap: .4cqw;
+  padding: .5cqw .9cqw; border-radius: 999px;
+  background: rgba(15, 23, 42, .85);
+  border: 1px solid var(--line-soft);
+  font-size: 1cqw; font-weight: 700; color: #FDE68A;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+.chip i { font-style: normal; font-size: 1.15cqw; }
+.chip.add {
+  width: 1.8cqw; height: 1.8cqw; justify-content: center;
+  color: var(--ok); border-color: rgba(38, 222, 129, .4);
+  background: rgba(38, 222, 129, .12); cursor: pointer; padding: 0;
+}
+.icon-btn {
+  width: 3cqw; height: 3cqw; flex: none;
+  border-radius: 8px; display: grid; place-items: center;
+  background: rgba(15, 23, 42, .8);
+  border: 1px solid var(--line-soft);
+  font-size: 1.3cqw; cursor: pointer;
+  transition: transform .2s var(--e-out), box-shadow .2s;
+}
+.icon-btn:hover { transform: translateY(-2px); box-shadow: 0 0 12px rgba(125, 211, 252, .35); }
+
+/* ---------- 左侧功能坞 ---------- */
+.dock {
+  grid-area: dock; z-index: 5;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.25cqw; padding: 1.1cqw 0;
+  background: linear-gradient(90deg, rgba(6, 10, 22, .9), rgba(10, 16, 32, .25));
+  border-right: 1px solid var(--line-soft);
+}
+.dock-btn {
+  position: relative;
+  width: 4.3cqw; height: 4.3cqw;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  background: linear-gradient(180deg, rgba(30, 41, 59, .95), rgba(15, 23, 42, .95));
+  border: 1px solid var(--line-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 4px 10px rgba(0, 0, 0, .4);
+  font-size: 1.75cqw; cursor: pointer;
+  transition: transform .25s var(--e-out), box-shadow .25s, border-color .25s;
+}
+.dock-btn span {
+  position: absolute; bottom: -.95cqw; left: 50%; transform: translateX(-50%);
+  font-size: .72cqw; color: var(--txt-2); white-space: nowrap; letter-spacing: .05em;
+}
+.dock-btn:hover {
+  transform: translateY(-3px) scale(1.06);
+  border-color: rgba(125, 211, 252, .55);
+  box-shadow: 0 0 18px rgba(125, 211, 252, .35), inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+.dock-btn.is-on {
+  border-color: rgba(255, 159, 67, .8);
+  box-shadow: 0 0 0 1px rgba(255, 159, 67, .35), 0 0 20px rgba(255, 159, 67, .45);
+  animation: dockBreath 2.4s ease-in-out infinite;
+}
+@keyframes dockBreath {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 159, 67, .3), 0 0 16px rgba(255, 159, 67, .35); }
+  50%      { box-shadow: 0 0 0 1px rgba(255, 159, 67, .55), 0 0 26px rgba(255, 159, 67, .6); }
+}
+.dock-btn.is-on span { color: #FFD9A8; font-weight: 700; }
+
+/* ---------- 中央精灵台 ---------- */
+.stage {
+  grid-area: stage; z-index: 3;
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding-top: 1.2cqw;
+  min-width: 0;
+}
+
+/* 形态切换 tab */
+.form-tabs {
+  position: relative; z-index: 8;
+  display: flex; gap: .5cqw;
+  padding: .45cqw;
+  border-radius: 999px;
+  background: rgba(6, 10, 22, .78);
+  border: 1px solid var(--line-soft);
+  backdrop-filter: blur(6px);
+}
+.form-tabs button {
+  font: inherit; cursor: pointer;
+  font-size: .95cqw; font-weight: 700; letter-spacing: .06em;
+  color: var(--txt-2);
+  padding: .45cqw 1.15cqw;
+  border: 0; border-radius: 999px;
+  background: transparent;
+  transition: color .2s, background .2s, box-shadow .2s, transform .15s;
+}
+.form-tabs button:hover { color: #fff; transform: translateY(-1px); }
+.form-tabs button.on {
+  color: #1A1206;
+  background: linear-gradient(180deg, #FFE9A8, #FFB020);
+  box-shadow: 0 0 16px rgba(255, 176, 32, .55), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+
+/* 站台 */
+.altar {
+  position: relative;
+  flex: 1; width: 100%;
+  display: grid; place-items: end center;
+  min-height: 0;
+}
+/* 向上光柱 */
+.beam {
+  position: absolute; left: 50%; bottom: 6%;
+  width: 26cqw; height: 30cqw;
+  transform: translateX(-50%);
+  background: linear-gradient(to top,
+      color-mix(in srgb, var(--accent) 42%, transparent) 0%,
+      color-mix(in srgb, var(--accent) 12%, transparent) 45%,
+      transparent 100%);
+  filter: blur(10px);
+  opacity: .85;
+  z-index: 0;
+  animation: beamBreath 2.6s ease-in-out infinite;
+}
+@keyframes beamBreath { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
+/* 台座：椭圆地台 + 旋转光环 */
+.dais {
+  position: absolute; left: 50%; bottom: 3.5%;
+  width: 34cqw; height: 8.4cqw;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 50%,
+      color-mix(in srgb, var(--accent) 55%, #000) 0%,
+      rgba(10, 16, 32, .9) 58%,
+      rgba(10, 16, 32, 0) 72%);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 35%, transparent);
+  z-index: 1;
+}
+.dais::after {
+  content: ""; position: absolute; inset: 12% 8%;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  animation: spinFlat 14s linear infinite;
+}
+@keyframes spinFlat { to { transform: rotate(360deg); } }
+
+/* 光环层 */
+.rings { position: absolute; left: 50%; bottom: 4%; width: 26cqw; aspect-ratio: 1; transform: translateX(-50%); z-index: 1; pointer-events: none; }
+.rings i {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  opacity: var(--ring-op, .5);
+}
+.rings i:nth-child(1) { inset: 14%; animation: spin 16s linear infinite; border-style: dashed; }
+.rings i:nth-child(2) { inset: 6%; animation: spin 24s linear infinite reverse; border-width: 2px; }
+.rings i:nth-child(3) { inset: 0; animation: spin 32s linear infinite; opacity: calc(var(--ring-op, .5) * .6); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 精灵本体（含遮罩：临时去掉淡紫方底，正式版用透明 PNG） */
+.pet-glow {
+  position: absolute; left: 50%; bottom: 6%;
+  width: 40cqw; height: 34cqw;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 65%,
+      color-mix(in srgb, var(--accent) 30%, #F2ECFA) 0%,
+      transparent 62%);
+  filter: blur(14px);
+  opacity: var(--aura, .5);
+  z-index: 2;
+  pointer-events: none;
+}
+/* 立绘容器：底部留出台座高度，立绘在容器内贴底居中；漂浮动画放容器上，避免与换形态的缩放冲突 */
+.pet-holder {
+  position: absolute;
+  inset: 0 0 13% 0;
+  display: grid; place-items: end center;
+  z-index: 4;
+  pointer-events: none;
+  animation: float 3.4s ease-in-out infinite;
+}
+.pet-img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .65))
+          drop-shadow(0 0 calc(var(--aura, .5) * 30px) color-mix(in srgb, var(--accent) 55%, transparent));
+  -webkit-mask-image: radial-gradient(ellipse 58% 58% at 50% 48%, #000 52%, transparent 76%);
+  mask-image: radial-gradient(ellipse 58% 58% at 50% 48%, #000 52%, transparent 76%);
+  transition: filter .5s var(--e-out);
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.1cqw); }
+}
+/* 换形态时的过曝闪光 */
+.flash {
+  position: absolute; inset: 0; z-index: 7;
+  background: radial-gradient(circle at 50% 52%, #fff 0%, rgba(255, 255, 255, .65) 28%, transparent 62%);
+  opacity: 0; pointer-events: none;
+}
+.flash.on { animation: flashOut 620ms var(--e-out); }
+@keyframes flashOut {
+  0%   { opacity: .95; }
+  100% { opacity: 0; }
+}
+
+/* 上升粒子 */
+.particles { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.particles i {
+  position: absolute; bottom: 8%;
+  width: .5cqw; height: .5cqw; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 70%, #fff);
+  box-shadow: 0 0 .8cqw var(--accent);
+  left: var(--x); animation: rise 2.6s linear infinite; animation-delay: var(--d);
+  opacity: 0;
+}
+@keyframes rise {
+  0%   { transform: translateY(0) scale(.6); opacity: 0; }
+  20%  { opacity: .9; }
+  100% { transform: translateY(-24cqw) scale(1.1); opacity: 0; }
+}
+
+/* 名称牌 */
+.nameplate {
+  position: relative; z-index: 8;
+  margin-top: -1.2cqw;
+  display: flex; align-items: center; gap: .9cqw;
+  padding: .55cqw 2.2cqw;
+  background: linear-gradient(180deg, rgba(30, 41, 59, .97), rgba(12, 18, 34, .97));
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  clip-path: polygon(.85cqw 0, calc(100% - .85cqw) 0, 100% 50%, calc(100% - .85cqw) 100%, .85cqw 100%, 0 50%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 30%, transparent),
+              inset 0 1px 0 rgba(255, 255, 255, .12);
+  transform: translateY(0);
+  transition: border-color .4s, box-shadow .4s;
+}
+.nameplate .nm {
+  font-size: 1.5cqw; font-weight: 900; letter-spacing: .08cqw;
+  color: #fff;
+  text-shadow: 0 0 .8cqw color-mix(in srgb, var(--accent) 75%, transparent), 0 2px 4px rgba(0, 0, 0, .8);
+}
+.nameplate .form-tag {
+  font-size: .85cqw; font-weight: 800; letter-spacing: .1em;
+  padding: .18cqw .6cqw; border-radius: 4px;
+  color: #1A1206;
+  background: linear-gradient(180deg, #FFE9A8, var(--accent));
+}
+.nameplate .stars { font-size: 1cqw; color: var(--gold); letter-spacing: .12cqw; text-shadow: 0 0 8px rgba(255, 215, 0, .7); }
+.nameplate .el {
+  font-size: .85cqw; font-weight: 700; color: #fff;
+  padding: .16cqw .55cqw; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 35%, #0F172A);
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.nameplate .lv { font-size: .9cqw; color: var(--txt-2); font-variant-numeric: tabular-nums; }
+
+/* ---------- 右侧任务面板 ---------- */
+.side {
+  grid-area: side; z-index: 5;
+  display: flex; flex-direction: column; gap: .8cqw;
+  padding: 1.2cqw 1.2cqw 1.2cqw 0;
+  min-width: 0;
+}
+.panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: .85cqw .95cqw;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 8px 20px rgba(0, 0, 0, .35);
+  clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .95cqw; font-weight: 800; color: #E2E8F0; letter-spacing: .06em;
+  padding-bottom: .5cqw; margin-bottom: .5cqw;
+  border-bottom: 1px solid var(--line-soft);
+}
+.panel-head em { font-style: normal; font-size: .8cqw; color: var(--txt-3); font-weight: 600; }
+.panel-head .pct { color: var(--ok); }
+
+.quest { display: flex; align-items: center; gap: .5cqw; padding: .3cqw 0; font-size: .88cqw; color: #CBD5E1; }
+.quest .dot {
+  width: .55cqw; height: .55cqw; border-radius: 50%; flex: none;
+  background: var(--txt-3);
+}
+.quest.done .dot { background: var(--ok); box-shadow: 0 0 .5cqw var(--ok); }
+.quest .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quest .p { color: var(--txt-2); font-size: .8cqw; font-variant-numeric: tabular-nums; }
+.quest .r { color: var(--gold); font-weight: 800; font-size: .82cqw; }
+.quest.done .t { color: var(--txt-3); text-decoration: line-through; }
+
+.progress { height: .5cqw; border-radius: 999px; background: rgba(148, 163, 184, .18); overflow: hidden; margin-top: .5cqw; }
+.progress > i { display: block; height: 100%; background: linear-gradient(90deg, #26DE81, #7DFFB4); box-shadow: 0 0 8px rgba(38, 222, 129, .7); }
+
+.notice { font-size: .85cqw; color: var(--txt-2); line-height: 1.5; }
+.notice b { color: var(--gold); }
+.notice u { color: var(--cyan); text-decoration: none; }
+
+/* ---------- 底部 CTA ---------- */
+.cta {
+  grid-area: cta; z-index: 6;
+  display: flex; align-items: center; justify-content: center; gap: 1.4cqw;
+  padding: 1.1cqw 1.6cqw;
+  background: linear-gradient(0deg, rgba(3, 6, 14, .96), rgba(6, 10, 22, .55));
+  border-top: 1px solid var(--line-soft);
+}
+.btn2 {
+  position: relative; overflow: hidden;
+  font: inherit; font-weight: 900; letter-spacing: .06em;
+  border: 0; border-radius: 10px; cursor: pointer;
+  color: #fff;
+  display: flex; align-items: center; gap: .55cqw;
+  padding: 1.05cqw 2.4cqw; font-size: 1.15cqw;
+  background: linear-gradient(180deg, rgba(51, 65, 85, .95), rgba(30, 41, 59, .95));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 6px 16px rgba(0, 0, 0, .45);
+  transition: transform .15s var(--e-out), filter .2s;
+  min-height: 44px;
+}
+.btn2:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.btn2:active { transform: translateY(0) scale(.98); }
+.btn2--main {
+  background: linear-gradient(180deg, #FFB25E, var(--primary) 45%, var(--primary-2));
+  color: #2A1500;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 8px 22px rgba(255, 122, 26, .45);
+  padding: 1.05cqw 3.4cqw; font-size: 1.3cqw;
+}
+.btn2--main::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 40%;
+  left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: sheen 2.8s ease-in-out infinite;
+}
+@keyframes sheen { 0% { left: -60%; } 55%, 100% { left: 120%; } }
+.btn2 .k { font-size: .9cqw; font-weight: 700; opacity: .8; }
+
+/* ---------- 形态主题（data-form 驱动） ---------- */
+.screen[data-form="1"] { --accent: #7DD3FC; --aura: .3;  --ring-op: .35; }
+.screen[data-form="2"] { --accent: #C084FC; --aura: .55; --ring-op: .55; }
+.screen[data-form="3"] { --accent: #FFD700; --aura: .8;  --ring-op: .75; }
+
+/* ---------- 窄屏：手机竖屏布局 ---------- */
+@container (max-width: 720px) {
+  .screen {
+    aspect-ratio: 9 / 16;
+    grid-template-columns: 1fr;
+    grid-template-rows: 13cqw 1fr auto auto;
+    grid-template-areas:
+      "hud"
+      "stage"
+      "dock"
+      "cta";
+  }
+  .dock {
+    flex-direction: row; justify-content: space-around;
+    padding: .8cqw .6cqw 2.2cqw;
+    border-right: 0; border-top: 1px solid var(--line-soft);
+    background: linear-gradient(0deg, rgba(6, 10, 22, .95), rgba(10, 16, 32, .4));
+  }
+  .dock-btn { width: 11.5cqw; height: 11.5cqw; border-radius: 16px; font-size: 5cqw; }
+  .dock-btn span { bottom: -1.6cqw; font-size: 2.6cqw; }
+  .dock-btn:nth-child(n+5) { display: none; }  /* 手机上只留 4 个主功能 */
+
+  .side { display: none; }                     /* 任务面板改为浮动按钮 */
+  .float-quest {
+    display: grid; place-items: center;
+    position: absolute; right: 2.5cqw; top: 15cqw; z-index: 7;
+    width: 11cqw; height: 11cqw; border-radius: 50%;
+    background: rgba(15, 23, 42, .92);
+    border: 1px solid var(--line);
+    font-size: 5cqw; box-shadow: 0 0 16px rgba(125, 211, 252, .35);
+  }
+  .hud { padding: 2.2cqw 3cqw; gap: 2.4cqw; }
+  .avatar { width: 10.5cqw; font-size: 4.2cqw; }
+  .avatar b { font-size: 2.4cqw; padding: .7cqw 1.2cqw; }
+  .who .n { font-size: 4cqw; }
+  .who .s { font-size: 2.6cqw; }
+  .chip { font-size: 2.9cqw; padding: 1.2cqw 2.2cqw; gap: 1cqw; }
+  .chip i { font-size: 3.2cqw; }
+  .chip.add { width: 4.6cqw; height: 4.6cqw; }
+  .icon-btn { width: 8cqw; height: 8cqw; font-size: 3.6cqw; }
+
+  .form-tabs { padding: 1.1cqw; gap: 1.2cqw; margin-top: 1.4cqw; }
+  .form-tabs button { font-size: 2.9cqw; padding: 1.2cqw 3.2cqw; }
+  .pet-holder { inset: auto 0 18cqw 0; height: 74cqw; }
+  .pet-glow { width: 86cqw; height: 68cqw; }
+  .beam { width: 58cqw; height: 66cqw; }
+  .dais { width: 76cqw; height: 18cqw; }
+  .rings { width: 74cqw; bottom: 12cqw; }
+  .nameplate { padding: 1.4cqw 5cqw; margin-top: 0; gap: 2.2cqw; }
+  .nameplate .nm { font-size: 4.6cqw; }
+  .nameplate .form-tag { font-size: 2.6cqw; padding: .5cqw 1.6cqw; }
+  .nameplate .stars { font-size: 3cqw; }
+  .nameplate .el { font-size: 2.6cqw; padding: .4cqw 1.4cqw; }
+  .nameplate .lv { font-size: 2.8cqw; }
+
+  .cta { flex-direction: column; gap: 2cqw; padding: 2.4cqw 3cqw 3cqw; }
+  .btn2 { width: 100%; justify-content: center; font-size: 3.6cqw; padding: 3.4cqw; min-height: 52px; }
+  .btn2--main { font-size: 4.2cqw; }
+  .btn2 .k { font-size: 2.8cqw; }
+  .particles i { width: 1.4cqw; height: 1.4cqw; }
+}
+
+/* ==========================================================================
+   页面其余部分（说明 / 三形态详解 / 令牌）
+   ========================================================================== */
+h2.sec { font-size: 18px; margin: 44px 0 6px; color: #fff; }
+h2.sec span { font-size: 12px; font-weight: 600; color: var(--txt-3); margin-left: 8px; }
+p.sec-desc { margin: 0 0 16px; font-size: 13px; color: var(--txt-2); }
+p.sec-desc b { color: #E2E8F0; }
+p.sec-desc code { color: var(--cyan); background: rgba(125, 211, 252, .1); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+.forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.form-card {
+  background: linear-gradient(180deg, #131C2E, #0C1220);
+  border: 1px solid rgba(125, 211, 252, .18);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+.form-card .pic {
+  position: relative; height: 200px;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 62%, #1B2440 0%, #0A0E1A 72%);
+  overflow: hidden;
+}
+.form-card .pic img {
+  height: 168px; object-fit: contain;
+  -webkit-mask-image: radial-gradient(ellipse 56% 56% at 50% 48%, #000 50%, transparent 75%);
+  mask-image: radial-gradient(ellipse 56% 56% at 50% 48%, #000 50%, transparent 75%);
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .6));
+}
+.form-card .pic .tag {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  padding: 2px 10px; border-radius: 4px; color: #10151F;
+  background: linear-gradient(180deg, #E2E8F0, #94A3B8);
+}
+.form-card.f2 .pic .tag { background: linear-gradient(180deg, #E9D5FF, #C084FC); }
+.form-card.f3 .pic .tag { background: linear-gradient(180deg, #FEF3C7, #FFD700); }
+.form-card .body { padding: 12px 14px 16px; }
+.form-card .body h3 { margin: 0 0 6px; font-size: 15px; color: #fff; }
+.form-card .body p { margin: 4px 0; font-size: 12px; color: var(--txt-2); }
+.form-card .body p b { color: #E2E8F0; }
+.form-card .body .file { font-size: 11px; color: var(--cyan); font-family: ui-monospace, Consolas, monospace; }
+
+.tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.tk { border-radius: 10px; overflow: hidden; background: #131C2E; border: 1px solid rgba(255, 255, 255, .06); }
+.tk .c { height: 52px; }
+.tk .m { padding: 6px 8px; font-size: 11px; }
+.tk .m b { display: block; color: #E2E8F0; font-size: 12px; }
+.tk .m span { color: var(--txt-3); font-family: ui-monospace, Consolas, monospace; }
+
+.tricks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.trick {
+  background: #131C2E; border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 12px; padding: 14px; text-align: center;
+}
+.trick .demo { height: 64px; display: grid; place-items: center; margin-bottom: 8px; }
+.trick .cap { font-size: 12px; color: var(--txt-2); }
+.trick .cap b { color: #E2E8F0; display: block; font-size: 12px; }
+.demo-clip {
+  padding: 8px 18px; font-size: 12px; font-weight: 800; color: #FFD9A8;
+  background: linear-gradient(180deg, #1E293B, #0F172A);
+  border: 1px solid rgba(125, 211, 252, .35);
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.demo-inset {
+  padding: 8px 18px; font-size: 12px; font-weight: 800; color: #2A1500;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #FFB25E, #FF7A1A);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 6px 16px rgba(255, 122, 26, .4);
+}
+.demo-sheen {
+  position: relative; overflow: hidden;
+  padding: 8px 18px; font-size: 12px; font-weight: 800; color: #fff;
+  border-radius: 8px; background: linear-gradient(180deg, #334155, #1E293B);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.demo-sheen::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: sheen 2.8s ease-in-out infinite;
+}
+.note {
+  background: linear-gradient(180deg, #131C2E, #0C1220);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--txt-2);
+  margin-top: 16px;
+}
+.note b { color: #E2E8F0; }
+.note code { color: var(--cyan); background: rgba(125, 211, 252, .1); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .particles { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <h1>王宠课堂 2.0 · <span>游戏主界面</span> 设计稿 v2</h1>
+    <p>DSH · 2026-11-02 · 分支 <code>dev-dsh</code> · 赛尔号式大厅 + 三形态觉醒</p>
+    <p>宠物立绘暂用仓库现有老虎三段图（lv1 幼崽 / lv4 壮虎 / lv7 星空神虎）演示形态变化；正式版替换为 AI 出图的透明 PNG。</p>
+  </header>
+
+  <div class="device">
+    <div class="device-bar"><i></i><i></i><i></i><span style="margin-left:6px">学生端 · 游戏大厅 · 1280×720</span></div>
+
+    <div class="screen" id="screen" data-form="1">
+      <div class="sky"></div>
+      <div class="stars" id="stars"></div>
+      <div class="nebula n1"></div>
+      <div class="nebula n2"></div>
+      <div class="horizon"></div>
+
+      <!-- 顶部 HUD -->
+      <header class="hud">
+        <div class="avatar">🧑‍🚀<b>12</b></div>
+        <div class="who">
+          <div class="n">李四 · G6-1班</div>
+          <div class="s">训练师 <em>★★★☆☆</em> · 今日 +38 分</div>
+        </div>
+        <div class="hud-spacer"></div>
+        <div class="chips">
+          <div class="chip"><i>⭐</i><span id="pts">1,250</span><span class="add">+</span></div>
+          <div class="chip"><i>💎</i>80</div>
+          <div class="chip"><i>⚡</i>5/5</div>
+        </div>
+        <div class="icon-btn" title="设置">⚙</div>
+      </header>
+
+      <!-- 左侧功能坞 -->
+      <aside class="dock">
+        <button class="dock-btn is-on">⚔<span>战斗</span></button>
+        <button class="dock-btn">🐾<span>宠物</span></button>
+        <button class="dock-btn">🎒<span>背包</span></button>
+        <button class="dock-btn">🛒<span>商店</span></button>
+        <button class="dock-btn">🏆<span>排行</span></button>
+        <button class="dock-btn">📖<span>图鉴</span></button>
+      </aside>
+
+      <!-- 中央精灵台 -->
+      <main class="stage">
+        <div class="form-tabs" id="formTabs">
+          <button class="on" data-form="1">初始</button>
+          <button data-form="2">共鸣</button>
+          <button data-form="3">究极</button>
+        </div>
+
+        <div class="altar">
+          <div class="beam"></div>
+          <div class="rings"><i></i><i></i><i></i></div>
+          <div class="pet-glow"></div>
+          <div class="particles" id="particles"></div>
+          <div class="pet-holder">
+            <img class="pet-img" id="petImg" src="../public/pets/tiger/lv1.png" alt="老虎 初始形态" />
+          </div>
+          <div class="dais"></div>
+          <div class="flash" id="flash"></div>
+        </div>
+
+        <div class="nameplate" id="namePlate">
+          <span class="nm" id="petName">老虎</span>
+          <span class="form-tag" id="formTag">初始形态</span>
+          <span class="stars" id="starBox">★★★☆☆☆</span>
+          <span class="el">神兽</span>
+          <span class="lv">Lv.3</span>
+        </div>
+      </main>
+
+      <!-- 右侧任务面板 -->
+      <aside class="side">
+        <div class="panel">
+          <div class="panel-head">每日任务 <em>03:21:14</em><span class="pct">3/4</span></div>
+          <div class="quest done"><span class="dot"></span><span class="t">登录游戏</span><span class="r">+5</span></div>
+          <div class="quest done"><span class="dot"></span><span class="t">喂养宠物 1 次</span><span class="r">+20</span></div>
+          <div class="quest done"><span class="dot"></span><span class="t">查看排行榜</span><span class="r">+10</span></div>
+          <div class="quest"><span class="dot"></span><span class="t">完成 3 场战斗</span><span class="p">1/3</span><span class="r">+30</span></div>
+          <div class="progress"><i style="width:75%"></i></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">赛季公告 <em>第 2 赛季</em></div>
+          <div class="notice">
+            <b>G6-1 班</b> 反超 <b>G6-2 班</b>，当前 <u>280 : 265</u><br>
+            赛季剩余 <b>4 天 6 小时</b>，本周双倍积分日：周五
+          </div>
+        </div>
+
+        <div class="panel" style="flex:1">
+          <div class="panel-head">好友动态 <em>在线 6</em></div>
+          <div class="quest"><span class="dot" style="background:#26DE81"></span><span class="t">王小二 觉醒了焰尾狐</span></div>
+          <div class="quest"><span class="dot" style="background:#C084FC"></span><span class="t">张三 抽到 5★ 辉羽鹤</span></div>
+          <div class="quest"><span class="dot" style="background:#7DD3FC"></span><span class="t">赵六 联赛升到白银</span></div>
+        </div>
+      </aside>
+
+      <!-- 底部 CTA -->
+      <footer class="cta">
+        <button class="btn2 btn2--main">⚔ 开始战斗<span class="k">消耗 1 体力</span></button>
+        <button class="btn2">🐣 抽卡 10 连<span class="k">1000 ⭐</span></button>
+        <button class="btn2">🏆 排行榜</button>
+      </footer>
+
+      <div class="float-quest">📋</div>
+    </div>
+  </div>
+
+  <p class="sec-desc" style="margin-top:14px">
+    点上方 <b>初始 / 共鸣 / 究极</b> 切换形态 —— 换图时有 <b>过曝闪光 + 弹入</b>，名称牌、星级、光环强度同步变化。
+    把窗口拉窄到手机宽度，布局会切成竖屏（功能坞变底栏、任务面板收起）。
+  </p>
+
+  <!-- ============ 三形态详解 ============ -->
+  <h2 class="sec">三形态的具体差异 <span>美术要遵守的四个递进维度</span></h2>
+  <p class="sec-desc">同一只宠物必须能认出是同一只，只在 <b>体型 / 配件 / 配色 / 光</b> 四个维度上递进。下面是现有素材的实例关系。</p>
+
+  <div class="forms">
+    <article class="form-card f1">
+      <div class="pic">
+        <span class="tag">FORM 1</span>
+        <img src="../public/pets/tiger/lv1.png" alt="老虎 初始形态" />
+      </div>
+      <div class="body">
+        <h3>初始形态 · 幼崽</h3>
+        <p><b>体型</b> 100%　<b>配件</b> 无</p>
+        <p><b>配色</b> 原色，无第二强调色</p>
+        <p><b>光</b> 无自身光</p>
+        <p class="file">→ form1.png（或复用 lv1.png）</p>
+      </div>
+    </article>
+
+    <article class="form-card f2">
+      <div class="pic">
+        <span class="tag">FORM 2</span>
+        <img src="../public/pets/tiger/lv4.png" alt="老虎 共鸣形态" />
+      </div>
+      <div class="body">
+        <h3>共鸣形态 · 壮虎</h3>
+        <p><b>体型</b> 112–115%　<b>配件</b> +1（体型/肌理）</p>
+        <p><b>配色</b> 主色不变，饱和度 +12%，金瞳出现</p>
+        <p><b>光</b> 体表微光 + 一层光环</p>
+        <p class="file">→ form2.png（或复用 lv4.png）</p>
+      </div>
+    </article>
+
+    <article class="form-card f3">
+      <div class="pic">
+        <span class="tag">FORM 3</span>
+        <img src="../public/pets/tiger/lv7.png" alt="老虎 究极形态" />
+      </div>
+      <div class="body">
+        <h3>究极形态 · 星空神兽</h3>
+        <p><b>体型</b> 130–135%　<b>配件</b> +3（光环/飘带/星纹）</p>
+        <p><b>配色</b> 主色保留 60% + 金/紫金属色</p>
+        <p><b>光</b> <b>自身发光</b>（身体里有光，不是外圈光）</p>
+        <p class="file">→ form3.png（或复用 lv7.png）</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <b>关键一步：</b>现有图是 <code>1024×1024 JPEG + 淡紫平底 + 右下角水印</code>，直接贴到深空背景上会露出一个淡紫方块。
+    稿里用 CSS 径向遮罩 + 光台把方角糊掉了，这只是过渡办法 —— 正式美术必须出 <b>PNG-24 透明底、无水印、主体高 72%</b> 的图，否则换形态时宠物会忽大忽小、边缘发虚。
+  </div>
+
+  <!-- ============ 视觉令牌 ============ -->
+  <h2 class="sec">游戏化令牌 <span>深色版，替换 v1 的浅色令牌</span></h2>
+  <div class="tokens">
+    <div class="tk"><div class="c" style="background:linear-gradient(180deg,#0A0E1A,#16112B)"></div><div class="m"><b>深空底</b><span>#0A0E1A → #16112B</span></div></div>
+    <div class="tk"><div class="c" style="background:#3B1A63"></div><div class="m"><b>星云紫</b><span>#3B1A63</span></div></div>
+    <div class="tk"><div class="c" style="background:#0E3B5C"></div><div class="m"><b>星云蓝</b><span>#0E3B5C</span></div></div>
+    <div class="tk"><div class="c" style="background:rgba(15,23,42,.93)"></div><div class="m"><b>面板</b><span>rgba(15,23,42,.93)</span></div></div>
+    <div class="tk"><div class="c" style="background:#7DD3FC"></div><div class="m"><b>科技描边</b><span>#7DD3FC</span></div></div>
+    <div class="tk"><div class="c" style="background:#FFD700"></div><div class="m"><b>传说金</b><span>#FFD700</span></div></div>
+    <div class="tk"><div class="c" style="background:#FF9F43"></div><div class="m"><b>主按钮</b><span>#FF9F43</span></div></div>
+    <div class="tk"><div class="c" style="background:#26DE81"></div><div class="m"><b>成功</b><span>#26DE81</span></div></div>
+  </div>
+
+  <!-- ============ 面板手法 ============ -->
+  <h2 class="sec">游戏感是怎么做出来的 <span>4 个纯 CSS 手法</span></h2>
+  <div class="tricks">
+    <div class="trick"><div class="demo"><span class="demo-clip">斜切角面板</span></div><div class="cap"><b>斜切角</b>clip-path 切 10px 角</div></div>
+    <div class="trick"><div class="demo"><span class="demo-inset">内高光按钮</span></div><div class="cap"><b>内高光</b>inset 0 1px 0 白 55%</div></div>
+    <div class="trick"><div class="demo"><span class="demo-sheen">扫光条</span></div><div class="cap"><b>扫光</b>渐变平移 2.8s 循环</div></div>
+    <div class="trick"><div class="demo">
+      <span style="padding:8px 18px;border-radius:999px;font-size:12px;font-weight:800;color:#FFD9A8;background:linear-gradient(180deg,#1E293B,#0F172A);border:1px solid rgba(255,159,67,.8);box-shadow:0 0 20px rgba(255,159,67,.45)">呼吸发光</span>
+    </div><div class="cap"><b>呼吸</b>box-shadow 2.4s 明暗</div></div>
+  </div>
+
+  <div class="note" style="border-left-color:#C084FC">
+    <b>还没有做的：</b>这是视觉提案，没有写任何生产代码。你确认方向后，我按 <code>tokens.css → HeroStage + HUD/Dock → GameLobby 页</code> 的顺序落地，
+    统一到 <code>/lobby</code> 路由，再用你的真实宠物图验收。
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 星空：随机星点 ---------- */
+  var starsBox = document.getElementById('stars');
+  var count = 110;
+  var frag = '';
+  for (var i = 0; i < count; i++) {
+    var size = Math.random() < 0.85 ? 1 : 2;
+    frag += '<i style="left:' + (Math.random() * 100).toFixed(2) + '%;' +
+            'top:' + (Math.random() * 100).toFixed(2) + '%;' +
+            'width:' + size + 'px;height:' + size + 'px;' +
+            '--d:' + (Math.random() * 4).toFixed(2) + 's"></i>';
+  }
+  starsBox.innerHTML = frag;
+
+  /* ---------- 上升粒子 ---------- */
+  var pBox = document.getElementById('particles');
+  var pf = '';
+  for (var j = 0; j < 14; j++) {
+    pf += '<i style="--x:' + (18 + Math.random() * 64).toFixed(1) + '%;' +
+          '--d:' + (Math.random() * 2.6).toFixed(2) + 's"></i>';
+  }
+  pBox.innerHTML = pf;
+
+  /* ---------- 三形态切换 ---------- */
+  var FORMS = {
+    1: { src: '../public/pets/tiger/lv1.png', tag: '初始形态', name: '老虎', stars: '★★★☆☆☆', lv: 'Lv.3',  alt: '老虎 初始形态' },
+    2: { src: '../public/pets/tiger/lv4.png', tag: '共鸣形态', name: '老虎', stars: '★★★★★☆', lv: 'Lv.5',  alt: '老虎 共鸣形态' },
+    3: { src: '../public/pets/tiger/lv7.png', tag: '究极形态', name: '老虎', stars: '★★★★★★', lv: 'Lv.7',  alt: '老虎 究极形态' }
+  };
+
+  var screenEl = document.getElementById('screen');
+  var imgEl = document.getElementById('petImg');
+  var tagEl = document.getElementById('formTag');
+  var starEl = document.getElementById('starBox');
+  var lvEl = document.querySelector('.nameplate .lv');
+  var flashEl = document.getElementById('flash');
+  var tabs = document.getElementById('formTabs').querySelectorAll('button');
+  var switching = false;
+
+  function setForm(n) {
+    var f = FORMS[n];
+    if (!f || switching) return;
+    switching = true;
+
+    /* 1) 过曝闪光 */
+    flashEl.classList.remove('on');
+    void flashEl.offsetWidth;          /* 触发重排，允许动画重播 */
+    flashEl.classList.add('on');
+
+    /* 2) 旧图淡出 → 换图 → 新图弹入 */
+    imgEl.style.transition = 'opacity 200ms ease, transform 200ms ease, filter .5s ease';
+    imgEl.style.opacity = '0';
+    imgEl.style.transform = 'scale(.92)';
+
+    setTimeout(function () {
+      imgEl.src = f.src;
+      imgEl.alt = f.alt;
+      screenEl.dataset.form = String(n);
+      tagEl.textContent = f.tag;
+      starEl.textContent = f.stars;
+      lvEl.textContent = f.lv;
+
+      imgEl.style.transition = 'opacity 400ms cubic-bezier(.22,1,.36,1), transform 400ms cubic-bezier(.34,1.56,.64,1), filter .5s ease';
+      imgEl.style.opacity = '1';
+      imgEl.style.transform = 'scale(1)';
+    }, 200);
+
+    tabs.forEach(function (b) {
+      b.classList.toggle('on', b.dataset.form === String(n));
+    });
+
+    setTimeout(function () { switching = false; }, 900);
+  }
+
+  tabs.forEach(function (btn) {
+    btn.addEventListener('click', function () { setForm(Number(btn.dataset.form)); });
+  });
+
+  /* ---------- 键盘：1/2/3 切形态 ---------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === '1' || e.key === '2' || e.key === '3') setForm(Number(e.key));
+  });
+})();
+</script>
+</body>
+</html>

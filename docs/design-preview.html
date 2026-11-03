@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>王宠课堂 2.0 · UI 设计稿 v1（DSH）</title>
+<style>
+/* ==========================================================================
+   王宠课堂 2.0 — 设计稿（DSH）
+   用途：给教师确认视觉风格与特效参数。此文件不是生产代码，
+        确认后会把这里的令牌与特效拆进 src/styles/tokens.css + effects.css。
+   ========================================================================== */
+
+/* ---------- §2 设计令牌 ---------- */
+:root {
+  /* 品牌与语义色（沿用现有 tailwind.config.js） */
+  --c-primary: #FF9F43;
+  --c-secondary: #26DE81;
+  --c-danger: #EF4444;
+  --c-warning: #F59E0B;
+  --c-pink: #FF6B9D;
+  --c-purple: #A855F7;
+  --c-blue: #3B82F6;
+  --c-cyan: #06B6D4;
+  --c-emerald: #10B981;
+
+  /* 属性色 */
+  --el-fire: #E85D3A;
+  --el-water: #3A8FE8;
+  --el-grass: #4CAF50;
+  --el-electric: #FFD600;
+  --el-light: #FFC107;
+  --el-dark: #7B1FA2;
+
+  /* 稀有度 */
+  --r1: #9CA3AF;
+  --r2: #26DE81;
+  --r3: #3B82F6;
+  --r4: #A855F7;
+  --r5: #F59E0B;
+  --r6: #FFD700;
+
+  /* 圆角 / 阴影 */
+  --r-card: 16px;
+  --r-modal: 24px;
+  --r-sm: 10px;
+  --sh-card: 0 2px 8px rgba(0, 0, 0, .08);
+  --sh-hover: 0 8px 25px rgba(0, 0, 0, .15);
+
+  /* 动效 */
+  --d-instant: 120ms;
+  --d-quick: 200ms;
+  --d-base: 300ms;
+  --d-slow: 600ms;
+  --e-out: cubic-bezier(.22, 1, .36, 1);
+  --e-back: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Roboto, sans-serif;
+  background: #f5f7fa;
+  color: #1f2937;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; padding: 32px 20px 80px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- 页面头部 ---------- */
+.page-head {
+  background: linear-gradient(120deg, #FF9F43 0%, #FF6B9D 55%, #A855F7 100%);
+  border-radius: var(--r-modal);
+  padding: 28px 32px;
+  color: #fff;
+  box-shadow: 0 12px 40px rgba(255, 107, 157, .28);
+  margin-bottom: 36px;
+}
+.page-head h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: .5px; }
+.page-head p { margin: 4px 0; font-size: 14px; opacity: .95; }
+.page-head .tag {
+  display: inline-block; margin-top: 12px; padding: 4px 12px;
+  background: rgba(255, 255, 255, .22); border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 999px; font-size: 12px; letter-spacing: .5px;
+}
+
+/* ---------- 区块 ---------- */
+section { margin-bottom: 48px; }
+.sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.sec-head h2 { margin: 0; font-size: 20px; }
+.sec-head .badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: #fff; border: 1px solid #e5e7eb; color: #6b7280;
+}
+.sec-desc { margin: 0 0 20px; font-size: 13px; color: #6b7280; }
+.sec-desc b { color: #374151; }
+
+/* ---------- §1 色板 ---------- */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.swatch { border-radius: var(--r-sm); overflow: hidden; background: #fff; box-shadow: var(--sh-card); }
+.swatch .chip { height: 56px; }
+.swatch .meta { padding: 6px 8px; font-size: 11px; line-height: 1.35; }
+.swatch .meta b { display: block; font-size: 12px; color: #111827; }
+.swatch .meta span { color: #9ca3af; }
+
+.sub-title { font-size: 13px; font-weight: 700; color: #374151; margin: 20px 0 8px; }
+.sub-title:first-of-type { margin-top: 8px; }
+
+/* ---------- 特效展示台（深色） ---------- */
+.stage {
+  background: radial-gradient(circle at 50% 30%, #1f2937 0%, #0b1220 70%);
+  border-radius: var(--r-modal);
+  padding: 24px 16px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.stage--row { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+
+/* 宠物图容器：本体 + 外发光副本（双通道） */
+.pet {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  isolation: isolate;
+}
+.pet img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  object-position: bottom center;
+  position: absolute;
+  bottom: 4%;
+  left: 9%;
+}
+/* 本体：只调明度/饱和度，保证认得出是哪只宠物 */
+.pet .body {
+  /* 落地阴影，让宠物"站"在台面上 */
+  filter: saturate(var(--aw-sat, 1)) brightness(var(--aw-bri, 1)) drop-shadow(0 10px 12px rgba(0, 0, 0, .45));
+  z-index: 2;
+}
+/* 外发光副本：模糊 + 色相偏移，制造"觉醒色" */
+.pet .aura {
+  filter: blur(14px) saturate(2.2) hue-rotate(var(--aw-hue, 0deg));
+  opacity: var(--aw-aura, 0);
+  mix-blend-mode: screen;
+  transform: scale(1.08);
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity var(--d-slow) var(--e-out), filter var(--d-slow) var(--e-out);
+}
+
+/* 光环：L1+ */
+.pet .ring {
+  position: absolute;
+  left: 50%; bottom: 6%;
+  width: 74%; aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 2px solid var(--aw-ring, transparent);
+  box-shadow: 0 0 18px var(--aw-ring, transparent), inset 0 0 18px var(--aw-ring, transparent);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+/* L2+：第二层大环 */
+.pet .ring--outer {
+  width: 96%;
+  border-width: 1px;
+  opacity: 0;
+}
+/* L3+：旋转锥形光 */
+.pet .cone {
+  position: absolute;
+  left: 50%; bottom: 2%;
+  width: 110%; aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      transparent 0deg, var(--aw-ring, transparent) 40deg,
+      transparent 90deg, transparent 220deg,
+      var(--aw-ring, transparent) 260deg, transparent 310deg);
+  opacity: 0;
+  filter: blur(10px);
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle, transparent 52%, #000 62%, #000 78%, transparent 88%);
+  mask-image: radial-gradient(circle, transparent 52%, #000 62%, #000 78%, transparent 88%);
+}
+/* 粒子层 */
+.pet .particles {
+  position: absolute; inset: 0;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+}
+.pet .particles i {
+  position: absolute;
+  bottom: 8%;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--aw-ring, #FFD700) 45%, transparent 70%);
+  animation: rise 2.2s linear infinite;
+  animation-delay: var(--delay, 0s);
+  left: var(--x, 50%);
+}
+@keyframes rise {
+  0%   { transform: translate3d(0, 0, 0) scale(.6); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0px), -110px, 0) scale(1.15); opacity: 0; }
+}
+
+/* ---- 觉醒 0-4 阶：通过 data-aw 注入参数 ---- */
+[data-aw="0"] { --aw-sat: 1;    --aw-bri: 1;    --aw-hue: 0deg;   --aw-aura: 0;   --aw-ring: transparent; }
+[data-aw="1"] { --aw-sat: 1.15; --aw-bri: 1.0;  --aw-hue: 10deg;  --aw-aura: .35; --aw-ring: rgba(255, 215, 0, .85); }
+[data-aw="2"] { --aw-sat: 1.30; --aw-bri: 1.03; --aw-hue: 25deg;  --aw-aura: .45; --aw-ring: rgba(255, 176, 32, .9); }
+[data-aw="3"] { --aw-sat: 1.50; --aw-bri: 1.08; --aw-hue: 40deg;  --aw-aura: .55; --aw-ring: rgba(255, 140, 40, .95); }
+[data-aw="4"] { --aw-sat: 1.70; --aw-bri: 1.15; --aw-hue: 60deg;  --aw-aura: .70; --aw-ring: rgba(255, 215, 0, .95); }
+
+/* 各阶开启对应图层 —— 用 !important 只是设计稿的简便写法 */
+[data-aw="1"] .ring { opacity: .9; animation: breathe 3s ease-in-out infinite; }
+[data-aw="2"] .ring { opacity: .95; animation: breathe 2s ease-in-out infinite; }
+[data-aw="2"] .ring--outer { opacity: .5; }
+[data-aw="2"] .particles { opacity: 1; }
+[data-aw="3"] .ring { opacity: 1; animation: pulseRing 2.4s ease-in-out infinite; }
+[data-aw="3"] .ring--outer { opacity: .7; }
+[data-aw="3"] .cone { opacity: .8; animation: spin 8s linear infinite; }
+[data-aw="3"] .particles { opacity: 1; }
+[data-aw="4"] .ring { opacity: 1; animation: pulseRing 1.8s ease-in-out infinite; }
+[data-aw="4"] .ring--outer { opacity: .85; animation: spinReverse 6s linear infinite; }
+[data-aw="4"] .cone { opacity: 1; animation: spin 4s linear infinite; }
+[data-aw="4"] .particles { opacity: 1; }
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 12px var(--aw-ring, transparent); }
+  50%      { box-shadow: 0 0 26px var(--aw-ring, transparent), 0 0 44px var(--aw-ring, transparent); }
+}
+@keyframes pulseRing {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.06); }
+}
+@keyframes spin { to { transform: translateX(-50%) rotate(360deg); } }
+@keyframes spinReverse { from { transform: translateX(-50%) rotate(0); } to { transform: translateX(-50%) rotate(-360deg); } }
+
+/* 展示台里的阶位标签 */
+.tile { text-align: center; position: relative; }
+.tile .cap { color: #e5e7eb; font-size: 12px; margin-top: 4px; }
+.tile .cap b { color: #fff; font-size: 13px; }
+.tile .cap em { display: block; font-style: normal; color: #94a3b8; font-size: 11px; }
+.tile .lv {
+  position: absolute; top: 6px; left: 6px; z-index: 5;
+  font-size: 11px; font-weight: 700; color: #111827;
+  background: #fff; border-radius: 999px; padding: 1px 8px;
+}
+
+/* ---------- 方案对比 ---------- */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.cmp-card {
+  background: radial-gradient(circle at 50% 30%, #1f2937 0%, #0b1220 70%);
+  border-radius: var(--r-card); padding: 14px 10px; text-align: center;
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+.cmp-card .label { font-size: 12px; color: #e5e7eb; margin-top: 6px; }
+.cmp-card .label small { display: block; color: #94a3b8; font-size: 11px; margin-top: 2px; }
+.cmp-card .pick {
+  display: inline-block; margin-top: 6px; font-size: 11px; padding: 1px 8px;
+  border-radius: 999px; background: rgba(38, 222, 129, .16);
+  color: #6ee7b7; border: 1px solid rgba(38, 222, 129, .35);
+}
+/* 提示词原方案：整体 hue-rotate（用于对比） */
+.pet--legacy .body {
+  filter: hue-rotate(60deg) brightness(1.5) saturate(2.5) contrast(1.2) !important;
+  animation: legacyPulse 1s infinite;
+}
+@keyframes legacyPulse {
+  0%, 100% { filter: hue-rotate(60deg) brightness(1.5) saturate(2.5); }
+  50%      { filter: hue-rotate(90deg) brightness(2) saturate(2.5); }
+}
+
+/* ---------- §4 星级卡 ---------- */
+.rarity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.rcard {
+  position: relative;
+  background: #fff;
+  border-radius: var(--r-card);
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--sh-card);
+  transition: transform var(--d-base) var(--e-out), box-shadow var(--d-base) var(--e-out);
+  overflow: hidden;
+  border: 2px solid var(--rc, #e5e7eb);
+}
+.rcard:hover { transform: translateY(-4px); box-shadow: var(--sh-hover); }
+.rcard .avatar {
+  height: 96px; display: flex; align-items: flex-end; justify-content: center;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .18));
+}
+.rcard .avatar img { max-height: 100%; max-width: 100%; object-fit: contain; }
+.rcard .name { font-size: 13px; font-weight: 700; margin-top: 6px; }
+.rcard .stars { font-size: 12px; color: var(--rc, #6b7280); letter-spacing: 1px; }
+.rcard .lvbadge {
+  position: absolute; top: 8px; left: 8px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-radius: 999px; padding: 1px 8px;
+}
+.rcard .elbadge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 11px; color: #fff; border-radius: 999px; padding: 1px 8px;
+}
+
+/* 6★ 流光边框 */
+.rcard--r6 {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(from 0deg, #FFD700, #FF6B9D, #A855F7, #3B82F6, #26DE81, #FFD700) border-box;
+  animation: hueSpin 6s linear infinite;
+}
+@keyframes hueSpin { to { filter: hue-rotate(360deg); } }
+.rcard--r6 .stars { color: #b45309; }
+.rcard--r6::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .75) 46%, transparent 60%);
+  background-size: 250% 100%;
+  animation: shine 2.8s linear infinite;
+}
+@keyframes shine { from { background-position: 200% 0; } to { background-position: -60% 0; } }
+
+/* ---------- 按钮 / 进度条 ---------- */
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  font: inherit; font-size: 14px; font-weight: 700; color: #fff;
+  border: 0; border-radius: var(--r-sm); padding: 10px 20px;
+  cursor: pointer; transition: transform var(--d-instant) var(--e-out), filter var(--d-quick);
+  min-height: 44px;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible { outline: 2px solid #1f2937; outline-offset: 2px; }
+.btn--primary { background: linear-gradient(135deg, #FFB25E, #FF9F43); box-shadow: 0 4px 12px rgba(255, 159, 67, .35); }
+.btn--secondary { background: linear-gradient(135deg, #4EE59A, #26DE81); box-shadow: 0 4px 12px rgba(38, 222, 129, .3); }
+.btn--danger { background: linear-gradient(135deg, #F87171, #EF4444); }
+.btn--ghost { background: #fff; color: #374151; border: 1px solid #e5e7eb; }
+.btn--disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; filter: none; }
+.btn--disabled:active { transform: none; }
+
+.bars { display: grid; gap: 14px; margin-top: 16px; }
+.bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #4b5563; }
+.bar { flex: 1; height: 10px; border-radius: 999px; background: #e5e7eb; overflow: hidden; position: relative; }
+.bar > i { display: block; height: 100%; border-radius: 999px; }
+.bar--hp > i { background: linear-gradient(90deg, #26DE81, #4EE59A); }
+.bar--exp > i { background: linear-gradient(90deg, #FF9F43, #FF6B9D); }
+/* 进度条流光 */
+.bar--exp::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  pointer-events: none;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -100% 0; } }
+
+/* ---------- §5 抽卡演出 ---------- */
+.gacha-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.gacha-btns .btn { padding: 8px 16px; font-size: 13px; }
+
+.gacha-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+}
+.gacha-overlay.on { display: flex; }
+.gacha-stage { position: relative; width: min(92vw, 460px); height: 460px; display: grid; place-items: center; }
+
+/* 蛋体 */
+.gacha-egg {
+  width: 96px; height: 120px;
+  border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%;
+  background: radial-gradient(circle at 35% 28%, #fff 0%, #E8E2D6 38%, #A9A090 100%);
+  box-shadow: inset -8px -10px 18px rgba(0, 0, 0, .18), 0 12px 30px rgba(0, 0, 0, .35);
+  animation: eggShake .5s ease-in-out infinite;
+  transition: opacity var(--d-quick);
+}
+@keyframes eggShake {
+  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+  25%      { transform: translate(-3px, 1px) rotate(2deg); }
+  75%      { transform: translate(3px, -1px) rotate(-1deg); }
+}
+
+/* 光柱 / 光圈扩散 */
+.gacha-burst {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  opacity: 0;
+}
+.gacha-burst.fire { background: radial-gradient(circle, #fff 0%, var(--gacha-c, #FFD700) 35%, transparent 70%); }
+/* 星级配色 */
+.gacha-overlay[data-rarity="1"] { --gacha-c: #E5E7EB; }
+.gacha-overlay[data-rarity="2"] { --gacha-c: #E5E7EB; }
+.gacha-overlay[data-rarity="3"] { --gacha-c: #E5E7EB; }
+.gacha-overlay[data-rarity="4"] { --gacha-c: #60A5FA; }
+.gacha-overlay[data-rarity="5"] { --gacha-c: #C084FC; }
+.gacha-overlay[data-rarity="6"] { --gacha-c: #FFD700; }
+
+.gacha-overlay.phase-burst .gacha-burst {
+  animation: burst 800ms var(--e-out) forwards;
+  opacity: 1;
+}
+@keyframes burst {
+  0%   { width: 0; height: 0; opacity: 1; }
+  70%  { opacity: .9; }
+  100% { width: 620px; height: 620px; opacity: 0; }
+}
+.gacha-overlay.phase-burst .gacha-egg { opacity: 0; transform: scale(.7); }
+
+/* 光柱（垂直） */
+.gacha-beam {
+  position: absolute; left: 50%; top: 0; width: 0; height: 100%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent 0%, var(--gacha-c, #FFD700) 45%, transparent 100%);
+  opacity: 0; filter: blur(14px);
+}
+.gacha-overlay.phase-reveal .gacha-beam {
+  animation: beam 700ms var(--e-out) forwards;
+}
+/* 爆发阶段光柱立即让位给结果卡 */
+.gacha-overlay.phase-burst .gacha-beam { animation: none; opacity: 0; }
+@keyframes beam {
+  0%   { width: 0; opacity: 0; }
+  40%  { width: 90px; opacity: .9; }
+  100% { width: 130px; opacity: .35; }
+}
+
+/* 结果卡 */
+.gacha-result {
+  position: absolute; inset: auto 0 40px 0;
+  text-align: center; opacity: 0; transform: translateY(16px) scale(.9);
+}
+.gacha-overlay.phase-burst .gacha-result {
+  animation: resultIn 420ms var(--e-back) 260ms forwards;
+}
+@keyframes resultIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+.gacha-result .rname { color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 12px rgba(0, 0, 0, .6); }
+.gacha-result .rstars { font-size: 26px; letter-spacing: 6px; margin-top: 2px; color: var(--gacha-c, #FFD700); text-shadow: 0 0 18px var(--gacha-c, #FFD700); }
+.gacha-result .rstars span { display: inline-block; opacity: 0; transform: scale(.3); }
+.gacha-overlay.phase-burst .rstars span { animation: starPop 200ms var(--e-back) forwards; animation-delay: calc(300ms + var(--i) * 120ms); }
+@keyframes starPop { to { opacity: 1; transform: scale(1); } }
+.gacha-result .rtip { color: #cbd5e1; font-size: 12px; margin-top: 6px; }
+
+/* 抽卡粒子 */
+.gacha-particles { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.gacha-overlay.phase-burst .gacha-particles { opacity: 1; }
+.gacha-particles i {
+  position: absolute; left: 50%; top: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gacha-c, #FFD700);
+  box-shadow: 0 0 10px var(--gacha-c, #FFD700);
+  animation: fly 900ms var(--e-out) forwards;
+  animation-delay: calc(320ms + var(--i) * 12ms);
+  transform: translate(-50%, -50%);
+}
+@keyframes fly {
+  from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  to   { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(.2); opacity: 0; }
+}
+
+.gacha-skip {
+  position: absolute; right: 8px; bottom: 0;
+  font-size: 12px; color: #cbd5e1; background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px;
+  padding: 4px 12px; cursor: pointer; opacity: 0; transition: opacity var(--d-quick);
+}
+.gacha-skip.show { opacity: 1; }
+
+/* ---------- §6 徽章 ---------- */
+.badges { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.badge-item { text-align: center; width: 104px; }
+.badge {
+  width: 84px; height: 84px; margin: 0 auto;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 30px;
+  background: radial-gradient(circle at 35% 28%, #fff5d6, #FFD700 55%, #F59E0B 100%);
+  border: 3px solid rgba(255, 255, 255, .55);
+  box-shadow: 0 0 24px rgba(245, 158, 11, .5), inset 0 -4px 10px rgba(0, 0, 0, .15);
+  position: relative;
+  transition: transform var(--d-base) var(--e-out);
+}
+.badge--locked {
+  background: #f3f4f6; color: #cbd5e1; border: 2px dashed #d1d5db;
+  box-shadow: none; filter: grayscale(1) opacity(.55);
+}
+.badge-item .btitle { font-size: 12px; color: #374151; margin-top: 8px; font-weight: 700; }
+.badge-item .bdesc { font-size: 11px; color: #9ca3af; }
+.badge.unlocking { animation: unlock 600ms var(--e-back); }
+@keyframes unlock {
+  0%   { transform: rotate(0) scale(.6); }
+  60%  { transform: rotate(380deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.badge.unlocking::after {
+  content: ""; position: absolute; inset: -18px; border-radius: 50%;
+  border: 3px solid rgba(255, 215, 0, .8);
+  animation: halo 600ms var(--e-out) forwards;
+}
+@keyframes halo {
+  from { transform: scale(.6); opacity: .9; }
+  to   { transform: scale(1.6); opacity: 0; }
+}
+
+/* ---------- §7 页面骨架（响应式网格演示） ---------- */
+.wire {
+  background: #fff; border-radius: var(--r-modal); padding: 16px; box-shadow: var(--sh-card);
+}
+.wire .topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(255, 255, 255, .8); backdrop-filter: blur(8px);
+  border: 1px solid #f1f5f9; border-radius: var(--r-sm);
+  padding: 8px 12px; font-size: 12px; color: #6b7280; margin-bottom: 12px;
+}
+.wire .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 720px) { .wire .kpis { grid-template-columns: repeat(4, 1fr); } }
+.kpi {
+  border-radius: var(--r-card); padding: 16px 12px; text-align: center;
+  color: #7c3f00; font-size: 13px; font-weight: 700;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1px solid #fed7aa;
+  min-height: 88px; display: grid; place-items: center; gap: 4px;
+}
+.kpi b { display: block; font-size: 22px; }
+.wire .active-pet {
+  margin-top: 12px; display: flex; gap: 12px; align-items: center;
+  background: linear-gradient(135deg, #fff7ed, #ffe4e6);
+  border: 1px solid #fecdd3; border-radius: var(--r-card); padding: 10px 14px;
+}
+.wire .active-pet img { width: 54px; height: 54px; object-fit: contain; }
+.wire .active-pet .t { font-size: 13px; font-weight: 700; }
+.wire .active-pet .s { font-size: 12px; color: #9f1239; }
+.timeline { margin: 12px 0 0; padding: 0; list-style: none; font-size: 13px; }
+.timeline li {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding: 8px 10px; border-radius: var(--r-sm); background: #f9fafb; margin-bottom: 6px;
+}
+.timeline li .plus { color: #059669; font-weight: 700; }
+.timeline li .minus { color: #dc2626; font-weight: 700; }
+.timeline li time { color: #9ca3af; font-size: 12px; }
+
+/* ---------- 通用说明块 ---------- */
+.note {
+  background: #fff; border-left: 4px solid var(--c-primary);
+  border-radius: var(--r-sm); padding: 12px 16px; font-size: 13px; color: #4b5563;
+  box-shadow: var(--sh-card); margin-top: 16px;
+}
+.note b { color: #111827; }
+.note code {
+  background: #f3f4f6; padding: 1px 6px; border-radius: 4px;
+  font-size: 12px; color: #b45309;
+}
+table.spec {
+  width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 16px;
+  background: #fff; border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-card);
+}
+table.spec th, table.spec td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+table.spec th { background: #f9fafb; font-weight: 700; color: #374151; white-space: nowrap; }
+table.spec td code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+
+/* ---------- 系统降级 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .pet .particles { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <h1>王宠课堂 2.0 · UI 设计稿 v1</h1>
+    <p>DSH（UI/UX）· 2026-11-02 · 分支 <code style="color:#fff">dev-dsh</code></p>
+    <p>本页是可交互的视觉提案：所有特效均为纯 CSS / 原生 JS 实现，无图片资源依赖（宠物图沿用仓库现成素材）。</p>
+    <span class="tag">确认后才会进入编码阶段</span>
+  </header>
+
+  <!-- ============ §1 设计令牌 ============ -->
+  <section>
+    <div class="sec-head"><h2>1 · 设计令牌</h2><span class="badge">沿用现有 + 新增</span></div>
+    <p class="sec-desc">品牌色、语义色<b>完全沿用</b>现有 <b>tailwind.config.js</b>；属性色从 Battle.vue 的硬编码里收编；星级与觉醒阶是新增加的。</p>
+
+    <div class="sub-title">品牌 / 语义</div>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#FF9F43"></div><div class="meta"><b>primary</b><span>#FF9F43</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#26DE81"></div><div class="meta"><b>secondary</b><span>#26DE81</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#EF4444"></div><div class="meta"><b>danger</b><span>#EF4444</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#F59E0B"></div><div class="meta"><b>warning</b><span>#F59E0B</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FF6B9D"></div><div class="meta"><b>accent.pink</b><span>#FF6B9D</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#A855F7"></div><div class="meta"><b>accent.purple</b><span>#A855F7</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#3B82F6"></div><div class="meta"><b>accent.blue</b><span>#3B82F6</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#06B6D4"></div><div class="meta"><b>accent.cyan</b><span>#06B6D4</span></div></div>
+    </div>
+
+    <div class="sub-title">属性六色（对战轨）</div>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#E85D3A"></div><div class="meta"><b>火 🔥</b><span>#E85D3A</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#3A8FE8"></div><div class="meta"><b>水 💧</b><span>#3A8FE8</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#4CAF50"></div><div class="meta"><b>草 🌿</b><span>#4CAF50</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FFD600"></div><div class="meta"><b>电 ⚡</b><span>#FFD600</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FFC107"></div><div class="meta"><b>光 ✨</b><span>#FFC107</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#7B1FA2"></div><div class="meta"><b>暗 🌑</b><span>#7B1FA2</span></div></div>
+    </div>
+
+    <div class="sub-title">稀有度六阶（新增）</div>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#9CA3AF"></div><div class="meta"><b>1★ 普通</b><span>#9CA3AF</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#26DE81"></div><div class="meta"><b>2★ 优秀</b><span>#26DE81</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#3B82F6"></div><div class="meta"><b>3★ 精良</b><span>#3B82F6</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#A855F7"></div><div class="meta"><b>4★ 稀有</b><span>#A855F7</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#F59E0B"></div><div class="meta"><b>5★ 史诗</b><span>#F59E0B</span></div></div>
+      <div class="swatch"><div class="chip" style="background:conic-gradient(from 0deg,#FFD700,#FF6B9D,#A855F7,#3B82F6,#26DE81,#FFD700)"></div><div class="meta"><b>6★ 传说</b><span>彩虹流金</span></div></div>
+    </div>
+
+    <div class="sub-title">觉醒五阶（新增）</div>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#E5E7EB"></div><div class="meta"><b>0 原初</b><span>无特效</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FFD700"></div><div class="meta"><b>1 觉醒</b><span>#FFD700</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FFB020"></div><div class="meta"><b>2 共鸣</b><span>#FFB020</span></div></div>
+      <div class="swatch"><div class="chip" style="background:#FF8C28"></div><div class="meta"><b>3 爆发</b><span>#FF8C28</span></div></div>
+      <div class="swatch"><div class="chip" style="background:linear-gradient(135deg,#FFD700,#A855F7)"></div><div class="meta"><b>4 究极</b><span>金→紫双环</span></div></div>
+    </div>
+  </section>
+
+  <!-- ============ §2 觉醒特效 ============ -->
+  <section>
+    <div class="sec-head"><h2>2 · 觉醒 0–4 阶（核心）</h2><span class="badge">模块 2 · 难度 ⭐⭐⭐⭐⭐</span></div>
+    <p class="sec-desc">这就是提示词里的觉醒系统实物效果。注意 <b>宠物本体颜色基本不变</b>（只提亮/加饱和），色相变化集中在外发光层 —— 学生仍能认出自己的宠物。</p>
+
+    <div class="stage">
+      <div class="tile" data-aw="0">
+        <span class="lv">Lv.0</span>
+        <div class="pet"><div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐 觉醒0阶" />
+        </div>
+        <div class="cap"><b>原初</b><em>原色 · 无特效</em></div>
+      </div>
+
+      <div class="tile" data-aw="1">
+        <span class="lv">Lv.1</span>
+        <div class="pet"><div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐 觉醒1阶" />
+        </div>
+        <div class="cap"><b>觉醒</b><em>金环 · 呼吸 3s</em></div>
+      </div>
+
+      <div class="tile" data-aw="2">
+        <span class="lv">Lv.2</span>
+        <div class="pet"><div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <div class="particles">
+            <i style="--x:22%;--delay:0s;--drift:-8px"></i>
+            <i style="--x:36%;--delay:.4s;--drift:6px"></i>
+            <i style="--x:50%;--delay:.8s;--drift:-4px"></i>
+            <i style="--x:63%;--delay:.2s;--drift:9px"></i>
+            <i style="--x:76%;--delay:.6s;--drift:-6px"></i>
+            <i style="--x:44%;--delay:1.1s;--drift:3px"></i>
+          </div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐 觉醒2阶" />
+        </div>
+        <div class="cap"><b>共鸣</b><em>双环 · 6 粒子上浮</em></div>
+      </div>
+
+      <div class="tile" data-aw="3">
+        <span class="lv">Lv.3</span>
+        <div class="pet"><div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <div class="particles">
+            <i style="--x:18%;--delay:0s;--drift:-10px"></i>
+            <i style="--x:29%;--delay:.35s;--drift:5px"></i>
+            <i style="--x:40%;--delay:.7s;--drift:-6px"></i>
+            <i style="--x:52%;--delay:.15s;--drift:8px"></i>
+            <i style="--x:61%;--delay:.5s;--drift:-7px"></i>
+            <i style="--x:72%;--delay:.85s;--drift:4px"></i>
+            <i style="--x:82%;--delay:.25s;--drift:-5px"></i>
+            <i style="--x:34%;--delay:1.05s;--drift:7px"></i>
+          </div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐 觉醒3阶" />
+        </div>
+        <div class="cap"><b>爆发</b><em>旋转光 8s · 星芒</em></div>
+      </div>
+
+      <div class="tile" data-aw="4">
+        <span class="lv">Lv.4</span>
+        <div class="pet"><div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <div class="particles">
+            <i style="--x:14%;--delay:0s;--drift:-12px"></i>
+            <i style="--x:24%;--delay:.2s;--drift:6px"></i>
+            <i style="--x:33%;--delay:.45s;--drift:-8px"></i>
+            <i style="--x:42%;--delay:.7s;--drift:9px"></i>
+            <i style="--x:50%;--delay:.1s;--drift:-5px"></i>
+            <i style="--x:58%;--delay:.55s;--drift:11px"></i>
+            <i style="--x:67%;--delay:.3s;--drift:-9px"></i>
+            <i style="--x:76%;--delay:.85s;--drift:7px"></i>
+            <i style="--x:86%;--delay:.4s;--drift:-6px"></i>
+            <i style="--x:46%;--delay:1.15s;--drift:4px"></i>
+          </div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐 觉醒4阶" />
+        </div>
+        <div class="cap"><b>究极</b><em>双环反向 6s · 流光</em></div>
+      </div>
+    </div>
+
+    <table class="spec">
+      <thead><tr><th>阶</th><th>本体 saturate</th><th>本体 brightness</th><th>外光 hue-rotate</th><th>外光透明度</th><th>光环</th><th>粒子</th></tr></thead>
+      <tbody>
+        <tr><td>0 原初</td><td><code>1</code></td><td><code>1</code></td><td><code>0deg</code></td><td><code>0</code></td><td>无</td><td>0</td></tr>
+        <tr><td>1 觉醒</td><td><code>1.15</code></td><td><code>1.0</code></td><td><code>10deg</code></td><td><code>.35</code></td><td>金环 2px · 呼吸 3s</td><td>0</td></tr>
+        <tr><td>2 共鸣</td><td><code>1.30</code></td><td><code>1.03</code></td><td><code>25deg</code></td><td><code>.45</code></td><td>双环 · 呼吸 2s</td><td>6</td></tr>
+        <tr><td>3 爆发</td><td><code>1.50</code></td><td><code>1.08</code></td><td><code>40deg</code></td><td><code>.55</code></td><td>锥形光旋转 8s</td><td>12</td></tr>
+        <tr><td>4 究极</td><td><code>1.70</code></td><td><code>1.15</code></td><td><code>60deg</code></td><td><code>.70</code></td><td>双环反向 6s + 流光</td><td>24</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ §3 方案对比 ============ -->
+  <section>
+    <div class="sec-head"><h2>3 · 需要你拍板：觉醒色相怎么做</h2><span class="badge">D1</span></div>
+    <p class="sec-desc">左：提示词模块 2 的原始 CSS（整张图 <b>hue-rotate + brightness</b>）。中：我的双通道方案。右：原色基准。</p>
+
+    <div class="compare">
+      <div class="cmp-card">
+        <div class="pet pet--legacy">
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="提示词原方案：整体 hue-rotate" />
+        </div>
+        <div class="label">提示词原方案 · 觉醒4阶<small>hue-rotate(60deg) brightness(1.5)</small></div>
+      </div>
+
+      <div class="cmp-card">
+        <div class="pet" data-aw="4">
+          <div class="ring"></div><div class="ring ring--outer"></div><div class="cone"></div>
+          <img class="aura" src="../public/pets/pet_fire_fox/front_stand.png" alt="" />
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="双通道方案：觉醒4阶" />
+        </div>
+        <div class="label">双通道方案 · 觉醒4阶<small>本体只提亮，色相只作用于外光</small></div>
+        <span class="pick">我的推荐</span>
+      </div>
+
+      <div class="cmp-card">
+        <div class="pet" data-aw="0">
+          <img class="body" src="../public/pets/pet_fire_fox/front_stand.png" alt="原色基准" />
+        </div>
+        <div class="label">原色基准 · 觉醒0阶<small>学生认得的焰尾狐</small></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>为什么改：</b>提示词原方案把整张图色相转 60°，橙色狐狸会变绿，学生第一眼认不出自己的宠物；
+      叠加 <code>brightness(1.5~2)</code> 后浅底上羽毛细节全糊；且 Safari 上 <code>filter + box-shadow</code> 同时动画容易掉帧。
+      双通道方案把「变色」放到模糊发光副本上，本体只调明度饱和度 —— 特效更贵气，宠物还认得出来。
+    </div>
+  </section>
+
+  <!-- ============ §4 星级卡 ============ -->
+  <section>
+    <div class="sec-head"><h2>4 · 宠物卡与稀有度</h2><span class="badge">PetCard.vue</span></div>
+    <p class="sec-desc">同一只宠物按 1★–6★ 展示：边框色 + 星标 + 6★ 专属流光。鼠标悬停看卡片上浮。</p>
+
+    <div class="rarity-grid">
+      <div class="rcard" style="--rc:#9CA3AF">
+        <span class="lvbadge">Lv.3</span><span class="elbadge" style="background:#4CAF50">草</span>
+        <div class="avatar"><img src="../public/pets/west-highland/lv1.png" alt="西高地" /></div>
+        <div class="name">西高地</div><div class="stars">★☆☆☆☆☆</div>
+      </div>
+      <div class="rcard" style="--rc:#26DE81">
+        <span class="lvbadge">Lv.4</span><span class="elbadge" style="background:#26DE81">草</span>
+        <div class="avatar"><img src="../public/pets/tiger/lv1.png" alt="老虎" /></div>
+        <div class="name">老虎</div><div class="stars">★★☆☆☆☆</div>
+      </div>
+      <div class="rcard" style="--rc:#3B82F6">
+        <span class="lvbadge">Lv.5</span><span class="elbadge" style="background:#3A8FE8">水</span>
+        <div class="avatar"><img src="../public/pets/pet_water_turtle/front_stand.png" alt="潮甲龟" /></div>
+        <div class="name">潮甲龟</div><div class="stars">★★★☆☆☆</div>
+      </div>
+      <div class="rcard" style="--rc:#A855F7">
+        <span class="lvbadge">Lv.6</span><span class="elbadge" style="background:#7B1FA2">暗</span>
+        <div class="avatar"><img src="../public/pets/pet_dark_wolf/front_stand.png" alt="影幽狼" /></div>
+        <div class="name">影幽狼</div><div class="stars">★★★★☆☆</div>
+      </div>
+      <div class="rcard" style="--rc:#F59E0B">
+        <span class="lvbadge">Lv.7</span><span class="elbadge" style="background:#FFC107">光</span>
+        <div class="avatar"><img src="../public/pets/pet_light_crane/front_stand.png" alt="辉羽鹤" /></div>
+        <div class="name">辉羽鹤</div><div class="stars">★★★★★☆</div>
+      </div>
+      <div class="rcard rcard--r6">
+        <span class="lvbadge">Lv.7</span><span class="elbadge" style="background:#E85D3A">火</span>
+        <div class="avatar"><img src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐" /></div>
+        <div class="name">焰尾狐</div><div class="stars">★★★★★★</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>6★ 为什么用彩虹：</b>传说蛋 70% 出 6★（见提示词模块 5），如果 6★ 只用单色金光，学生会很快麻木。
+      6★ 用「角色本身也流光」的彩虹描边，视觉上明确高出一个层级。
+    </div>
+  </section>
+
+  <!-- ============ §5 抽卡演出 ============ -->
+  <section>
+    <div class="sec-head"><h2>5 · 抽卡演出</h2><span class="badge">GachaAnimation.vue</span></div>
+    <p class="sec-desc">点下面的按钮看真实演出（总时长 2.4s，800ms 后出现「点击跳过」）。六档分别对应白光 → 蓝光 → 紫光 → 金光。</p>
+
+    <div class="gacha-btns">
+      <button class="btn btn--ghost" data-rarity="1">1★ 白光</button>
+      <button class="btn btn--ghost" data-rarity="3">3★ 白光</button>
+      <button class="btn btn--ghost" data-rarity="4">4★ 蓝光</button>
+      <button class="btn btn--ghost" data-rarity="5">5★ 紫光</button>
+      <button class="btn btn--ghost" data-rarity="6">6★ 金光 + 彩虹</button>
+    </div>
+
+    <table class="spec">
+      <thead><tr><th>阶段</th><th>时间</th><th>画面</th></tr></thead>
+      <tbody>
+        <tr><td>蓄力</td><td>0 – 800ms</td><td>蛋体抖动呼吸，屏幕暗场 <code>rgba(0,0,0,.55)</code></td></tr>
+        <tr><td>光柱</td><td>800 – 1600ms</td><td>光柱冲出 + 光圈扩散 0 → 620px，颜色按星级</td></tr>
+        <tr><td>爆发</td><td>1600 – 2400ms</td><td>24 粒子飞散 + 稀有度文字弹入 + 星级逐颗点亮（每颗 120ms）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ §6 徽章 ============ -->
+  <section>
+    <div class="sec-head"><h2>6 · 成就徽章</h2><span class="badge">AchievementBadge.vue</span></div>
+    <p class="sec-desc">未解锁灰度虚线，已解锁金色光晕。<b>点「解锁一个试试」</b>能看到旋转收束 + 光晕绽放动画。</p>
+
+    <div class="badges" id="badges">
+      <div class="badge-item">
+        <div class="badge">⚔️</div>
+        <div class="btitle">初战告捷</div><div class="bdesc">完成第一场战斗</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge">🏆</div>
+        <div class="btitle">连胜达人</div><div class="bdesc">连续获胜 5 场</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge badge--locked" id="badge-locked">💎</div>
+        <div class="btitle">觉醒大师</div><div class="bdesc">2 / 4 阶</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge badge--locked">🐉</div>
+        <div class="btitle">百战百胜</div><div class="bdesc">45 / 100</div>
+      </div>
+    </div>
+    <div class="btns" style="margin-top:16px">
+      <button class="btn btn--primary" id="btn-unlock">解锁一个试试</button>
+    </div>
+  </section>
+
+  <!-- ============ §7 按钮 / 进度条 ============ -->
+  <section>
+    <div class="sec-head"><h2>7 · 按钮与进度条</h2><span class="badge">通用控件</span></div>
+    <p class="sec-desc">按钮最小高度 44px（学生用平板手指点得到），按下缩放 <b>0.97</b>，禁用态不发亮。<br>进度条带流光，用于经验/成长值；数字全部用等宽数字（tabular-nums）避免跳动。</p>
+
+    <div class="btns">
+      <button class="btn btn--primary">开始战斗</button>
+      <button class="btn btn--secondary">领取奖励</button>
+      <button class="btn btn--danger">扣除积分</button>
+      <button class="btn btn--ghost">取消</button>
+      <button class="btn btn--disabled" disabled>积分不足</button>
+    </div>
+
+    <div class="bars">
+      <div class="bar-row"><span style="width:64px">羁绊</span><div class="bar bar--exp"><i style="width:68%"></i></div><span class="num">68%</span></div>
+      <div class="bar-row"><span style="width:64px">经验</span><div class="bar bar--exp"><i style="width:42%"></i></div><span class="num">17/40</span></div>
+      <div class="bar-row"><span style="width:64px">生命</span><div class="bar bar--hp"><i style="width:82%"></i></div><span class="num">205/250</span></div>
+    </div>
+  </section>
+
+  <!-- ============ §8 页面骨架 ============ -->
+  <section>
+    <div class="sec-head"><h2>8 · 学生首页骨架</h2><span class="badge">Dashboard.vue · 响应式</span></div>
+    <p class="sec-desc">把浏览器窗口拉窄看网格变化：<b>&lt;720px 两列大按钮</b>，<b>≥720px 四列</b>。顶部信息条 sticky 玻璃拟态。</p>
+
+    <div class="wire">
+      <div class="topbar">
+        <span>👤 20260112 · 李四</span>
+        <span>⭐ <b class="num" style="color:#FF9F43">1,250</b> 积分</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span style="font-size:22px">🐾</span>我的宠物</div>
+        <div class="kpi"><span style="font-size:22px">⚔️</span>开始战斗</div>
+        <div class="kpi"><span style="font-size:22px">🛒</span>积分商城</div>
+        <div class="kpi"><span style="font-size:22px">🏆</span>排行榜</div>
+      </div>
+      <div class="active-pet">
+        <img src="../public/pets/pet_fire_fox/front_stand.png" alt="焰尾狐" />
+        <div>
+          <div class="t">当前出战：焰尾狐 Lv.5 · 觉醒3阶</div>
+          <div class="s">稀有度 ★★★★★☆ · 下次升级还需 23 分</div>
+        </div>
+      </div>
+      <ul class="timeline">
+        <li><span>回答问题</span><span class="plus num">+3</span><time>10:24</time></li>
+        <li><span>作业优秀</span><span class="plus num">+5</span><time>昨天</time></li>
+        <li><span>迟到</span><span class="minus num">−1</span><time>昨天</time></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="note" style="border-left-color:#A855F7">
+    <b>下一步：</b>这份稿子确认后，我按 M1 开始写 <code>tokens.css</code> + <code>effects.css</code> + <code>AwakeningEffect</code> / <code>PetCard</code> / <code>AchievementBadge</code>，
+    并在 <code>/preview</code> 页装出来给你看实物。规范全文见 <code>docs/UI设计规范-DSH-v1.md</code>。
+  </div>
+
+</div>
+
+<!-- ============ 抽卡演出遮罩 ============ -->
+<div class="gacha-overlay" id="gacha-overlay" data-rarity="5">
+  <div class="gacha-stage">
+    <div class="gacha-beam"></div>
+    <div class="gacha-burst fire"></div>
+    <div class="gacha-egg"></div>
+    <div class="gacha-particles" id="gacha-particles"></div>
+    <div class="gacha-result">
+      <div class="rname" id="gacha-name">史诗</div>
+      <div class="rstars" id="gacha-stars"></div>
+      <div class="rtip">点击任意处关闭</div>
+    </div>
+    <button class="gacha-skip" id="gacha-skip">点击跳过</button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   设计稿交互脚本（原生 JS，无依赖）
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var RARITY_NAME = { 1: '普通', 2: '优秀', 3: '精良', 4: '稀有', 5: '史诗', 6: '传说' };
+
+  var overlay = document.getElementById('gacha-overlay');
+  var starsBox = document.getElementById('gacha-stars');
+  var nameBox = document.getElementById('gacha-name');
+  var particlesBox = document.getElementById('gacha-particles');
+  var skipBtn = document.getElementById('gacha-skip');
+
+  var timers = [];
+  var playing = false;
+
+  function clearTimers() {
+    timers.forEach(function (t) { clearTimeout(t); });
+    timers = [];
+  }
+
+  /* 生成粒子（按设备性能分档，与规范 §3.1 一致） */
+  function buildParticles(count, color) {
+    particlesBox.innerHTML = '';
+    for (var i = 0; i < count; i++) {
+      var angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+      var dist = 120 + Math.random() * 140;
+      var p = document.createElement('i');
+      p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      p.style.setProperty('--i', i);
+      if (color) p.style.background = color;
+      particlesBox.appendChild(p);
+    }
+  }
+
+  /* 播放一次抽卡演出 */
+  function playGacha(rarity) {
+    if (playing) return;
+    playing = true;
+
+    var lowEnd = (navigator.hardwareConcurrency || 8) <= 4;
+    var particleCount = lowEnd ? 12 : 24;
+
+    overlay.dataset.rarity = rarity;
+    nameBox.textContent = RARITY_NAME[rarity] || '';
+    nameBox.style.color = rarity === 6 ? '#FFD700' : '#fff';
+
+    /* 星级逐颗点亮 */
+    starsBox.innerHTML = '';
+    for (var i = 0; i < 6; i++) {
+      var s = document.createElement('span');
+      s.style.setProperty('--i', i);
+      s.textContent = i < rarity ? '★' : '☆';
+      starsBox.appendChild(s);
+    }
+    buildParticles(particleCount);
+
+    /* class 切换 = 时间轴：蓄力 → 光柱 → 爆发 */
+    overlay.className = 'gacha-overlay on';
+    skipBtn.classList.remove('show');
+
+    timers.push(setTimeout(function () {
+      overlay.classList.add('phase-reveal');
+    }, 800));
+
+    timers.push(setTimeout(function () {
+      overlay.classList.add('phase-burst');
+    }, 1600));
+
+    /* 800ms 后允许跳过（与规范 §4.4 一致） */
+    timers.push(setTimeout(function () {
+      skipBtn.classList.add('show');
+    }, 800));
+
+    timers.push(setTimeout(finish, 2400));
+  }
+
+  function finish() {
+    clearTimers();
+    overlay.className = 'gacha-overlay';
+    playing = false;
+    skipBtn.classList.remove('show');
+  }
+
+  /* 绑定抽卡按钮 */
+  document.querySelectorAll('[data-rarity]').forEach(function (btn) {
+    if (btn.classList.contains('btn')) {
+      btn.addEventListener('click', function () {
+        playGacha(Number(btn.dataset.rarity));
+      });
+    }
+  });
+
+  /* 跳过 / 关闭 */
+  skipBtn.addEventListener('click', function (e) { e.stopPropagation(); finish(); });
+  overlay.addEventListener('click', finish);
+
+  /* 徽章解锁动画 */
+  var lockedBadge = document.getElementById('badge-locked');
+  var inited = false;
+  document.getElementById('btn-unlock').addEventListener('click', function () {
+    if (!inited) {
+      lockedBadge.classList.remove('badge--locked');
+      lockedBadge.classList.add('unlocking');
+      inited = true;
+      setTimeout(function () { lockedBadge.classList.remove('unlocking'); }, 700);
+    } else {
+      /* 再点一次：重置为未解锁，方便反复看效果 */
+      lockedBadge.classList.add('badge--locked');
+      inited = false;
+    }
+  });
+
+  /* 键盘可关闭（可访问性） */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && playing) finish();
+  });
+})();
+</script>
+</body>
+</html>
