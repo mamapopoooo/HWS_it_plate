@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-900 text-white overflow-x-hidden">
+  <div class="duel-page min-h-screen bg-gray-900 text-white overflow-x-hidden">
     <!-- 宠物选择界面 -->
     <div v-if="phase === 'select'" class="flex flex-col items-center min-h-screen p-3 sm:p-4">
       <h1 class="text-xl sm:text-3xl font-bold mb-2 sm:mb-4 text-orange-400">组建你的战队</h1>
