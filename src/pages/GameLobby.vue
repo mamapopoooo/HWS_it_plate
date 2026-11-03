@@ -136,6 +136,10 @@ function goBattle() {
   void router.push('/battle')
 }
 
+function goGacha() {
+  void router.push('/gacha')
+}
+
 onUnmounted(() => {
   if (happyTimer) clearTimeout(happyTimer)
 })
@@ -253,7 +257,7 @@ onUnmounted(() => {
       <button class="gw-seal gw-seal--primary" @click="goBattle">
         斗法<span class="gw-seal__hint">耗 1 卦力</span>
       </button>
-      <button class="gw-seal" disabled>求签<span class="gw-seal__hint">十连 45 灵石</span></button>
+      <button class="gw-seal" @click="goGacha">求签<span class="gw-seal__hint">十连 45 灵石</span></button>
       <button class="gw-seal" disabled>封神榜</button>
     </footer>
 
