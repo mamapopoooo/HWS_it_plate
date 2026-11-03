@@ -81,11 +81,22 @@ const demoPets = computed<Record<number, PetView>>(() => {
 
 const dockItems: DockItem[] = [
   { key: 'battle', label: '斗法', glyph: '战' },
-  { key: 'pets', label: '灵宠', glyph: '宠' },
   { key: 'collection', label: '图鉴', glyph: '册' },
-  { key: 'shop', label: '集市', glyph: '市' },
-  { key: 'ranking', label: '封神榜', glyph: '榜' },
+  { key: 'ranking', label: '封神榜', glyph: '榜', disabled: true },
+  { key: 'shop', label: '集市', glyph: '市', disabled: true },
+  { key: 'pets', label: '灵宠', glyph: '宠', disabled: true },
 ]
+
+/** 只给已建好的页面跳转，未建的按钮保持禁用（不留死链） */
+const DOCK_ROUTES: Record<string, string> = {
+  battle: '/battle',
+  collection: '/collection',
+}
+
+function onDock(key: string) {
+  const path = DOCK_ROUTES[key]
+  if (path) void router.push(path)
+}
 
 const quests = [
   { text: '入馆签到', reward: '+5', done: true },
@@ -144,7 +155,7 @@ onUnmounted(() => {
     />
 
     <div class="lobby__body">
-      <GameDock :items="dockItems" active="battle" @select="() => {}" />
+      <GameDock :items="dockItems" active="battle" @select="onDock" />
 
       <main class="stage">
         <!-- 品阶切换（配置驱动，加第六阶会自动出现） -->

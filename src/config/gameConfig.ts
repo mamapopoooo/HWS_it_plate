@@ -107,6 +107,17 @@ export function getTrigram(code: string): TrigramConfig | undefined {
   return TRIGRAMS.find((t) => t.code === code)
 }
 
+/**
+ * 宠物某形态的立绘路径。
+ * 优先级：模板 formImages → 约定路径 {id}/formN.png（缺图由组件退化为卦象占位，不报错）。
+ */
+export function formImage(pet: PetTemplate, form = 1): string {
+  const custom = pet.formImages?.[String(form)]
+  if (custom) return custom
+  const shortId = pet.id.replace(/^pet_/, '')
+  return `/pet-garden/pets/${shortId}/form${form}.png`
+}
+
 export function tierName(tier: number): string {
   return getTier(tier)?.name ?? `第${tier}阶`
 }

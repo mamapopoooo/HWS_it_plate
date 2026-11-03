@@ -13,6 +13,7 @@ const router = createRouter({
 
     // v3.0 学生端主界面（太极盘大厅）
     { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue') },
+    { path: '/collection', name: 'collection', component: () => import('@/pages/Collection.vue') },
 
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },
