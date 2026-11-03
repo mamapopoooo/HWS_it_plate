@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { initDb, db } from './db.js'
 import { calculateLevel } from './utils/level.js'
 import { migrateV2 } from './game/migrate-v2.js'
+import { migrateV3 } from './game/migrate-v3.js'
+import { importSeeds } from './game/import-seeds.js'
 
 // 导入路由
 import authRoutes from './routes/auth.js'
@@ -17,6 +19,7 @@ import settingsRoutes from './routes/settings.js'
 import customPetsRoutes from './routes/custom-pets.js'
 import gameRoutes from './routes/game.js'
 import gameV2Routes from './routes/game-v2.js'
+import gameV3Routes from './routes/game-v3.js'
 
 const app = express()
 const PORT = 3002
@@ -41,6 +44,8 @@ app.use(express.json())
 // 初始化数据库
 initDb()
 migrateV2()
+migrateV3()
+importSeeds()
 
 // 创建默认游客用户
 const guestUser = db.prepare('SELECT id FROM users WHERE username = ?').get('guest')
@@ -85,6 +90,7 @@ app.use('/api/settings', settingsRoutes)
 app.use('/api/custom-pets', customPetsRoutes)
 app.use('/api/game', gameRoutes)
 app.use('/api/v2', gameV2Routes)
+app.use('/api/v3', gameV3Routes)
 
 // 健康检查（公开）
 app.get('/api/health', (req, res) => {
