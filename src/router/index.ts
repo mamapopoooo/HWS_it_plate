@@ -21,6 +21,7 @@ const router = createRouter({
     { path: '/achievements', name: 'achievements', component: () => import('@/pages/Achievements.vue') },
     { path: '/character', name: 'character', component: () => import('@/pages/Character.vue') },
     { path: '/custom', name: 'custom', component: () => import('@/pages/CustomPet.vue') },
+    { path: '/pet/:id', name: 'pet-detail', component: () => import('@/pages/PetDetail.vue') },
     // 教师端：造物审核（M2 迁到 /admin/review 并加 role 守卫）
     { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue') },
 

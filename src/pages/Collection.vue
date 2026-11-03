@@ -72,8 +72,7 @@ function goCreate() {
 }
 
 function onSelect(pet: PetTemplate) {
-  // M2：跳详情页 /pet/:id
-  console.info('[图鉴] 选中', pet.name, pet.pinyin)
+  void router.push(`/pet/${pet.id}`)
 }
 </script>
 
