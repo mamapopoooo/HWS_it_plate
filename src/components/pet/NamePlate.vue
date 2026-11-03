@@ -5,6 +5,8 @@
  */
 defineProps<{
   name: string
+  /** 注音：生僻字必须显示（学生 11–14 岁） */
+  pinyin: string
   tierName: string
   trigramText: string
   formText: string
@@ -15,7 +17,10 @@ defineProps<{
 
 <template>
   <div class="plate" :style="{ '--accent': accent }">
-    <span class="plate__name">{{ name }}</span>
+    <span class="plate__who">
+      <b class="plate__name">{{ name }}</b>
+      <small class="plate__pinyin">{{ pinyin }}</small>
+    </span>
     <span class="plate__tier">{{ tierName }}</span>
     <span class="plate__tri">{{ trigramText }}</span>
     <span class="plate__form">{{ formText }}</span>
@@ -35,11 +40,24 @@ defineProps<{
   border-radius: var(--r-sm);
   box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.8), 0 3px 10px rgba(28, 28, 36, 0.14);
 }
+.plate__who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
 .plate__name {
   font-family: var(--font-title);
   font-size: 19px;
   letter-spacing: 0.12em;
   color: var(--ink);
+}
+/* 注音：小一号、低对比，但不能小到看不清 */
+.plate__pinyin {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
 }
 .plate__tier {
   font-family: var(--font-title);

@@ -15,7 +15,9 @@ import {
   TIERS,
   calcPower,
   formName,
+  getPet,
   getTier,
+  styleName,
   tierName,
   trigramGlyphs,
   trigramLabel,
@@ -25,9 +27,30 @@ const router = useRouter()
 
 /* ---------------- 占位数据（M2 换接口） ---------------- */
 
-interface DemoPet {
+/**
+ * 占位数据：只写「玩家侧」的个体差异（等级/觉醒/立绘）。
+ * 名称、注音、风格、卦属一律从宠物库（docs/seeds/pets.json → PETS）读取，
+ * 不在组件里另存一份，避免与数据库不一致。
+ */
+interface DemoSlot {
+  petId: string
+  level: number
+  awaken: number
+  image: string
+}
+
+const DEMO_SLOTS: DemoSlot[] = [
+  { petId: 'pet_jiuweihu', level: 3, awaken: 0, image: '/pet-garden/pets/white-tiger/lv1.png' },
+  { petId: 'pet_baize', level: 4, awaken: 1, image: '/pet-garden/pets/white-tiger/lv4.png' },
+  { petId: 'pet_baihu', level: 7, awaken: 3, image: '/pet-garden/pets/white-tiger/lv7.png' },
+  { petId: 'pet_yinyu', level: 7, awaken: 4, image: '/pet-garden/pets/white-tiger/lv8.png' },
+]
+
+interface PetView {
   id: string
   name: string
+  pinyin: string
+  style: string
   tier: number
   trigram: string
   level: number
@@ -35,44 +58,26 @@ interface DemoPet {
   image: string
 }
 
-const DEMO_PETS: Record<number, DemoPet> = {
-  1: {
-    id: 'pet_jiuweihu',
-    name: '九尾狐',
-    tier: 1,
-    trigram: 'li',
-    level: 3,
-    awaken: 0,
-    image: '/pet-garden/pets/white-tiger/lv1.png',
-  },
-  2: {
-    id: 'pet_baize',
-    name: '白泽',
-    tier: 2,
-    trigram: 'qian',
-    level: 4,
-    awaken: 1,
-    image: '/pet-garden/pets/white-tiger/lv4.png',
-  },
-  3: {
-    id: 'pet_baihu',
-    name: '白虎·监兵',
-    tier: 3,
-    trigram: 'qian,dui',
-    level: 7,
-    awaken: 3,
-    image: '/pet-garden/pets/white-tiger/lv7.png',
-  },
-  4: {
-    id: 'pet_yinyu',
-    name: '阴鱼·太阴',
-    tier: 4,
-    trigram: 'all',
-    level: 7,
-    awaken: 4,
-    image: '/pet-garden/pets/white-tiger/lv8.png',
-  },
-}
+/** 宠物库 + 玩家实例合并；库中缺 id 时自动跳过，不产生半成品数据 */
+const demoPets = computed<Record<number, PetView>>(() => {
+  const map: Record<number, PetView> = {}
+  for (const slot of DEMO_SLOTS) {
+    const tpl = getPet(slot.petId)
+    if (!tpl) continue
+    map[tpl.tier] = {
+      id: tpl.id,
+      name: tpl.name,
+      pinyin: tpl.pinyin,
+      style: tpl.style,
+      tier: tpl.tier,
+      trigram: tpl.trigram,
+      level: slot.level,
+      awaken: slot.awaken,
+      image: slot.image,
+    }
+  }
+  return map
+})
 
 const dockItems: DockItem[] = [
   { key: 'battle', label: '斗法', glyph: '战' },
@@ -95,7 +100,7 @@ const activeTier = ref(3)
 const happy = ref(false)
 let happyTimer: ReturnType<typeof setTimeout> | undefined
 
-const current = computed<DemoPet | null>(() => DEMO_PETS[activeTier.value] ?? null)
+const current = computed<PetView | null>(() => demoPets.value[activeTier.value] ?? null)
 const currentTier = computed(() => getTier(activeTier.value))
 const accent = computed(() => currentTier.value?.bezelColor ?? '#c9a227')
 const aura = computed(() => Math.min(1, 0.2 + activeTier.value * 0.16))
@@ -168,6 +173,7 @@ onUnmounted(() => {
           />
           <NamePlate
             :name="current.name"
+            :pinyin="current.pinyin"
             :tier-name="tierName(current.tier)"
             :trigram-text="`${trigramGlyphs(current.trigram)} ${trigramLabel(current.trigram)}`"
             :form-text="formName(current.awaken + 1)"
@@ -175,6 +181,7 @@ onUnmounted(() => {
             :accent="accent"
           />
           <div class="stage__meta">
+            <span class="stage__style" :data-style="current.style">{{ styleName(current.style) }}</span>
             <span class="stage__power num">战力 {{ power }}</span>
             <button class="stage__touch" @click="onTouch">摸头</button>
             <span class="stage__tip">立绘为占位素材，正式美术按 §7 规范出图</span>
@@ -317,6 +324,33 @@ onUnmounted(() => {
   font-size: 13px;
   color: var(--cinnabar);
   font-weight: 700;
+}
+
+/* 风格标签：萌/俊/雅/奇 各一色，让学生一眼分得清路线 */
+.stage__style {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  color: var(--ink-2);
+}
+.stage__style[data-style='meng'] {
+  color: #b5637d;
+  background: rgba(212, 84, 107, 0.1);
+}
+.stage__style[data-style='jun'] {
+  color: var(--stone-blue);
+  background: rgba(46, 92, 138, 0.1);
+}
+.stage__style[data-style='ya'] {
+  color: var(--stone-green);
+  background: rgba(62, 124, 89, 0.1);
+}
+.stage__style[data-style='qi'] {
+  color: var(--trigram-zhen);
+  background: rgba(109, 76, 159, 0.1);
 }
 .stage__touch {
   padding: 5px 14px;

@@ -42,8 +42,12 @@ export interface TrigramConfig {
 export interface PetTemplate {
   id: string
   name: string
+  /** 注音（生僻字必须显示，学生 11–14 岁） */
+  pinyin: string
   tier: number
   trigram: string
+  /** 风格标签：meng 萌系 / jun 俊逸 / ya 雅致 / qi 奇诡 */
+  style: string
   source: string
   role: string
   description: string
@@ -76,10 +80,27 @@ export const ECONOMY = economySeed as unknown as EconomyConfig
 /** 形态名（下标 = 形态号 - 1），超出范围时回退为「第 N 相」 */
 export const FORM_NAMES = ['初相', '化相', '法相', '真形', '神相', '无相'] as const
 
+/** 风格标签（见 品阶体系-v3 §7.4 风格光谱） */
+export const STYLE_NAMES: Record<string, string> = {
+  meng: '萌系',
+  jun: '俊逸',
+  ya: '雅致',
+  qi: '奇诡',
+}
+
+export function styleName(code: string): string {
+  return STYLE_NAMES[code] ?? '—'
+}
+
 /* ---------------- 查询 ---------------- */
 
 export function getTier(tier: number): TierConfig | undefined {
   return TIERS.find((t) => t.tier === tier)
+}
+
+/** 按 id 取宠物模板：名称/注音/风格/卦属的唯一来源 */
+export function getPet(id: string): PetTemplate | undefined {
+  return PETS.find((p) => p.id === id)
 }
 
 export function getTrigram(code: string): TrigramConfig | undefined {

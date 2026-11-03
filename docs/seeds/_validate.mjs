@@ -39,6 +39,8 @@ if (tiers && trigrams && pets) {
 
   const ids = new Set()
   const perTier = {}
+  const styleCount = {}
+  const styleByTier = {}
   for (const p of pets.pets) {
     if (ids.has(p.id)) problems.push(`宠物 id 重复: ${p.id}`)
     ids.add(p.id)
@@ -46,7 +48,27 @@ if (tiers && trigrams && pets) {
     for (const tr of String(p.trigram).split(',')) {
       if (tr !== 'all' && !codes.has(tr)) problems.push(`${p.id} 的 trigram 不存在: ${tr}`)
     }
+    // 注音必须跟着宠物名走（生僻字多，UI 不做兜底拼音）
+    if (!p.pinyin || !/^[a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ·\s]+$/.test(p.pinyin)) {
+      problems.push(`${p.id} 缺少或不合法注音: ${p.pinyin}`)
+    }
+    if (!['meng', 'jun', 'ya', 'qi'].includes(p.style)) problems.push(`${p.id} 风格非法: ${p.style}`)
     perTier[p.tier] = (perTier[p.tier] || 0) + 1
+    styleCount[p.style] = (styleCount[p.style] || 0) + 1
+    if (!styleByTier[p.tier]) styleByTier[p.tier] = {}
+    styleByTier[p.tier][p.style] = (styleByTier[p.tier][p.style] || 0) + 1
+  }
+
+  // 风格光谱校验：萌系不低于 15%，同阶单风格不超过 50%，每阶至少 2 种风格
+  const total = pets.pets.length
+  const mengRatio = (styleCount.meng || 0) / total
+  if (mengRatio < 0.15) problems.push(`萌系占比 ${(mengRatio * 100).toFixed(0)}%，低于 15% 下限`)
+  for (const [tier, styles] of Object.entries(styleByTier)) {
+    const count = perTier[tier]
+    if (count >= 4 && Object.keys(styles).length < 2) problems.push(`tier ${tier} 只有 1 种风格`)
+    for (const [style, n] of Object.entries(styles)) {
+      if (n / count > 0.5) problems.push(`tier ${tier} 的 ${style} 占比 ${((n / count) * 100).toFixed(0)}%，超过 50%`)
+    }
   }
 
   // 数量必须是 24 / 8 / 4 / 2
@@ -66,6 +88,7 @@ if (tiers && trigrams && pets) {
   }
 
   console.log(`宠物: ${pets.pets.length} 只，分阶 ${JSON.stringify(perTier)}`)
+  console.log(`风格分布: ${JSON.stringify(styleCount)}（萌 ${(mengRatio * 100).toFixed(0)}%）`)
   console.log(`抽卡概率合计: ${rateSum}`)
 }
 
