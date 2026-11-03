@@ -1,0 +1,25 @@
+{
+  "_comment": "内容层：功名册（成就）。condition 用 DSL 描述，加成就只插一行；reward 可为积分/皮肤/称号。",
+  "achievements": [
+    { "id": "ach_first_win",   "category": "battle", "name": "初战告捷",   "seal": "捷", "desc": "赢得第一场斗法",          "cond": { "type": "battle_win", "value": 1 },   "reward": [ { "item": "points", "amount": 20 } ] },
+    { "id": "ach_streak5",     "category": "battle", "name": "连胜达人",   "seal": "连", "desc": "连续获胜 5 场",            "cond": { "type": "win_streak", "value": 5 },   "reward": [ { "item": "points", "amount": 80 } ] },
+    { "id": "ach_battle100",   "category": "battle", "name": "百战",       "seal": "百", "desc": "完成 100 场斗法",          "cond": { "type": "battle", "value": 100 },     "reward": [ { "item": "points", "amount": 300 } ] },
+
+    { "id": "ach_awaken4",     "category": "growth", "name": "觉醒大师",   "seal": "觉", "desc": "把一只宠物觉醒到上限",    "cond": { "type": "awaken_max", "value": 1 },  "reward": [ { "item": "points", "amount": 120 } ] },
+    { "id": "ach_tier3",       "category": "growth", "name": "位列四象",   "seal": "象", "desc": "获得第一只四象",          "cond": { "type": "possess_tier", "value": 3 }, "reward": [ { "item": "points", "amount": 200 } ] },
+    { "id": "ach_tier4",       "category": "growth", "name": "两仪在手",   "seal": "仪", "desc": "获得阴阳鱼中的任意一只",  "cond": { "type": "possess_tier", "value": 4 }, "reward": [ { "item": "points", "amount": 300 } ] },
+
+    { "id": "ach_collect20",   "category": "collect", "name": "藏珍二十",  "seal": "藏", "desc": "图鉴收集 20 只",          "cond": { "type": "collect_count", "value": 20 }, "reward": [ { "item": "points", "amount": 150 } ] },
+    { "id": "ach_collect_all", "category": "collect", "name": "山海尽览",  "seal": "览", "desc": "集齐 38 只官方宠物",       "cond": { "type": "collect_count", "value": 38 }, "reward": [ { "item": "points", "amount": 800 } ] },
+    { "id": "ach_draw50",      "category": "collect", "name": "签缘五十",  "seal": "签", "desc": "累计求签 50 次",           "cond": { "type": "gacha", "value": 50 },       "reward": [ { "item": "points", "amount": 200 } ] },
+
+    { "id": "ach_creator",     "category": "special", "name": "造物者",    "seal": "造", "desc": "第一只本命通过教师审核",   "cond": { "type": "custom_approved", "value": 1 }, "reward": [ { "item": "points", "amount": 500 } ] },
+    { "id": "ach_class_top3",  "category": "special", "name": "班级之光",  "seal": "光", "desc": "班级战个人贡献前三",       "cond": { "type": "class_rank", "value": 3 },  "reward": [ { "item": "points", "amount": 250 } ] }
+  ],
+  "categories": [
+    { "key": "battle",  "name": "斗法" },
+    { "key": "growth",  "name": "养成" },
+    { "key": "collect", "name": "收集" },
+    { "key": "special", "name": "special" }
+  ]
+}

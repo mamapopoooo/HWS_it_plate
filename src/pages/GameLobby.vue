@@ -83,8 +83,9 @@ const dockItems: DockItem[] = [
   { key: 'battle', label: '斗法', glyph: '战' },
   { key: 'collection', label: '图鉴', glyph: '册' },
   { key: 'ranking', label: '封神榜', glyph: '榜' },
-  { key: 'shop', label: '集市', glyph: '市', disabled: true },
-  { key: 'pets', label: '灵宠', glyph: '宠', disabled: true },
+  { key: 'shop', label: '集市', glyph: '市' },
+  { key: 'quests', label: '课业', glyph: '课' },
+  { key: 'achievements', label: '功名册', glyph: '印' },
 ]
 
 /** 只给已建好的页面跳转，未建的按钮保持禁用（不留死链） */
@@ -92,6 +93,9 @@ const DOCK_ROUTES: Record<string, string> = {
   battle: '/battle',
   collection: '/collection',
   ranking: '/ranking',
+  shop: '/shop',
+  quests: '/quests',
+  achievements: '/achievements',
 }
 
 function onDock(key: string) {

@@ -1,0 +1,21 @@
+{
+  "_comment": "内容层：集市（商城）。价格不在本表写死——用 priceKey 指向 economy.json 的键，保证唯一来源。加商品 = 插一行 + 传图标（或用 glyph 字符）。",
+  "items": [
+    { "id": "item_ticket_single", "name": "签券",      "category": "utility", "glyph": "签", "priceKey": "gacha.single",      "limitKey": "weekly",  "limit": 5,  "desc": "等价一次求签，可在活动期囤着用" },
+    { "id": "item_rename",        "name": "改名符",    "category": "utility", "glyph": "名", "priceKey": "character.nicknameChange", "limit": 3, "desc": "改一次角色昵称（姓名不可改）" },
+    { "id": "item_title",         "name": "称号",      "category": "utility", "glyph": "号", "priceKey": "character.titleBuy", "limit": 1, "desc": "给角色挂一个称号，显示在封神榜" },
+    { "id": "item_trigram_reroll", "name": "换卦符",   "category": "utility", "glyph": "卦", "priceKey": "misc.trigramReroll", "limit": 1, "desc": "为一只宠物重掷卦属（每只限一次）" },
+    { "id": "item_battle_refill", "name": "补卦力",    "category": "utility", "glyph": "力", "priceKey": "misc.battleRefill", "limit": 2, "desc": "当日斗法次数 +1" },
+
+    { "id": "item_skin_school",   "name": "校服",      "category": "decor",   "glyph": "衣", "priceKey": "skin.school",  "limit": 1, "desc": "角色皮肤·宏文校服（男女各一版）" },
+    { "id": "item_skin_hanfu",    "name": "云纹汉服",  "category": "decor",   "glyph": "裳", "priceKey": "skin.hanfu",   "limit": 1, "desc": "角色皮肤·云纹汉服" },
+    { "id": "item_skin_season",   "name": "节气限定",  "category": "decor",   "glyph": "节", "priceKey": "skin.season",  "limit": 1, "desc": "赛季限定皮肤，赛季结束后下架" },
+
+    { "id": "item_fragment_box",  "name": "灵纹匣",    "category": "items",   "glyph": "匣", "price": 100,  "limit": 2, "desc": "开出 40 灵纹碎片，用于抵扣觉醒费用" }
+  ],
+  "categories": [
+    { "key": "utility", "name": "灵物" },
+    { "key": "decor",   "name": "装饰" },
+    { "key": "items",   "name": "匣盒" }
+  ]
+}

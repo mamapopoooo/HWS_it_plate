@@ -16,6 +16,9 @@ const router = createRouter({
     { path: '/collection', name: 'collection', component: () => import('@/pages/Collection.vue') },
     { path: '/gacha', name: 'gacha', component: () => import('@/pages/Gacha.vue') },
     { path: '/ranking', name: 'ranking', component: () => import('@/pages/Ranking.vue') },
+    { path: '/shop', name: 'shop', component: () => import('@/pages/Shop.vue') },
+    { path: '/quests', name: 'quests', component: () => import('@/pages/Quests.vue') },
+    { path: '/achievements', name: 'achievements', component: () => import('@/pages/Achievements.vue') },
 
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },

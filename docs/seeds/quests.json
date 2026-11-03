@@ -1,0 +1,13 @@
+{
+  "_comment": "内容层：课业（任务）。条件与奖励用 JSON 描述（00-总纲 §11 DSL），加任务只插一行。",
+  "quests": [
+    { "id": "quest_login",     "type": "daily",  "name": "入馆签到",     "cond": { "type": "login", "value": 1 },        "reward": [ { "item": "points", "amount": 5 } ] },
+    { "id": "quest_feed",      "type": "daily",  "name": "喂食一次",     "cond": { "type": "feed", "value": 1 },         "reward": [ { "item": "points", "amount": 20 } ] },
+    { "id": "quest_browse",    "type": "daily",  "name": "览封神榜",     "cond": { "type": "view_ranking", "value": 1 }, "reward": [ { "item": "points", "amount": 10 } ] },
+    { "id": "quest_battle3",   "type": "daily",  "name": "斗法三场",     "cond": { "type": "battle", "value": 3 },       "reward": [ { "item": "points", "amount": 30 } ] },
+
+    { "id": "quest_awaken1",   "type": "weekly", "name": "觉醒一次",     "cond": { "type": "awaken", "value": 1 },       "reward": [ { "item": "points", "amount": 80 } ] },
+    { "id": "quest_draw10",    "type": "weekly", "name": "求签十次",     "cond": { "type": "gacha", "value": 10 },       "reward": [ { "item": "points", "amount": 60 } ] },
+    { "id": "quest_powerup",   "type": "weekly", "name": "战力提升 20",  "cond": { "type": "power_gain", "value": 20 },  "reward": [ { "item": "points", "amount": 100 } ] }
+  ]
+}
