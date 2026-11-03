@@ -3,48 +3,61 @@
  * 课业（任务，P4）
  * 任务定义来自 seeds/quests.json；进度暂为占位，M2 接 /api/v2/quests/daily|weekly。
  */
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { QUESTS, rewardText } from '@/config/contentConfig'
+import { claimQuest, fetchQuests, fetchWallet } from '@/api/adapter'
 
 const router = useRouter()
 
-/** 占位进度：questId → 当前值 */
-const progress = reactive<Record<string, number>>({
-  quest_login: 1,
-  quest_feed: 1,
-  quest_browse: 1,
-  quest_battle3: 1,
-  quest_awaken1: 0,
-  quest_draw10: 4,
-  quest_powerup: 12,
-})
+/** 进度与领取状态：由 adapter 填充（真接口优先，未就绪回落占位） */
+const progress = ref<Record<string, number>>({})
+const claimed = ref<Record<string, boolean>>({})
+const wallet = ref(0)
 
-const claimed = reactive<Record<string, boolean>>({})
-const wallet = ref(1250)
+async function load() {
+  const [list, w] = await Promise.all([fetchQuests(), fetchWallet()])
+  const p: Record<string, number> = {}
+  const c: Record<string, boolean> = {}
+  for (const item of list) {
+    p[item.questId] = item.progress
+    c[item.questId] = item.claimed
+  }
+  progress.value = p
+  claimed.value = c
+  wallet.value = w.points
+}
+
+onMounted(load)
 
 const daily = computed(() => QUESTS.filter((q) => q.type === 'daily'))
 const weekly = computed(() => QUESTS.filter((q) => q.type === 'weekly'))
 
 function done(id: string): boolean {
   const q = QUESTS.find((x) => x.id === id)
-  return !!q && (progress[id] ?? 0) >= q.cond.value
+  return !!q && (progress.value[id] ?? 0) >= q.cond.value
 }
 
 function finishedCount(list: typeof QUESTS): number {
   return list.filter((q) => done(q.id)).length
 }
 
-function claim(qid: string) {
-  if (!done(qid) || claimed[qid]) return
+async function claim(qid: string) {
+  if (!done(qid) || claimed.value[qid]) return
   const q = QUESTS.find((x) => x.id === qid)
   if (!q) return
-  claimed[qid] = true
-  wallet.value += q.reward.reduce((sum, r) => (r.item === 'points' ? sum + r.amount : sum), 0)
+  claimed.value = { ...claimed.value, [qid]: true }
+  const res = await claimQuest(qid)
+  // 接口成功则以服务端余额为准；占位模式按配置里的奖励金额本地累加
+  if (res.ok && res.points > 0) {
+    wallet.value += res.points
+  } else {
+    wallet.value += q.reward.reduce((sum, r) => (r.item === 'points' ? sum + r.amount : sum), 0)
+  }
 }
 
 function claimAll(list: typeof QUESTS) {
-  list.forEach((q) => claim(q.id))
+  void Promise.all(list.map((q) => claim(q.id)))
 }
 
 function back() {

@@ -4,18 +4,24 @@
  * 商品与价格全部来自 seeds：shop.json 提供条目，价格经 priceKey 指向 economy.json。
  * 购买暂为本地占位，M2 接 POST /api/v2/shop/buy。
  */
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { SHOP_CATEGORIES, SHOP_ITEMS, itemPrice } from '@/config/contentConfig'
+import { fetchWallet } from '@/api/adapter'
 
 const router = useRouter()
 
 const grade = ref(6)
-const wallet = ref(1250)
+const wallet = ref(0)
 const activeCat = ref('utility')
 
-/** 已购买次数（限购用） */
+/** 已购买次数（限购用）；M2 由服务端返回 */
 const bought = reactive<Record<string, number>>({})
+
+onMounted(async () => {
+  const w = await fetchWallet()
+  wallet.value = w.points
+})
 
 const list = computed(() => SHOP_ITEMS.filter((i) => i.category === activeCat.value))
 

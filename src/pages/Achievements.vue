@@ -4,9 +4,10 @@
  * 印章式徽章：未解锁灰化并给进度，解锁后朱砂上色 + 盖章动画。
  * 定义来自 seeds/achievements.json；解锁状态暂为占位。
  */
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ACHIEVEMENTS, rewardText } from '@/config/contentConfig'
+import { fetchAchievements } from '@/api/adapter'
 
 const router = useRouter()
 
@@ -26,36 +27,36 @@ const CATEGORY_NAMES: Record<string, string> = {
 
 const activeCat = ref(categories.value[0]?.key ?? 'battle')
 
-/** 占位：已解锁与进度 */
-const unlocked = reactive<Record<string, boolean>>({
-  ach_first_win: true,
-  ach_streak5: true,
-  ach_collect20: false,
-  ach_draw50: true,
-})
+/** 解锁与进度：由 adapter 填充（真接口优先，未就绪回落占位） */
+const unlocked = ref<Record<string, boolean>>({})
+const progress = ref<Record<string, number>>({})
 
-const progress = reactive<Record<string, number>>({
-  ach_streak5: 5,
-  ach_battle100: 45,
-  ach_collect20: 18,
-  ach_collect_all: 18,
-  ach_draw50: 50,
-  ach_awaken4: 1,
-  ach_class_top3: 6,
-})
+async function load() {
+  const list = await fetchAchievements()
+  const u: Record<string, boolean> = {}
+  const p: Record<string, number> = {}
+  for (const item of list) {
+    u[item.achievementId] = item.unlocked
+    p[item.achievementId] = item.progress
+  }
+  unlocked.value = u
+  progress.value = p
+}
+
+onMounted(load)
 
 const list = computed(() => ACHIEVEMENTS.filter((a) => a.category === activeCat.value))
 
 const total = computed(() => ACHIEVEMENTS.length)
-const doneCount = computed(() => ACHIEVEMENTS.filter((a) => unlocked[a.id]).length)
+const doneCount = computed(() => ACHIEVEMENTS.filter((a) => unlocked.value[a.id]).length)
 const percent = computed(() => Math.round((doneCount.value / total.value) * 100))
 
 /** 解锁动画：刚点开的那个 */
 const animating = ref<string | null>(null)
 
 function toggle(id: string) {
-  if (unlocked[id]) return
-  unlocked[id] = true
+  if (unlocked.value[id]) return
+  unlocked.value = { ...unlocked.value, [id]: true }
   animating.value = id
   setTimeout(() => (animating.value = null), 700)
 }

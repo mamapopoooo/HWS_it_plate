@@ -5,8 +5,11 @@
  * 当前数据为种子/占位：M2 接 /api/v2/trainer/me 与 /api/v2/pets/my 后，
  * 只需替换 buildDemoState 部分，模板与组件不动（00-总纲 P1）。
  */
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchProfile } from '@/api/adapter'
+import { DEMO_PROFILE } from '@/api/demo'
+import type { Profile } from '@/api/types'
 import GameHud from '@/components/layout/GameHud.vue'
 import GameDock, { type DockItem } from '@/components/layout/GameDock.vue'
 import TaijiAltar from '@/components/pet/TaijiAltar.vue'
@@ -24,6 +27,13 @@ import {
 } from '@/config/gameConfig'
 
 const router = useRouter()
+
+/** 玩家档案：由 adapter 填充（真接口优先，未就绪回落占位） */
+const profile = ref<Profile>(DEMO_PROFILE)
+
+onMounted(async () => {
+  profile.value = await fetchProfile()
+})
 
 /* ---------------- 占位数据（M2 换接口） ---------------- */
 
@@ -153,13 +163,13 @@ onUnmounted(() => {
 <template>
   <div class="lobby gw-paper">
     <GameHud
-      display-name="李四"
-      :grade="6"
-      realm="筑基三层"
-      :level="12"
-      :points="1250"
-      :shards="12"
-      gender="female"
+      :display-name="profile.displayName"
+      :grade="profile.grade"
+      :realm="profile.realm"
+      :level="profile.trainerLevel"
+      :points="profile.points"
+      :shards="profile.shards"
+      :gender="profile.gender"
       @settings="() => {}"
       @avatar="() => router.push('/character')"
     />

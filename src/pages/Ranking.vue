@@ -4,10 +4,12 @@
  *
  * 展示规则（00-总纲 §9）：前三 = 领奖台 + 角色放大立绘；4–7 = 全身缩小图；8+ = 只显示名字。
  * 名字格式：昵称 · 姓名；按年级分组；全部公开。
- * 数据暂为占位，M2 接 GET /api/v2/rankings/:id（metric 读 ranking_config）。
+ * 数据走 api/adapter：真接口优先，未就绪时回落占位（metric 读 ranking_config）。
  */
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetchRanking } from '@/api/adapter'
+import type { RankRow } from '@/api/types'
 
 const router = useRouter()
 
@@ -35,33 +37,30 @@ const METRICS: Array<{ key: Metric; name: string; unit: string }> = [
   { key: 'collection', name: '收集榜', unit: '收集率' },
 ]
 
-/** 占位数据（G6） */
-const DEMO: RankEntry[] = [
-  { id: 'u1', nickname: '小狐仙', realname: '李四', gender: 'female', points: 1250, power: 244, collection: 18, rate: 0.47, me: true },
-  { id: 'u2', nickname: '玄鸟', realname: '王小二', gender: 'male', points: 1180, power: 268, collection: 22, rate: 0.58 },
-  { id: 'u3', nickname: '云中君', realname: '张三', gender: 'male', points: 1120, power: 231, collection: 16, rate: 0.42 },
-  { id: 'u4', nickname: '白露', realname: '赵六', gender: 'female', points: 1050, power: 198, collection: 14, rate: 0.37 },
-  { id: 'u5', nickname: '南山雪', realname: '陈七', gender: 'female', points: 980, power: 187, collection: 13, rate: 0.34 },
-  { id: 'u6', nickname: '小鱼干', realname: '周八', gender: 'male', points: 940, power: 176, collection: 12, rate: 0.32 },
-  { id: 'u7', nickname: '青丘', realname: '吴九', gender: 'female', points: 905, power: 170, collection: 11, rate: 0.29 },
-  { id: 'u8', nickname: '风息', realname: '郑十', gender: 'male', points: 860, power: 163, collection: 10, rate: 0.26 },
-  { id: 'u9', nickname: '叶上秋', realname: '孙一', gender: 'female', points: 820, power: 152, collection: 9, rate: 0.24 },
-  { id: 'u10', nickname: '雷泽', realname: '马二', gender: 'male', points: 760, power: 141, collection: 8, rate: 0.21 },
-  { id: 'u11', nickname: '素问', realname: '朱三', gender: 'female', points: 700, power: 133, collection: 7, rate: 0.18 },
-  { id: 'u12', nickname: '石中火', realname: '胡四', gender: 'male', points: 650, power: 120, collection: 6, rate: 0.16 },
-]
+/** 接口行 → 页面行（字段改名在 adapter 边界内完成，模板不用动） */
+function toEntry(r: RankRow): RankEntry {
+  return {
+    id: r.userId,
+    nickname: r.nickname,
+    realname: r.realName,
+    gender: r.gender,
+    points: r.points,
+    power: r.power,
+    collection: r.collection,
+    rate: r.rate,
+    me: r.me,
+  }
+}
 
-/** G7 用同一份数据做小幅偏移，仅用于演示分组 */
-const DEMO_G7: RankEntry[] = DEMO.map((e, i) => ({
-  ...e,
-  points: Math.max(50, Math.round(e.points * 0.62) + i * 7),
-  power: Math.round(e.power * 0.95),
-  collection: Math.max(1, e.collection - 2),
-  rate: Math.max(0.03, e.rate - 0.05),
-  me: i === 2,
-}))
+const rows = ref<RankEntry[]>([])
 
-const rows = computed(() => (grade.value === 6 ? DEMO : DEMO_G7))
+async function load() {
+  const list = await fetchRanking(metric.value, grade.value)
+  rows.value = list.map(toEntry)
+}
+
+onMounted(load)
+watch([metric, grade], load)
 
 const sorted = computed(() => {
   const key = metric.value

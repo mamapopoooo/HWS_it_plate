@@ -5,22 +5,35 @@
  * 皮肤从宠物端整体迁到这里（总纲 §7）：纯装饰、不加属性，G7 不买也不影响战力。
  * 定义来自 seeds/skins.json，价格按 theme 读 economy.json —— 组件不写死数量与价格。
  */
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type Gender, SKINS, skinPrice } from '@/config/contentConfig'
 import { ECONOMY } from '@/config/gameConfig'
+import { fetchCharacter, fetchWallet, saveSkin } from '@/api/adapter'
 
 const router = useRouter()
 
 const grade = ref(6)
-const nickname = ref('小狐仙')
-const realname = '李四'
+const nickname = ref('')
+const realname = ref('')
 const gender = ref<Gender>('female')
-const wallet = ref(1250)
+const wallet = ref(0)
 
-/** 占位：已拥有与当前穿戴 */
-const owned = ref<Set<string>>(new Set(['skin_base_f', 'skin_school_f']))
-const wearing = ref('skin_base_f')
+/** 已拥有与当前穿戴（由 adapter 填充） */
+const owned = ref<Set<string>>(new Set())
+const wearing = ref('')
+
+async function load() {
+  const [ch, w] = await Promise.all([fetchCharacter(), fetchWallet()])
+  nickname.value = ch.nickname
+  realname.value = ch.realName
+  gender.value = ch.gender
+  wearing.value = ch.skinId
+  owned.value = new Set(ch.ownedSkinIds)
+  wallet.value = w.points
+}
+
+onMounted(load)
 
 const list = computed(() =>
   SKINS.filter((s) => s.gender === gender.value).sort((a, b) => a.sortOrder - b.sortOrder),
@@ -35,9 +48,10 @@ function priceOf(id: string): number {
   return skin ? skinPrice(skin, grade.value) : 0
 }
 
-function buyOrWear(id: string) {
+async function buyOrWear(id: string) {
   if (canWear(id)) {
     wearing.value = id
+    void saveSkin(id)
     return
   }
   const price = priceOf(id)
@@ -46,16 +60,22 @@ function buyOrWear(id: string) {
   wallet.value -= price
   owned.value = new Set([...owned.value, id])
   wearing.value = id
+  void saveSkin(id)
 }
 
 function switchGender(g: Gender) {
   gender.value = g
   // 换性别时自动切到该性别的基础形象，避免出现「男角色穿女装」的错配
   const base = `skin_base_${g === 'male' ? 'm' : 'f'}`
-  if (owned.value.has(base)) wearing.value = base
+  if (owned.value.has(base)) {
+    wearing.value = base
+    void saveSkin(base)
+  }
 }
 
-const displayName = computed(() => `${nickname.value} · ${realname}`)
+const displayName = computed(() =>
+  realname.value ? `${nickname.value} · ${realname.value}` : nickname.value,
+)
 
 function back() {
   void router.push('/lobby')
@@ -77,7 +97,7 @@ function back() {
       <!-- 当前形象 -->
       <section class="chr__stage">
         <div class="chr__avatar" :class="`chr__avatar--${gender}`">
-          <span class="chr__seal">{{ realname.slice(-1) }}</span>
+          <span class="chr__seal">{{ realname.slice(-1) || '生' }}</span>
           <span class="chr__pose">全身立绘位</span>
         </div>
         <div class="chr__meta">

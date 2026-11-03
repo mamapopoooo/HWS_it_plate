@@ -111,6 +111,27 @@ export function getCoefficient(cfg: TrigramConfig, atk: string, def: string): nu
 
 **加一只宠物 = 种子文件加一项 + 传图**，不写代码。
 
+### 2.4 前端 adapter 已就绪：接口按这些字段返回即可（2026-11-03）
+
+前端已有 `src/api/adapter.ts`：**先调真接口，失败自动回落占位数据**。所以 Qoder 只要按下列字段实现，页面刷新即生效，前端不需要改任何页面。
+
+| 端点 | 前端读取的字段 | 备注 |
+|---|---|---|
+| `GET /v2/trainer/me` | `{ trainer: { user_id, nickname?, real_name, gender?, grade, title?, level, game_points, fragments? } }` | `nickname` 缺省用 `real_name`；`title` 即修行境界 |
+| `GET /v2/pets/my` | `{ pets: [ { templateId \| template_id, level } ] }` | 只用来算图鉴持有与抽卡去重 |
+| `GET /v2/quests/daily` | `{ progress: [ { quest_id, progress, claimed } ] }` | weekly 同结构 |
+| `POST /v2/quests/:id/claim` | `{ success, reward_points }` | `reward_points` 缺省时前端按 seeds 奖励本地累加 |
+| `GET /v2/achievements/my` | `{ achievements: [ { id, unlocked, progress } ] }` | |
+| `GET /v2/ranking/points?grade=6` | `{ rankings: [ { user_id, nickname, real_name, gender, points, power, collection, rate, is_me } ] }` | 前端按 `metric` 换端点（points / pvp / class） |
+| `GET /v2/character/me` | `{ character: { nickname, real_name, gender, skin_id, owned_skin_ids } }` | |
+| `POST /v2/character/skin` | `{ success }` | |
+| `GET /v2/admin/custom-pets/pending` | `{ items: [ { id, student_name, nickname, pet_name, pinyin, description, skills[], submitted_at_display, status, review_note } ] }` | `skills` 为 effect code 数组 |
+| `POST /v2/admin/custom-pets/:id/review` | `{ success }` | body：`{ action: 'approve' \| 'reject', note }` |
+| `POST /v2/gacha/draw` | `{ results: [ { tier, pet_id, is_new, fragments } ] }` | 未实现时前端本地抽卡 |
+
+> 请求超时 **1500ms**：超过即视为接口未就绪并回落占位，页面不会卡住。
+> 若字段名与上表不一致，**只改 `adapter.ts` 里的 pick 函数**，页面无需改动。
+
 ### 2.4 图片回落链
 
 ```

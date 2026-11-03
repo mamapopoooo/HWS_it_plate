@@ -3,37 +3,31 @@
  * 求签（抽卡）页面（P3）
  *
  * 数据：概率、保底、价格全部来自配置（utils/gacha.ts → seeds）。
- * 抽卡的随机与记账暂在本页（占位钱包），M2 换成 POST /api/v2/gacha/draw。
+ * 持有与余额走 api/adapter；随机与记账先用本地实现（服务端 draw 接口就绪后切成服务端权威）。
  */
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import GachaAnimation from '@/components/gacha/GachaAnimation.vue'
 import { ECONOMY, getTier, tierName } from '@/config/gameConfig'
 import { drawMany, drawOnce, drawPrice, pityProgress, rateTable, type DrawResult, type DrawState } from '@/utils/gacha'
+import { fetchOwned, fetchWallet } from '@/api/adapter'
 
 const router = useRouter()
 
-/** 占位：已持有（与图鉴保持一致的演示数据） */
-const DEMO_OWNED = [
-  'pet_jiuweihu',
-  'pet_tiangou',
-  'pet_huan',
-  'pet_qitu',
-  'pet_qianyang',
-  'pet_changyou',
-  'pet_baize',
-  'pet_lushu',
-  'pet_diting',
-  'pet_baihu',
-]
-
 const grade = ref(6)
-const wallet = ref(1250)
+const wallet = ref(0)
 const fragments = ref(0)
 
 const state = reactive<DrawState>({
   pulls: 0,
-  owned: new Set<string>(DEMO_OWNED),
+  owned: new Set<string>(),
+})
+
+onMounted(async () => {
+  const [owned, w] = await Promise.all([fetchOwned(), fetchWallet()])
+  state.owned = new Set(Object.keys(owned))
+  wallet.value = w.points
+  fragments.value = w.shards
 })
 
 const results = ref<DrawResult[]>([])

@@ -8,9 +8,10 @@
  *
  * 路由暂挂 /review（免登录便于演示）；M2 迁到 /admin/review 并加 role 守卫。
  */
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { CUSTOM_BUDGET, CUSTOM_SKILL_COUNT, SKILL_EFFECTS } from '@/config/contentConfig'
+import { fetchSubmissions, reviewSubmission } from '@/api/adapter'
 
 const router = useRouter()
 
@@ -30,52 +31,17 @@ interface Submission {
   note?: string
 }
 
-const submissions = ref<Submission[]>([
-  {
-    id: 'sub_001',
-    student: '王小二',
-    nickname: '玄鸟',
-    petName: '混沌',
-    pinyin: 'hùn dùn',
-    desc: '混沌未分，天地一气',
-    skills: ['damage_single', 'heal_pct', 'first_strike'],
-    submittedAt: '今天 09:12',
-    status: 'pending',
-  },
-  {
-    id: 'sub_002',
-    student: '张三',
-    nickname: '云中君',
-    petName: '烛照',
-    pinyin: 'zhú zhào',
-    desc: '衔烛而照幽都',
-    skills: ['damage_aoe', 'damage_burn', 'buff_stat'],
-    submittedAt: '昨天 16:40',
-    status: 'pending',
-  },
-  {
-    id: 'sub_003',
-    student: '赵六',
-    nickname: '白露',
-    petName: '幽荧',
-    pinyin: 'yōu yíng',
-    desc: '月魄所化，照夜无声',
-    skills: ['heal_pct', 'shield_pct'],
-    submittedAt: '昨天 10:05',
-    status: 'pending',
-  },
-  {
-    id: 'sub_000',
-    student: '陈七',
-    nickname: '南山雪',
-    petName: '霜序',
-    pinyin: 'shuāng xù',
-    desc: '秋霜为序',
-    skills: ['damage_single', 'stun'],
-    submittedAt: '前天 14:20',
-    status: 'approved',
-  },
-])
+/** 待审队列：由 adapter 填充（真接口优先，未就绪回落占位） */
+const submissions = ref<Submission[]>([])
+
+async function load() {
+  const list = await fetchSubmissions()
+  submissions.value = list as Submission[]
+  const first = list.find((s) => s.status === 'pending')
+  if (first) activeId.value = first.id
+}
+
+onMounted(load)
 
 const filter = ref<ReviewStatus | 'all'>('pending')
 const activeId = ref('sub_001')
@@ -109,23 +75,27 @@ function select(id: string) {
   note.value = ''
 }
 
-function approve() {
+async function approve() {
   const item = active.value
   if (!item) return
   item.status = 'approved'
   item.note = note.value || '通过'
+  const reason = item.note
   note.value = ''
   moveNext()
+  await reviewSubmission(item.id, 'approve', reason)
 }
 
-function reject() {
+async function reject() {
   const item = active.value
   if (!item) return
   if (!note.value.trim()) return // 驳回必须写理由
   item.status = 'rejected'
   item.note = note.value.trim()
+  const reason = item.note
   note.value = ''
   moveNext()
+  await reviewSubmission(item.id, 'reject', reason)
 }
 
 /** 审完自动跳到队列里下一条待审 */

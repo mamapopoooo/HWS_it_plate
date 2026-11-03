@@ -3,29 +3,25 @@
  * 灵宠图鉴 · 五阶分卷（P2）
  *
  * 分卷数量由配置决定（TIERS.map），加第六阶不需要改本文件 —— 这是 00-总纲 §10 的验收点。
- * 数据：宠物库 PETS（含名称/注音/风格/卦属/出处）；持有情况暂为占位，M2 接 /api/v2/collection。
+ * 数据：宠物库 PETS（含名称/注音/风格/卦属/出处）；持有情况走 api/adapter（接口未就绪自动回落占位）。
  */
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PetCard from '@/components/pet/PetCard.vue'
 import { PETS, TIERS, getTier, styleName } from '@/config/gameConfig'
 import type { PetTemplate } from '@/config/gameConfig'
+import { fetchOwned } from '@/api/adapter'
+import { DEMO_OWNED } from '@/api/demo'
+import type { OwnedMap } from '@/api/types'
 
 const router = useRouter()
 
-/** 占位持有数据：id → 等级（M2 换接口） */
-const DEMO_OWNED: Record<string, number> = {
-  pet_jiuweihu: 5,
-  pet_tiangou: 3,
-  pet_huan: 2,
-  pet_qitu: 4,
-  pet_qianyang: 2,
-  pet_changyou: 1,
-  pet_baize: 4,
-  pet_lushu: 3,
-  pet_diting: 2,
-  pet_baihu: 7,
-}
+/** 持有情况：先用占位垫一帧避免闪烁，随后由 adapter 覆盖（真接口优先） */
+const owned = ref<OwnedMap>({ ...DEMO_OWNED })
+
+onMounted(async () => {
+  owned.value = await fetchOwned()
+})
 
 /** 是否已解锁造物（阴阳鱼齐）——占位 */
 const canCreate = ref(false)
@@ -39,18 +35,18 @@ const list = computed<PetTemplate[]>(() =>
 )
 
 function ownedLevel(id: string): number | undefined {
-  return DEMO_OWNED[id]
+  return owned.value[id]
 }
 
 function tierOwned(tier: number): number {
-  return PETS.filter((p) => p.tier === tier && DEMO_OWNED[p.id]).length
+  return PETS.filter((p) => p.tier === tier && owned.value[p.id]).length
 }
 
 function tierTotal(tier: number): number {
   return PETS.filter((p) => p.tier === tier).length
 }
 
-const totalOwned = computed(() => Object.keys(DEMO_OWNED).length)
+const totalOwned = computed(() => Object.keys(owned.value).length)
 const totalAll = computed(() => PETS.length)
 const percent = computed(() => Math.round((totalOwned.value / totalAll.value) * 100))
 
