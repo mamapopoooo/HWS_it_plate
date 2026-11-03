@@ -3,6 +3,11 @@ import Home from '@/pages/Home.vue'
 import PetPreview from '@/pages/PetPreview.vue'
 import Battle from '@/pages/Battle.vue'
 
+/** 学生端页面：需学生登录 */
+const STUDENT = { requiresAuth: true, role: 'student' as const }
+/** 教师端页面：需管理员登录（造物审核、教师工作台） */
+const ADMIN = { requiresAuth: true, role: 'admin' as const }
+
 const router = createRouter({
   history: createWebHistory('/pet-garden/'),
   routes: [
@@ -11,24 +16,24 @@ const router = createRouter({
     { path: '/preview', name: 'preview', component: PetPreview },
     { path: '/battle', name: 'battle', component: Battle },
 
-    // v3.0 学生端主界面（太极盘大厅）
-    { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue') },
-    { path: '/collection', name: 'collection', component: () => import('@/pages/Collection.vue') },
-    { path: '/gacha', name: 'gacha', component: () => import('@/pages/Gacha.vue') },
-    { path: '/ranking', name: 'ranking', component: () => import('@/pages/Ranking.vue') },
-    { path: '/shop', name: 'shop', component: () => import('@/pages/Shop.vue') },
-    { path: '/quests', name: 'quests', component: () => import('@/pages/Quests.vue') },
-    { path: '/achievements', name: 'achievements', component: () => import('@/pages/Achievements.vue') },
-    { path: '/character', name: 'character', component: () => import('@/pages/Character.vue') },
-    { path: '/custom', name: 'custom', component: () => import('@/pages/CustomPet.vue') },
-    { path: '/pet/:id', name: 'pet-detail', component: () => import('@/pages/PetDetail.vue') },
-    // v3 斗法（重做版，保留 /battle 作为旧版入口）
-    { path: '/duel', name: 'duel', component: () => import('@/pages/Duel.vue') },
-    { path: '/events', name: 'events', component: () => import('@/pages/Events.vue') },
-    // 教师端 v3 国风皮肤（M2 迁到 /admin 并加 role 守卫）
-    { path: '/teacher', name: 'teacher', component: () => import('@/pages/TeacherDesk.vue') },
-    // 教师端：造物审核（M2 迁到 /admin/review 并加 role 守卫）
-    { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue') },
+    // ===== v3.0 学生端（太极盘大厅及衍生页） =====
+    { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue'), meta: STUDENT },
+    { path: '/collection', name: 'collection', component: () => import('@/pages/Collection.vue'), meta: STUDENT },
+    { path: '/pet/:id', name: 'pet-detail', component: () => import('@/pages/PetDetail.vue'), meta: STUDENT },
+    { path: '/gacha', name: 'gacha', component: () => import('@/pages/Gacha.vue'), meta: STUDENT },
+    { path: '/ranking', name: 'ranking', component: () => import('@/pages/Ranking.vue'), meta: STUDENT },
+    { path: '/shop', name: 'shop', component: () => import('@/pages/Shop.vue'), meta: STUDENT },
+    { path: '/quests', name: 'quests', component: () => import('@/pages/Quests.vue'), meta: STUDENT },
+    { path: '/achievements', name: 'achievements', component: () => import('@/pages/Achievements.vue'), meta: STUDENT },
+    { path: '/character', name: 'character', component: () => import('@/pages/Character.vue'), meta: STUDENT },
+    { path: '/custom', name: 'custom', component: () => import('@/pages/CustomPet.vue'), meta: STUDENT },
+    { path: '/events', name: 'events', component: () => import('@/pages/Events.vue'), meta: STUDENT },
+    // 斗法重做版；/battle 保留为旧版入口
+    { path: '/duel', name: 'duel', component: () => import('@/pages/Duel.vue'), meta: STUDENT },
+
+    // ===== v3.0 教师端（必须登录为管理员） =====
+    { path: '/teacher', name: 'teacher', component: () => import('@/pages/TeacherDesk.vue'), meta: ADMIN },
+    { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue'), meta: ADMIN },
 
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },
@@ -70,6 +75,12 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
+  // 开发预览：仅在 DEV 构建下生效，带 ?preview=1 可跳过角色校验（生产构建不会命中）
+  if (import.meta.env.DEV && to.query.preview === '1') {
+    next()
+    return
+  }
+
   const token = localStorage.getItem('token')
   const userStr = localStorage.getItem('user')
   const user = userStr ? JSON.parse(userStr) : null
@@ -77,6 +88,11 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !token) {
     next('/login')
   } else if (to.meta.role && user?.role !== to.meta.role) {
+    // 管理员可以查看学生端页面（课堂演示需要）；但学生不能进入教师端
+    if (to.meta.role === 'student' && user?.role === 'admin') {
+      next()
+      return
+    }
     // 角色不匹配，重定向到对应首页
     if (user?.role === 'admin') next('/admin')
     else if (user?.role === 'student') next('/student')
