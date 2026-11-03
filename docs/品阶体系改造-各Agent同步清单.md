@@ -19,10 +19,10 @@
 ```ts
 // 从 GET /api/v2/config 拿 trigrams，不要在代码里写死八对常量
 // trigram_config: { code, name, symbol, color, opposite, sort_order }
+// 对宫互指 ⇒ 相冲是双向的：只有 1.3 / 1.0，没有单向减伤（2026-11-03 修正）
 export function getCoefficient(cfg: TrigramConfig, atk: string, def: string): number {
-  if (cfg[atk].opposite === def) return 1.3
-  if (cfg[def].opposite === atk) return 0.77
-  return 1.0
+  if (atk === 'all' || def === 'all') return 1
+  return cfg[atk].opposite === def ? 1.3 : 1.0
 }
 ```
 
@@ -65,7 +65,7 @@ export function getCoefficient(cfg: TrigramConfig, atk: string, def: string): nu
 
 ### 1.6 必补测试
 
-- 8×8 属性克制矩阵（对宫 1.3 / 反向 0.77 / 其余 1.0）
+- 8×8 属性克制矩阵（对宫 1.3 / 其余 1.0；对宫双向，无 0.77）
 - 四象双属性防御取最优、太极无弱点
 - 抽卡 10000 次 tier 命中率 ±0.5%
 - 保底 20/60 抽必触发

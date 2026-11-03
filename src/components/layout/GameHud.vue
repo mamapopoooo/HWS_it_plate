@@ -13,14 +13,23 @@ defineProps<{
   gender: 'male' | 'female'
 }>()
 
-const emit = defineEmits<{ (e: 'settings'): void }>()
+const emit = defineEmits<{ (e: 'settings'): void; (e: 'avatar'): void }>()
 
 const onSettings = () => emit('settings')
+const onAvatar = () => emit('avatar')
 </script>
 
 <template>
   <header class="hud gw-paper">
-    <div class="hud__seal" :class="`hud__seal--${gender}`">
+    <div
+      class="hud__seal"
+      :class="`hud__seal--${gender}`"
+      role="button"
+      tabindex="0"
+      title="查看角色"
+      @click="onAvatar"
+      @keyup.enter="onAvatar"
+    >
       {{ displayName.slice(-1) }}
       <b class="num">{{ level }}</b>
     </div>

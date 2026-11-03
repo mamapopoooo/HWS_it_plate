@@ -7,6 +7,7 @@
 import shopSeed from '../../docs/seeds/shop.json'
 import questsSeed from '../../docs/seeds/quests.json'
 import achievementsSeed from '../../docs/seeds/achievements.json'
+import skinsSeed from '../../docs/seeds/skins.json'
 import { ECONOMY, priceFor } from '@/config/gameConfig'
 
 export interface ShopItem {
@@ -49,6 +50,30 @@ export const SHOP_ITEMS = shopSeed.items as unknown as ShopItem[]
 export const SHOP_CATEGORIES = shopSeed.categories as unknown as ShopCategory[]
 export const QUESTS = questsSeed.quests as unknown as QuestDef[]
 export const ACHIEVEMENTS = achievementsSeed.achievements as unknown as AchievementDef[]
+
+export type Gender = 'male' | 'female'
+
+export interface SkinDef {
+  id: string
+  name: string
+  theme: string
+  gender: Gender
+  image: string
+  unlock: { type: string; value: number } | null
+  sortOrder: number
+}
+
+export const SKINS = skinsSeed.skins as unknown as SkinDef[]
+
+/**
+ * 皮肤价格：按 theme 读 economy.json 的 skin.<theme>。
+ * base / graduate 定价为 0 —— 一个默认送、一个毕业才能拿，都不走购买。
+ */
+export function skinPrice(skin: SkinDef, grade: number): number {
+  const table = ECONOMY.skin as unknown as Record<string, number>
+  const base = table[skin.theme] ?? 0
+  return base === 0 ? 0 : priceFor(base, grade)
+}
 
 /** 按点号路径读 economy，例如 "skin.hanfu" */
 function readEconomy(path: string): number | undefined {

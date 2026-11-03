@@ -161,6 +161,7 @@ onUnmounted(() => {
       :shards="12"
       gender="female"
       @settings="() => {}"
+      @avatar="() => router.push('/character')"
     />
 
     <div class="lobby__body">
