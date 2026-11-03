@@ -15,6 +15,7 @@ const router = createRouter({
     { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue') },
     { path: '/collection', name: 'collection', component: () => import('@/pages/Collection.vue') },
     { path: '/gacha', name: 'gacha', component: () => import('@/pages/Gacha.vue') },
+    { path: '/ranking', name: 'ranking', component: () => import('@/pages/Ranking.vue') },
 
     // v2.0 登录
     { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },

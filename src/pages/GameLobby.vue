@@ -82,7 +82,7 @@ const demoPets = computed<Record<number, PetView>>(() => {
 const dockItems: DockItem[] = [
   { key: 'battle', label: '斗法', glyph: '战' },
   { key: 'collection', label: '图鉴', glyph: '册' },
-  { key: 'ranking', label: '封神榜', glyph: '榜', disabled: true },
+  { key: 'ranking', label: '封神榜', glyph: '榜' },
   { key: 'shop', label: '集市', glyph: '市', disabled: true },
   { key: 'pets', label: '灵宠', glyph: '宠', disabled: true },
 ]
@@ -91,6 +91,7 @@ const dockItems: DockItem[] = [
 const DOCK_ROUTES: Record<string, string> = {
   battle: '/battle',
   collection: '/collection',
+  ranking: '/ranking',
 }
 
 function onDock(key: string) {
@@ -258,7 +259,7 @@ onUnmounted(() => {
         斗法<span class="gw-seal__hint">耗 1 卦力</span>
       </button>
       <button class="gw-seal" @click="goGacha">求签<span class="gw-seal__hint">十连 45 灵石</span></button>
-      <button class="gw-seal" disabled>封神榜</button>
+      <button class="gw-seal" @click="() => router.push('/ranking')">封神榜</button>
     </footer>
 
     <!-- 水墨远山压在最底层 -->
