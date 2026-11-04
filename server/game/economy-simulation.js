@@ -10,7 +10,9 @@ export function simulateEconomy({ grade, months, monthlyIncome, consumptionRate 
   }
 
   const totalIncome = months * monthlyIncome
-  const targetSpending = Math.round(totalIncome * consumptionRate)
+  if (!Number.isFinite(totalIncome)) throw new Error('累计总收入必须为有限数')
+  const product = totalIncome * consumptionRate
+  const targetSpending = Math.round(product + Number.EPSILON * product)
   const targetSaving = totalIncome - targetSpending
   const singlePrice = drawPrice('single', grade, ECONOMY)
   const tenPrice = drawPrice('ten', grade, ECONOMY)

@@ -1,5 +1,7 @@
 // @vitest-environment node
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { buildEconomyCsv } from '../../scripts/generate-economy-report.mjs'
 import { simulateEconomy } from './economy-simulation.js'
 
 describe('simulateEconomy', () => {
@@ -40,6 +42,31 @@ describe('simulateEconomy', () => {
     expect(report.targetSpending + report.targetSaving).toBe(report.totalIncome)
   })
 
+  it.each([
+    { months: 3, monthlyIncome: 15, totalIncome: 45, targetSpending: 32, targetSaving: 13 },
+    { months: 11, monthlyIncome: 15, totalIncome: 165, targetSpending: 116, targetSaving: 49 },
+    { months: 15, monthlyIncome: 45, totalIncome: 675, targetSpending: 473, targetSaving: 202 },
+  ])('G7 $months 个月、月收入 $monthlyIncome 的 70% 半值消耗向上取整', ({
+    months,
+    monthlyIncome,
+    totalIncome,
+    targetSpending,
+    targetSaving,
+  }) => {
+    const report = simulateEconomy({ grade: 7, months, monthlyIncome, consumptionRate: 0.7 })
+
+    expect(report).toMatchObject({ totalIncome, targetSpending, targetSaving })
+  })
+
+  it('累计总收入溢出时抛错', () => {
+    expect(() => simulateEconomy({
+      grade: 7,
+      months: 2,
+      monthlyIncome: Number.MAX_VALUE,
+      consumptionRate: 0.7,
+    })).toThrow('累计总收入必须为有限数')
+  })
+
   it.each([0.7, 0.85])('接受边界消耗比例 %s', (consumptionRate) => {
     const report = simulateEconomy({ grade: 6, months: 10, monthlyIncome: 60, consumptionRate })
 
@@ -62,5 +89,13 @@ describe('simulateEconomy', () => {
 
   it.each([0.69, 0.851, NaN, Infinity, -Infinity])('拒绝越界或非有限消耗比例 %s', (consumptionRate) => {
     expect(() => simulateEconomy({ grade: 6, months: 1, monthlyIncome: 60, consumptionRate })).toThrow()
+  })
+})
+
+describe('经济模拟 CSV 报表', () => {
+  it('提交 CSV 与生成器输出逐字一致', () => {
+    const committed = readFileSync(new URL('../../docs/economy-simulation-20-months.csv', import.meta.url), 'utf8')
+
+    expect(buildEconomyCsv()).toBe(committed)
   })
 })

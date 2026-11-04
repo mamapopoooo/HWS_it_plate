@@ -247,10 +247,13 @@ export function simulateEconomy({ grade, months, monthlyIncome, consumptionRate 
   if (!Number.isInteger(months) || months < 1) throw new Error('教学月必须为正整数')
   if (monthlyIncome < 0 || consumptionRate < 0.7 || consumptionRate > 0.85) throw new Error('经济参数超出总纲范围')
   const totalIncome = months * monthlyIncome
+  if (!Number.isFinite(totalIncome)) throw new Error('累计总收入必须为有限数')
+  const product = totalIncome * consumptionRate
+  const targetSpending = Math.round(product + Number.EPSILON * product)
   return {
     grade, months, monthlyIncome, consumptionRate, totalIncome,
-    targetSpending: Math.round(totalIncome * consumptionRate),
-    targetSaving: totalIncome - Math.round(totalIncome * consumptionRate),
+    targetSpending,
+    targetSaving: totalIncome - targetSpending,
     singlePrice: drawPrice('single', grade, ECONOMY),
     tenPrice: drawPrice('ten', grade, ECONOMY),
     incomeEquivalentPulls: Math.floor(totalIncome / drawPrice('single', grade, ECONOMY)),
@@ -265,10 +268,12 @@ Expected: 收入、消耗与抽数投影通过。
 
 脚本遍历 G6/G7、1–20 教学月及低收入/中位收入/高收入情景，共输出 120 数据行。G6 三档月收入为 30/60/90，G7 为 15/30/45；低收入和高收入分别为中位收入的 50%/150%，仅为本报告情景假设，并非总纲新增规则。每行分别以 70%、77.5%、85% 调用 `simulateEconomy`，CSV 使用 UTF-8 BOM 写入 `docs/economy-simulation-20-months.csv`。
 
-列含义：`grade`、`month`、`scenario`、`monthly_income` 分别为年级、教学月、情景和月收入；`total_income` 为累计总收入；`single_price`、`ten_price` 为单抽、十连价格；`income_equivalent_pulls` 为累计总收入除以单抽价后向下取整的等效抽数；`target_spending_70/77_5/85` 与 `target_saving_70/77_5/85` 分别为三档消耗比例下的目标消耗与结余。G7 第 10 月作为一年节点包含在 120 行中，不额外增加数据行。
+列含义：`grade`、`month`、`scenario`、`monthly_income` 分别为年级、教学月、情景和月收入；`total_income` 为累计总收入，必须先通过 `Number.isFinite` 校验；`single_price`、`ten_price` 为单抽、十连价格；`income_equivalent_pulls` 为累计总收入除以单抽价后向下取整的等效抽数；`target_spending_70/77_5/85` 与 `target_saving_70/77_5/85` 分别为三档消耗比例下的目标消耗与结余。目标消耗使用 `Math.round(product + Number.EPSILON * product)`，仅修正浮点半值误差，不量化消耗比例；目标结余始终为累计总收入减目标消耗。G7 第 10 月作为一年节点包含在 120 行中，不额外增加数据行。
+
+生成器导出纯函数 `buildEconomyCsv()` 返回完整 BOM+CSV 字符串，仅在作为主程序运行时写文件。自动测试用 `readFileSync` 读取提交 CSV，并通过 `expect(buildEconomyCsv()).toBe(committed)` 验证逐字一致，测试运行不得改写报表。
 
 Run: `node scripts/generate-economy-report.mjs`
-Expected: 生成 `docs/economy-simulation-20-months.csv`，G6 第 20 月中位情景为 240 抽，G7 第 10 月中位情景为 100 抽。
+Expected: 生成 `docs/economy-simulation-20-months.csv`，共 120 数据行、每行 14 列；G6 第 20 月中位情景为 240 抽，G7 第 10 月中位情景为 100 抽；CSV 一致性测试通过。
 
 - [ ] **Step 4: 全量验证并提交**
 
