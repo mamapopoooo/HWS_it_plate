@@ -110,13 +110,10 @@ export function coefAgainst(attacker: string, defender: string): number {
   if (attacker === 'all' || defender === 'all') return 1
   const atkCodes = attacker.split(',')
   const defCodes = defender.split(',')
-  let best = 1
-  for (const a of atkCodes) {
-    for (const d of defCodes) {
-      best = Math.max(best, elementCoefficient(a, d))
-    }
-  }
-  return best
+  // 对每个防守属性，攻击方取最优；防守方再从自己的属性中取最优（系数最低）。
+  return Math.min(...defCodes.map((d) =>
+    Math.max(...atkCodes.map((a) => elementCoefficient(a, d))),
+  ))
 }
 
 /**

@@ -45,6 +45,12 @@ describe('属性克制', () => {
     expect(coefAgainst('qian,dui', 'kun')).toBe(1.3)
   })
 
+  it('防守方双属性取对自己最有利的系数，而不是攻击方最有利', () => {
+    expect(coefAgainst('li', 'kan,zhen')).toBe(1)
+    expect(coefAgainst('qian', 'kun,dui')).toBe(1)
+    expect(coefAgainst('zhen,dui', 'xun')).toBe(1.3)
+  })
+
   it('全属不吃克制', () => {
     expect(coefAgainst('all', 'kan')).toBe(1)
     expect(coefAgainst('li', 'all')).toBe(1)
