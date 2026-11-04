@@ -1,485 +1,209 @@
-# 班级宠物园 (ClassPetGarden) 🐾
+# 王宠课堂 2.0 · 班级宠物园（v3）
 
-> 游戏化班级管理工具，让积分评价变得有趣高效
+> 游戏化班级管理系统：教师课堂加分为唯一货币 → 学生抽签集宠 → 回合制斗法 → 班级战。
+> v3 起改为**中国风水墨**、**五阶品阶（无极·太极·四象·八卦·万象）**、**八卦八属性**。
 
-![版本](https://img.shields.io/badge/version-1.0.0-blue)
-![技术栈](https://img.shields.io/badge/技术栈-Vue3%20+%20Node.js%20+%20SQLite-green)
-
-## ✨ 项目简介
-
-班级宠物园是一个面向中小学教师的班级管理工具，将传统的积分评价系统与电子宠物养成玩法相结合。学生通过良好表现获得积分，让宠物成长升级，最终获得毕业徽章。游戏化的设计让班级管理变得更有趣，激励学生积极向上。
-
-### 核心特点
-
-- 🎓 **多班级管理** - 支持创建和管理多个班级，一键切换
-- 👨‍🎓 **学生管理** - 添加、编辑、删除、搜索、批量导入学生
-- 🐾 **宠物养成** - 24种可爱宠物，8级成长体系，每级形态变化
-- ⭐ **积分评价** - 83条默认规则，支持自定义，覆盖学习/行为/健康/其他
-- 📊 **数据可视化** - 排行榜、成长进度、评价统计
-- 💾 **数据安全** - SQLite数据库，支持备份/恢复/导出
-- 📱 **响应式设计** - 适配电脑、平板、手机
+![版本](https://img.shields.io/badge/version-3.0-purple)
+![技术栈](https://img.shields.io/badge/技术栈-Vue3%20%2B%20TS%20%2B%20Express%20%2B%20SQLite-green)
+![测试](https://img.shields.io/badge/tests-45%20passed-brightgreen)
 
 ---
 
-## 🚀 快速开始
+## 一、这是什么
 
-### 在线演示
-访问：https://8.147.56.12/pet-garden/
+面向中小学信息技术课堂的积分 + 养成 + 对战平台。教师用手机或电脑给学生加减分，学生用积分抽签、集齐神兽、与同学斗法。
 
-### 本地开发
+**核心循环：**
 
-```bash
-# 克隆项目
-git clone https://github.com/gaotong132/class-pet-garden.git
-cd class-pet-garden
-
-# 安装依赖
-npm install
-
-# 启动开发服务器（同时启动前端和后端）
-npm start
-
-# 或分别启动
-npm run dev      # 前端
-npm run server   # 后端
+```
+课堂表现 → 积分（唯一货币）→ 求签 / 集市 → 宠物与角色成长 → 斗法 → 班级战与排行榜
 ```
 
-### 生产部署
+**v3 的三个关键设计：**
 
-```bash
-# 构建前端
-npm run build
-
-# 启动后端服务
-npm run server
-
-# 或使用启动脚本
-bash start-server.sh
-```
+| 设计 | 说明 |
+|---|---|
+| **五阶品阶** | 无极（隐藏/学生自造）> 太极（阴阳鱼）> 四象（四方神兽）> 八卦（八属之灵）> 万象（山海异兽）。图鉴共 38 只官方 + 每人 1 只本命 |
+| **三轴成长** | 品阶（物种，定死）× 等级（Lv.1–7）× 觉醒（上限随品阶递增，形态 = 觉醒 + 1） |
+| **风格光谱** | 38 只分四类画风：萌系 8 / 俊逸 10 / 雅致 10 / 奇诡 10，男女生各有所爱 |
 
 ---
 
-## 📸 功能截图
+## 二、功能清单
 
-### 主界面
-- 学生卡片网格展示
-- 宠物等级和进度显示
-- 快速评价入口
+### 学生端（12 个页面）
 
-### 宠物图鉴
-- 24种宠物预览
-- 1-8级形态对比
-- 分类筛选（普通动物/神兽）
+| 路由 | 页面 | 说明 |
+|---|---|---|
+| `/lobby` | 太极盘大厅 | 立绘站台、卦象环、功能坞、活动榜文 |
+| `/collection` | 灵宠图鉴 | **五阶分卷**（卷数由配置生成）、风格筛选、未获得剪影 |
+| `/pet/:id` | 宠物详情 | 卦象盘、形态切换、战力与觉醒费用 |
+| `/gacha` | 求签 | 摇签筒演出（2.4s，可跳过）、保底进度、概率公示 |
+| `/ranking` | 封神榜 | 三榜（积分/战力/收集）；前三领奖台、4–7 全身、8+ 只名字 |
+| `/shop` | 集市 | 分类货架、铜钱价签、限购 |
+| `/quests` | 课业 | 每日 / 每周双卷轴、领取奖励 |
+| `/achievements` | 功名册 | 印章式徽章、未解锁进度、盖章动画 |
+| `/character` | 修行者 | 男女形象、皮肤穿戴（纯装饰）、昵称 |
+| `/custom` | 造物 | 无极 UGC：立绘上传 + 效果池配技能（120 灵力，不可填数值） |
+| `/events` | 节气榜文 | 活动按日期自动上下架 |
+| `/duel` | 斗法 | 国风水墨战场、飘字、卷轴战况、结算 |
 
-### 评价系统
-- 分类标签切换
-- 快速加分/扣分
-- 评价记录查询
+### 教师端（2 个页面）
 
----
+| 路由 | 页面 | 说明 |
+|---|---|---|
+| `/teacher` | 教师工作台 | 学生卡片网格、−1/+1/+3/+5 快捷加分、待同步队列 |
+| `/review` | 造物审核 | 队列 + 详情、超预算自动提示、驳回必填理由 |
 
-## 🎯 功能详解
-
-### 一、班级管理
-
-| 功能 | 说明 |
-|------|------|
-| 创建班级 | 输入班级名称即可创建 |
-| 切换班级 | 顶部下拉菜单快速切换 |
-| 删除班级 | 支持删除班级及所有数据 |
-| 数据备份 | 导出JSON备份文件 |
-| 数据恢复 | 导入JSON恢复数据 |
-
-### 二、学生管理
-
-| 功能 | 说明 |
-|------|------|
-| 添加学生 | 单个添加或批量导入 |
-| 编辑信息 | 修改姓名、学号 |
-| 删除学生 | 单个删除或批量删除 |
-| 搜索筛选 | 按姓名搜索 |
-| 排序显示 | 按姓名/学号/进度排序 |
-
-### 三、宠物系统
-
-#### 宠物类型（24种）
-
-**普通动物（16种）**：
-- 🐕 犬类：西高地、比熊、边牧、柴犬、金毛、萨摩耶、哈士奇
-- 🐈 猫类：虎斑猫、加菲猫、布偶猫、橘猫
-- 🐇 兔类：垂耳兔、安哥拉兔
-- 🦆 其他：柯尔鸭、羊驼、小熊猫
-
-**神兽（8种）**：
-- 白虎、独角兽、貔貅、青龙、朱雀、狻猊、多肉精灵
-
-#### 成长体系
-
-| 等级 | 所需积分 | 阶段 |
-|------|----------|------|
-| Lv.1 | 0 | 初生 |
-| Lv.2 | 40 | 成长 |
-| Lv.3 | 100 | 优秀 |
-| Lv.4 | 180 | 进阶 |
-| Lv.5 | 280 | 稀有 |
-| Lv.6 | 400 | 精英 |
-| Lv.7 | 540 | 史诗 |
-| Lv.8 | 700 | 传说（毕业）|
-
-**毕业奖励**：宠物达到Lv.8获得专属徽章，可领养新宠物
-
-### 四、评价系统
-
-#### 评价分类
-- 📚 学习：作业、测验、考试相关
-- 🎯 行为：纪律、礼仪、互助相关
-- 💪 健康：运动、卫生、作息相关
-- 📝 其他：其他自定义项目
-
-#### 默认规则（83条）
-
-| 分类 | 加分 | 扣分 | 合计 |
-|------|------|------|------|
-| 学习 | 9 | 7 | 16 |
-| 行为 | 13 | 19 | 32 |
-| 健康 | 7 | 7 | 14 |
-| 其他 | 16 | 5 | 21 |
-| **合计** | **45** | **38** | **83** |
-
-#### 评价示例
-
-**加分项**：
-- 作业完成优秀 +1
-- 测验满分 +3
-- 主动帮助同学 +2
-- 拾金不昧 +2~+5
-
-**扣分项**：
-- 不交作业 -1
-- 抄袭作业 -5
-- 欺负同学 -10
-- 说脏话 -2
-
-#### 自定义规则
-- 添加自定义评价项
-- 编辑规则名称和分值
-- 删除不需要的规则
-
-### 五、排行榜
-
-- 按总积分排名
-- 显示宠物等级和徽章数
-- 激励学生积极表现
-
-### 六、数据管理
-
-- 💾 导出备份：导出完整班级数据为JSON
-- 📥 导入恢复：从JSON文件恢复数据
-- 🔄 自动保存：所有操作实时保存到数据库
+> 两者都要求管理员登录；开发期可用 `?preview=1` 跳过角色校验（仅 DEV 构建生效）。
+> 旧 v1 页面（`/` 首页、`/preview`、`/battle`）已于 2026-11-04 下线；`/` 与 `/battle` 保留重定向。
 
 ---
 
-## 🏗️ 技术架构
+## 三、技术栈
 
-### 系统架构
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                      班级宠物园                          │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│   ┌─────────────────┐         ┌─────────────────┐      │
-│   │   Vue 3 前端     │   API   │  Node.js 后端   │      │
-│   │                 │ ←─────→ │                 │      │
-│   │  • Composition  │   REST  │  • Express.js   │      │
-│   │  • TypeScript   │   JSON  │  • better-sqlite│      │
-│   │  • Tailwind CSS │         │  • CORS         │      │
-│   │  • Vue Router   │         │                 │      │
-│   └─────────────────┘         └────────┬────────┘      │
-│                                        │                │
-│                                        ▼                │
-│                                ┌─────────────────┐      │
-│                                │     SQLite      │      │
-│                                │  pet-garden.db  │      │
-│                                └─────────────────┘      │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 技术栈
-
-| 层级 | 技术 | 说明 |
-|------|------|------|
-| 前端 | Vue 3 + TypeScript | 渐进式框架，类型安全 |
-| 构建 | Vite | 快速构建工具 |
-| 样式 | Tailwind CSS | 原子化CSS框架 |
-| 后端 | Node.js + Express | 轻量级Web框架 |
-| 数据库 | SQLite | 嵌入式关系数据库 |
-| 驱动 | better-sqlite3 | 同步SQLite驱动 |
-
-### API 列表
-
-```
-# 班级
-GET    /api/classes                 # 获取班级列表
-POST   /api/classes                 # 创建班级
-PUT    /api/classes/:id             # 更新班级
-DELETE /api/classes/:id             # 删除班级
-
-# 学生
-GET    /api/classes/:id/students    # 获取学生列表
-POST   /api/students                # 添加学生
-PUT    /api/students/:id            # 更新学生
-DELETE /api/students/:id            # 删除学生
-POST   /api/students/import         # 批量导入
-PUT    /api/students/:id/pet        # 更换宠物
-
-# 评价规则
-GET    /api/rules                   # 获取规则列表
-POST   /api/rules                   # 添加规则
-DELETE /api/rules/:id               # 删除规则
-
-# 评价记录
-POST   /api/evaluations             # 添加评价
-GET    /api/evaluations             # 获取记录
-DELETE /api/evaluations/:id         # 删除记录
-DELETE /api/evaluations/latest      # 撤回最近
-
-# 排行榜
-GET    /api/classes/:id/ranking     # 获取排行榜
-
-# 数据管理
-GET    /api/backup                  # 导出备份
-POST   /api/restore                 # 导入恢复
-GET    /api/health                  # 健康检查
-```
-
-### 数据库表结构
-
-```sql
--- 班级表
-CREATE TABLE classes (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at INTEGER,
-  updated_at INTEGER
-);
-
--- 学生表
-CREATE TABLE students (
-  id TEXT PRIMARY KEY,
-  class_id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  student_no TEXT,
-  total_points INTEGER DEFAULT 0,
-  pet_type TEXT,
-  pet_level INTEGER DEFAULT 1,
-  pet_exp INTEGER DEFAULT 0,
-  created_at INTEGER
-);
-
--- 徽章表（毕业记录）
-CREATE TABLE badges (
-  id TEXT PRIMARY KEY,
-  student_id TEXT NOT NULL,
-  pet_type TEXT NOT NULL,
-  earned_at INTEGER
-);
-
--- 评价规则表
-CREATE TABLE evaluation_rules (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  points INTEGER NOT NULL,
-  category TEXT NOT NULL,
-  is_custom INTEGER DEFAULT 0,
-  created_at INTEGER
-);
-
--- 评价记录表
-CREATE TABLE evaluation_records (
-  id TEXT PRIMARY KEY,
-  class_id TEXT NOT NULL,
-  student_id TEXT NOT NULL,
-  points INTEGER NOT NULL,
-  reason TEXT NOT NULL,
-  category TEXT NOT NULL,
-  timestamp INTEGER
-);
-```
+| 层 | 选型 |
+|---|---|
+| 前端 | Vue 3 + TypeScript + Vite + Pinia + Vue Router |
+| 样式 | 原生 CSS 变量 + 少量 Tailwind（国风令牌集中在 `src/styles/tokens.css`） |
+| 后端 | Node.js + Express + SQLite（better-sqlite3） |
+| 测试 | Vitest（45 条） |
+| 战斗表现 | Vue + CSS 外壳；PixiJS 特效层已按需预留（当前未引入） |
 
 ---
 
-## 📁 项目结构
+## 四、目录结构
 
 ```
 class-pet-garden/
-├── src/                          # 前端源码
-│   ├── components/               # 组件
-│   │   ├── PetImage.vue         # 宠物图片组件
-│   │   ├── PetLoading.vue       # 加载动画组件
-│   │   └── ...
-│   ├── pages/                    # 页面
-│   │   ├── Home.vue             # 主页面
-│   │   └── PetPreview.vue       # 宠物图鉴
-│   ├── data/                     # 数据配置
-│   │   ├── pets.ts              # 宠物配置
-│   │   └── evaluation-rules.ts  # 默认评价规则
-│   ├── composables/              # 组合式函数
-│   │   └── useImageLoader.ts    # 图片加载管理
-│   ├── router/                   # 路由
-│   ├── stores/                   # Pinia状态
-│   ├── utils/                    # 工具函数
-│   ├── App.vue                   # 根组件
-│   └── main.ts                   # 入口
-├── server/                       # 后端
-│   ├── index.js                  # Express服务
-│   └── pet-garden.db             # SQLite数据库
-├── public/                       # 静态资源
-│   └── pets/                     # 宠物图片
-├── dist/                         # 构建输出
-├── start-server.sh               # 启动脚本
-├── health-check.sh               # 健康检查
-└── README.md                     # 说明文档
+├── src/
+│   ├── api/            types.ts（契约）/ demo.ts（占位数据）/ adapter.ts（接口优先+回落）
+│   ├── config/         gameConfig.ts（品阶/八卦/战力/价格）/ contentConfig.ts（商城/任务/成就/皮肤/活动）
+│   ├── styles/         tokens.css（国风令牌）/ game.css（卷轴·印章·太极盘）/ battle.css（斗法配色）
+│   ├── components/     layout/（HUD·功能坞）pet/（卡片·站台·名称牌）gacha/（求签演出）
+│   ├── pages/          v3 页面（见上方路由表）+ v2/（旧版，待迁移）
+│   ├── utils/          gacha.ts / duel.ts（纯函数 + 单测）
+│   └── layouts/ stores/ composables/ router/
+├── server/             Express API（v1 /api、v2 /api/v2）
+├── docs/
+│   ├── 00-总纲-架构基线与内容扩展规范.md        ← 权威基线，先读这份
+│   ├── 品阶体系-v3-中国风设计规范.md
+│   ├── 品阶体系改造-各Agent同步清单.md
+│   ├── 战斗引擎选型.md
+│   ├── seeds/          tiers / trigrams / pets / skill_effects / economy
+│   │                   skins / shop / quests / achievements / events
+│   └── design-preview*.html                    视觉稿（浏览器直接打开）
+└── scripts/verify-build.mjs                    构建产物自检
 ```
 
 ---
 
-## 🔮 可优化功能
+## 五、快速开始
 
-### 高优先级
+> 本机 PowerShell 执行策略会拦 `npx` 与 `npm.ps1`，所以下面用 `node` 直跑二进制；能用 `npm run` 的环境照常用脚本。
 
-1. **商店系统完善**
-   - [ ] 商品管理（添加、编辑、删除）
-   - [ ] 学生积分兑换商品
-   - [ ] 兑换记录查询
-   - [ ] 库存管理
+```powershell
+# 安装依赖
+node "$env:ProgramFiles\nodejs\node_modules\npm\bin\npm-cli.js" install
 
-2. **数据统计分析**
-   - [ ] 班级评价趋势图（日/周/月）
-   - [ ] 学生个人成长曲线
-   - [ ] 评价分类占比饼图
-   - [ ] 导出统计报表
+# 开发（前端 3001 + 后端 3002，两个终端）
+node node_modules\vite\bin\vite.js
+node server\index.js
 
-3. **批量操作优化**
-   - [ ] 批量评价支持不同分值
-   - [ ] 批量更换宠物
-   - [ ] 批量导出学生数据
+# 打开
+# http://localhost:3001/pet-garden/lobby                  学生端
+# http://localhost:3001/pet-garden/teacher?preview=1       教师端
+```
 
-### 中优先级
-
-4. **用户系统**
-   - [ ] 教师账号登录
-   - [ ] 权限管理（班主任/科任老师）
-   - [ ] 操作日志记录
-
-5. **家长端**
-   - [ ] 学生表现推送
-   - [ ] 家长查看孩子积分
-   - [ ] 家长确认评价
-
-6. **移动端适配**
-   - [ ] 手机端优化布局
-   - [ ] 触摸操作优化
-   - [ ] 微信小程序版本
-
-### 低优先级
-
-7. **社交功能**
-   - [ ] 班级动态墙
-   - [ ] 学生互评（有限制）
-   - [ ] 点赞系统
-
-8. **游戏化增强**
-   - [ ] 宠物互动（喂食、玩耍）
-   - [ ] 宠物技能系统
-   - [ ] 班级挑战赛
-
-9. **AI功能**
-   - [ ] 智能评价建议
-   - [ ] 学生行为分析
-   - [ ] 自动生成评语
+**默认入口**：`/` 会重定向到 `/lobby`；未登录由守卫送去 `/login`。
 
 ---
 
-## 🆕 可新增功能
+## 六、数据与配置
 
-### 实用功能
+**所有内容都是数据，代码只读数据**（详见 `docs/00-总纲` §10）：
 
-1. **请假系统**
-   - 学生请假申请
-   - 病假/事假区分
-   - 请假期间积分保护
+```
+docs/seeds/*.json  →  src/config/*.ts  →  src/api/adapter.ts  →  页面
+   内容唯一入口          类型化与计算         接口优先、失败回落
+```
 
-2. **值日管理**
-   - 自动排班
-   - 值日评价
-   - 值日记录
+**加一只宠物的步骤**（0 行代码）：
 
-3. **作业管理**
-   - 作业发布
-   - 提交状态追踪
-   - 作业评价关联
+1. `docs/seeds/pets.json` 加一项（`tier` / `trigram` / `style` / `pinyin` / 出处）
+2. 把立绘放到 `public/pets/{id}/form{N}.png`
+3. 刷新 —— 图鉴自动分卷、抽签池自动包含、详情页自动可看
 
-4. **通知公告**
-   - 班级通知
-   - 系统公告
-   - 已读未读状态
+**价格与概率**只写在 `docs/seeds/economy.json` 与 `tiers.json` 里，改价格不用改代码。
 
-### 扩展功能
+**改种子数据后先跑校验：**
 
-5. **多班级对比**
-   - 跨班级排行榜
-   - 班级间挑战赛
-   - 年级排名
-
-6. **学期管理**
-   - 学期切换
-   - 历史数据查看
-   - 学期总结报告
-
-7. **自定义主题**
-   - 多套UI主题
-   - 班级自定义背景
-   - 节日主题
+```powershell
+node docs\seeds\_validate.mjs
+# 校验：宠物数量 24/8/4/2、概率合计 1.0、对宫互指、风格分布、男女皮肤配对、活动日期
+```
 
 ---
 
-## 🛠️ 开发计划
+## 七、测试与构建自检
 
-### 已完成 ✅
-- [x] 班级管理
-- [x] 学生管理
-- [x] 宠物系统（24种，8级）
-- [x] 评价系统（83条规则）
-- [x] 排行榜
-- [x] 数据备份/恢复
-- [x] 宠物图鉴
-- [x] 批量评价
+```powershell
+node node_modules\vue-tsc\bin\vue-tsc.js --noEmit    # 类型检查
+node node_modules\vitest\vitest.mjs run              # 单测（45 条）
+node node_modules\vite\bin\vite.js build             # 构建
+node scripts\verify-build.mjs                        # 产物自检（部署前必跑）
+```
 
-### 进行中 🔄
-- [ ] 商店系统
-- [ ] 数据统计
+`verify-build.mjs` 检查：`/pet-garden/` 基路径、资源是否真实存在、14 个页面分包是否齐全、产物里是否残留 v1 分包、体积是否超标。
 
-### 计划中 📋
-- [ ] 用户系统
-- [ ] 移动端适配
-- [ ] 家长端
+**当前体积**：主包 109.5 KB（gzip 42.4 KB），页面按需分包。
 
 ---
 
-## 📄 许可证
+## 八、部署（手工，无 CI）
 
-MIT License © 2024
+```powershell
+node node_modules\vue-tsc\bin\vue-tsc.js --noEmit
+node node_modules\vite\bin\vite.js build
+node scripts\verify-build.mjs          # 必须"通过"
+# 上传 dist/ 与 server/ 到服务器，重启 node server/index.js
+```
+
+| 项 | 值 |
+|---|---|
+| 服务器 | Ubuntu · `110.40.142.247` |
+| 前端路径 | `/var/www/hw-platform/pet-garden/` |
+| API 路径 | `/opt/pet-garden-server/` |
+| 端口 | 3002（API），Nginx 反代前端 |
+| 访问 | `http://110.40.142.247/pet-garden/` |
+
+> 离线缓存（Service Worker）按决定**暂不做**：机房内网稳定，SW 会增加"改了看不到新版本"的排查成本。
 
 ---
 
-## 🤝 贡献
+## 九、文档索引
 
-欢迎提交 Issue 和 Pull Request！
+| 文档 | 用途 |
+|---|---|
+| `docs/00-总纲-架构基线与内容扩展规范.md` | **权威基线**：原则、分层、扩展点、数值、经济、契约 |
+| `docs/品阶体系改造-各Agent同步清单.md` | 三个 Agent 各自改什么 + adapter 期望字段 |
+| `docs/品阶体系-v3-中国风设计规范.md` | 视觉语言、风格光谱、美术生产规范 |
+| `docs/战斗引擎选型.md` | 为什么不上 Phaser/Cocos，特效分层怎么做 |
+| `提示词-KIMI.md` / `提示词-DSH.md` | 各 Agent 的角色提示词（v3 版） |
+| `docs/seeds/*.json` | 全部内容数据 |
 
 ---
 
-## 📞 联系
+## 十、常见问题
 
-如有问题或建议，请通过 GitHub Issue 联系。
+**Q：页面显示"未获得"或卦象字符？**
+A：美术立绘尚未接入，缺图按设计退化为卦象占位，不是加载失败。
+
+**Q：数字都好整齐，是真实数据吗？**
+A：接口未就绪时页面使用 `docs/seeds` 的占位数据；`adapter.ts` 会在 1.5s 内尝试真实接口，成功即切换。
+
+**Q：为什么不用 Phaser / Cocos？**
+A：回合制没有物理需求，且引擎场景与 Vue 状态双份维护成本高。见 `docs/战斗引擎选型.md`。
+
+**Q：多个 Agent 同时改这个仓库要注意什么？**
+A：各开一个 `git worktree`（`git worktree add ..\pet-garden-xxx dev-xxx`），不要在同一个目录切换分支，否则会互相冲掉未提交改动。

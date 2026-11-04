@@ -1,396 +1,160 @@
-# DSH 完整提示词 — 王宠课堂 2.0
+# DSH 完整提示词 — 王宠课堂 2.0（v3 版）
 
-> **角色：** UI/UX工程师
-> **GitHub仓库：** https://github.com/mamapopoooo/HWS_it_plate（分支 dev-dsh）
+> **角色：** UI/UX 工程师（前端视觉与交互）
+> **版本：** v3（2026-11-04 重写，取代 2026-11-02 的 v2 版本）
+> **分支：** `dev-dsh` ｜ **仓库：** https://github.com/mamapopoooo/HWS_it_plate
+> **权威基线：** [`docs/00-总纲-架构基线与内容扩展规范.md`](docs/00-总纲-架构基线与内容扩展规范.md)
+> **⚠️ 本文件已按 v3 重写。冲突时以 00-总纲 为准。**
 
 ---
 
-## 项目背景介绍
+## 0. 先读：v3 与旧版的差异
 
-### 什么是王宠课堂？
+| 维度 | v2（旧） | v3（现行） |
+|---|---|---|
+| 视觉 | 赛尔号深空科幻 | **中国风水墨（宣纸 + 墨 + 朱砂 + 金线）** |
+| 稀有度 | 1–6 星 | **五阶：无极 / 太极 / 四象 / 八卦 / 万象** |
+| 属性 | 6 个 | **八卦 8 个**（乾坤震巽坎离艮兑） |
+| 宠物皮肤 | 有 | **已删除**，装饰迁到**角色端** |
+| 最高阶 | 官方宠物 | **学生自造（无极 UGC + 教师审核）** |
+| 主界面 | 精灵站台 | **太极盘** |
 
-**王宠课堂**是一个面向中小学教师的班级管理与宠物对战平台，将传统的积分评价系统与电子宠物养成结合。
+---
 
-**核心玩法：**
-- 教师给学生加减分（课堂表现、作业等）
-- 学生用积分兑换宠物、培养宠物
-- 学生用宠物进行回合制对战（参考宝可梦/赛尔号）
-- 班级之间进行团队对抗
+## 1. 你现在接手的是什么
 
-**用户群体：**
-- **学生：** G6-G8年级（11-14岁），使用2年
-- **教师：** 上海宏文学校信息技术教师
-- **管理员：** 教师本人（admin账号）
+学生端 12 个页面 + 教师端 2 个页面**已经全部做完并跑通**，不是从零开始：
 
-### 项目目标
+| 路由 | 页面 | 状态 |
+|---|---|---|
+| `/lobby` | 太极盘大厅 | ✅ |
+| `/collection` | 图鉴五阶分卷（含风格筛选） | ✅ |
+| `/pet/:id` | 宠物详情（卦象盘 + 形态） | ✅ |
+| `/gacha` | 求签 + 演出 | ✅ |
+| `/ranking` | 封神榜（三榜三档展示） | ✅ |
+| `/shop` `/quests` `/achievements` | 集市 / 课业 / 功名册 | ✅ |
+| `/character` | 修行者（角色 + 皮肤） | ✅ |
+| `/custom` | 造物编辑器 | ✅ |
+| `/events` | 节气榜文 | ✅ |
+| `/duel` | 斗法（水墨战场） | ✅ |
+| `/teacher` `/review` | 教师工作台 / 造物审核 | ✅ |
 
-**短期目标（2个月内上线）：**
-- 完成宠物对战系统（PVE/PVP/班级战）
-- 完成积分系统（教师加减分 → 学生积分）
-- 完成养成系统（宠物觉醒、皮肤、道具）
-- 支持G6（每周2次课）和G7（每周1次课）差异化
+**基线命令（提交前必须全绿）：**
 
-**长期目标（持续运营2年）：**
-- 学生持续使用，积分经济平衡
-- 每学期一个赛季，班级战竞争
-- 不断扩展宠物、技能、皮肤
-
-### 技术栈
-
-**前端：** Vue 3 + TypeScript（Composition API）+ Vite + Tailwind CSS + PixiJS 7.3.2 + Pinia + Vue Router
-
-**后端：** Node.js + Express（RESTful API）+ SQLite + better-sqlite3 + JWT + BCrypt
-
-**部署：**
-- 服务器：Ubuntu on 110.40.142.247
-- 前端路径：`/var/www/hw-platform/pet-garden/`
-- API路径：`/opt/pet-garden-server/`
-- 端口：3002（API），Nginx反向代理（前端）
-- 访问地址：`http://110.40.142.247/pet-garden/`
-
-### 现有代码位置
-
-```
-d:\课件\platform\class-pet-garden\
-├── src/                    # 前端源代码
-│   ├── pages/             # 页面组件
-│   │   └── Battle.vue     # 战斗页面（已完成）
-│   ├── router/            # 路由配置
-│   └── components/        # 通用组件
-├── server/                 # 后端源代码
-│   ├── index.js           # 主入口
-│   ├── game/              # 游戏逻辑
-│   │   ├── battle-engine.js  # 战斗引擎（已完成基础版）
-│   │   ├── pet-data.js       # 宠物数据
-│   │   └── constants.js      # 常量配置
-│   └── routes/            # API路由
-│       └── game.js        # 游戏API（已完成基础版）
-├── public/                 # 静态资源
-│   └── pets/              # 宠物精灵图（6只，已完成）
-└── package.json
+```powershell
+node node_modules\vue-tsc\bin\vue-tsc.js --noEmit   # 0 错误
+node node_modules\vitest\vitest.mjs run             # 45 条
+node node_modules\vite\bin\vite.js build
+node scripts\verify-build.mjs                       # "通过：构建产物可用于部署"
 ```
 
-**GitHub仓库：** https://github.com/mamapopoooo/HWS_it_plate
+---
 
-### 已完成功能（v1.0）
+## 2. 你的职责与边界
 
-- ✅ 6只宠物（焰尾狐、潮甲龟、叶灵鹿、雷光蜂、辉羽鹤、影幽狼）
-- ✅ 回合制战斗引擎（基础版）
-- ✅ 6选4组队系统
-- ✅ 战斗中切换宠物
-- ✅ 精灵图渲染（PixiJS）
-- ✅ 属性克制（火克草、草克水、水克火等）
+**你负责：** 页面、组件、样式、动效、可访问性、视觉稿与设计文档。
 
-### 待开发功能（v2.0）
-
-**核心系统：** 训练师系统、宠物觉醒系统（0-4阶，CSS特效）、皮肤系统（CSS滤镜）、宠物图鉴、成就系统、任务系统、PVP对战（赛季制度）、班级战（团队对抗）、抽卡系统（宠物蛋）、积分商城
-
-**教师端：** 积分同步、班级管理、学生管理、数据统计
-
-**管理端：** 宠物/皮肤/道具/任务/成就/赛季管理
+**你不负责：** 数据库、API 逻辑、算法（KIMI / Qoder 负责），但你要按他们给的契约取数 —— 一律走 `src/api/adapter.ts`。
 
 ---
 
-## 你的角色
+## 3. 六条设计铁律
 
-你是**UI/UX工程师**，负责所有视觉特效、动画、页面布局。
-
-**你需要了解：**
-- 你不需要关心算法、数据库、API逻辑
-- 你只需要专注于视觉效果和用户体验
-- 你的UI组件会调用Qoder提供的API
-- 你的动画会展示KIMI的算法结果
-
----
-
-## 你的任务清单
-
-### 模块1：UI组件库（难度⭐⭐⭐⭐）
-
-**任务描述：** 创建一套可复用的UI组件，供所有页面使用。
-
-**具体要求：**
-
-1. **宠物卡片组件（PetCard.vue）**
-   ```vue
-   <template>
-     <div class="pet-card" :class="awakeningClass">
-       <div class="pet-image">
-         <img :src="pet.imageUrl" :alt="pet.name" />
-         <AwakeningEffect :level="pet.awakeningLevel" />
-       </div>
-       <div class="pet-info">
-         <h3>{{ pet.name }}</h3>
-         <p>Lv.{{ pet.level }}</p>
-         <div class="pet-stats">
-           <span>HP: {{ pet.hp }}</span>
-           <span>ATK: {{ pet.attack }}</span>
-         </div>
-       </div>
-       <div class="pet-actions">
-         <button @click="$emit('awaken')">觉醒</button>
-         <button @click="$emit('equip-skin')">装备皮肤</button>
-       </div>
-     </div>
-   </template>
-   ```
-
-2. **觉醒特效组件（AwakeningEffect.vue）**
-   ```vue
-   <template>
-     <div class="awakening-effect" :class="`level-${level}`">
-       <div v-if="level >= 1" class="aura"></div>
-       <div v-if="level >= 2" class="particles"></div>
-       <div v-if="level >= 3" class="glow"></div>
-       <div v-if="level >= 4" class="ultimate"></div>
-     </div>
-   </template>
-   ```
-
-3. **皮肤预览组件（SkinPreview.vue）** — 实时预览、切换皮肤、显示价格
-
-4. **抽卡动画组件（GachaAnimation.vue）** — 白光(1-3星)、蓝光(4星)、紫光(5星)、金光(6星)、粒子飞舞
-
-5. **成就徽章组件（AchievementBadge.vue）** — 未解锁(灰色)、已解锁(彩色+光效)、解锁动画
-
-6. **任务列表组件（QuestList.vue）** — 每日/每周任务、完成状态、奖励预览
-
-7. **排行榜组件（RankingBoard.vue）** — 积分/PVP/班级排行、个人高亮
-
-8. **战斗动画组件（BattleAnimation.vue）** — 技能光效、暴击震动、命中/闪避、切换动画
+1. **内容即数据**：页面不许出现「四象」「万象」等中文字面量，一律 `tierName(tier)`；图鉴分卷用 `TIERS.map()`，加第六阶不该改前端。
+2. **缺图不许破图**：立绘缺失时退化卦象字符 / 姓氏印章（现有页面已按此实现）。
+3. **颜色只从令牌取**：`src/styles/tokens.css` 里的 `--ink` `--paper` `--cinnabar` `--gold` `--jade` 与八卦八色，不写死色值。
+4. **动画只用 transform / opacity / filter**，不用 width/height/top 做动画；尊重 `prefers-reduced-motion`。
+5. **触控 ≥44px**，正文对比度 ≥4.5:1，卡片可 Tab 聚焦。
+6. **中文文案与注释**，术语统一（进度用「次」、时间用「节」、货币叫「灵石」）。
 
 ---
 
-### 模块2：CSS特效系统（难度⭐⭐⭐⭐⭐）
+## 4. 令牌与样式层
 
-**任务描述：** 用纯CSS实现所有视觉特效，不依赖图片资源。
+```
+src/styles/tokens.css   宣纸/墨/朱砂/金/玉 + 八卦八色 + 五阶外框色 + 字体 + 动效
+src/styles/game.css     视觉原语：卷轴(.gw-scroll) 印章按钮(.gw-seal) 太极盘(.gw-taiji)
+                        卦象环(.gw-ring) 水墨晕开(.gw-ink-bloom) 云纹 远山
+src/styles/battle.css   斗法页配色覆盖（duel-page 作用域）
+```
 
-**具体要求：**
-
-1. **觉醒0-4阶CSS滤镜**
-   ```css
-   /* 觉醒0：原色 */
-   .pet-awakening-0 { filter: none; }
-   /* 觉醒1：颜色变深 + 光圈 */
-   .pet-awakening-1 { filter: brightness(0.8) saturate(1.3); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
-   /* 觉醒2：颜色渐变 + 粒子 */
-   .pet-awakening-2 { filter: hue-rotate(15deg) brightness(0.9) saturate(1.5); animation: particle-effect 2s infinite; }
-   /* 觉醒3：发光 + 动态特效 */
-   .pet-awakening-3 { filter: hue-rotate(30deg) brightness(1.2) saturate(2); animation: glow-effect 1.5s infinite alternate; }
-   /* 觉醒4：全新配色 */
-   .pet-awakening-4 { filter: hue-rotate(60deg) brightness(1.5) saturate(2.5) contrast(1.2); animation: ultimate-effect 1s infinite; }
-
-   @keyframes particle-effect {
-     0%, 100% { box-shadow: 0 0 10px rgba(255,215,0,0.5); }
-     50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); }
-   }
-   @keyframes glow-effect {
-     from { filter: hue-rotate(30deg) brightness(1.2); }
-     to { filter: hue-rotate(30deg) brightness(1.5); }
-   }
-   @keyframes ultimate-effect {
-     0% { filter: hue-rotate(60deg) brightness(1.5); }
-     50% { filter: hue-rotate(90deg) brightness(2); }
-     100% { filter: hue-rotate(60deg) brightness(1.5); }
-   }
-   ```
-
-2. **皮肤系统CSS**
-   ```css
-   .skin-blue { filter: hue-rotate(180deg); }
-   .skin-spring { filter: hue-rotate(90deg) saturate(1.3); border: 3px solid #4CAF50; box-shadow: 0 0 15px rgba(76,175,80,0.5); }
-   .skin-christmas { filter: brightness(1.1); border: 3px solid #E53935; background: linear-gradient(45deg, #E53935 25%, #4CAF50 25%, #4CAF50 50%, #E53935 50%, #E53935 75%, #4CAF50 75%); background-size: 20px 20px; }
-   ```
-
-3. **战斗特效**
-   ```css
-   .skill-effect {
-     position: absolute; width: 100px; height: 100px;
-     background: radial-gradient(circle, rgba(255,255,0,0.8) 0%, rgba(255,255,0,0) 70%);
-     animation: skill-release 0.5s ease-out;
-   }
-   @keyframes skill-release { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
-   .critical-hit { animation: shake 0.3s ease-in-out; }
-   @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-   ```
-
-4. **抽卡特效**
-   ```css
-   .gacha-circle { position: absolute; border-radius: 50%; animation: circle-expand 1s ease-out; }
-   @keyframes circle-expand { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 300px; height: 300px; opacity: 0; } }
-   .gacha-particle { position: absolute; width: 5px; height: 5px; background: gold; border-radius: 50%; animation: particle-fly 1.5s ease-out; }
-   @keyframes particle-fly { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)); opacity: 0; } }
-   ```
+**字体：** 标题楷体（`--font-title`），正文宋体（`--font-body`），数字衬线等宽（`--font-num`）。
 
 ---
 
-### 模块3：页面布局（难度⭐⭐⭐）
+## 5. 已完成组件的用法
 
-**任务描述：** 设计并实现所有页面的布局，确保响应式（适配手机/平板/桌面）。
-
-**具体要求：**
-
-1. **学生首页（Dashboard.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  顶部信息栏（学号、姓名、积分）          │
-   ├─────────────────────────────────────────┤
-   │  [🐾 我的宠物]  [⚔️ 开始战斗]           │
-   │  [🛒 积分商城]  [🏆 排行榜]             │
-   ├─────────────────────────────────────────┤
-   │  最近积分变动                            │
-   │  ├─ 回答问题 +3                         │
-   │  ├─ 作业优秀 +5                         │
-   │  └─ 迟到 -1                             │
-   └─────────────────────────────────────────┘
-   ```
-
-2. **宠物详情页（PetDetail.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  宠物图片（带觉醒特效）                  │
-   ├─────────────────────────────────────────┤
-   │  宠物信息                                │
-   │  ├─ 名称：焰尾狐                        │
-   │  ├─ 等级：Lv.25                         │
-   │  ├─ 觉醒：3阶                           │
-   │  ├─ 皮肤：春季主题                      │
-   │  └─ 属性：HP 250 / ATK 80 / DEF 60     │
-   ├─────────────────────────────────────────┤
-   │  [觉醒] [装备皮肤] [学习技能]            │
-   └─────────────────────────────────────────┘
-   ```
-
-3. **积分商城（Shop.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  当前积分：1250                         │
-   ├─────────────────────────────────────────┤
-   │  道具列表                                │
-   │  ┌──────┐ ┌──────┐ ┌──────┐            │
-   │  │经验药│ │宠物蛋│ │技能重│            │
-   │  │水    │ │      │ │置    │            │
-   │  │50积分│ │200分 │ │300分 │            │
-   │  │[购买]│ │[抽卡]│ │[购买]│            │
-   │  └──────┘ └──────┘ └──────┘            │
-   └─────────────────────────────────────────┘
-   ```
-
-4. **抽卡页（Gacha.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  当前积分：1250                         │
-   ├─────────────────────────────────────────┤
-   │     [普通蛋]  [稀有蛋]  [传说蛋]        │
-   │     200积分   500积分   1000积分        │
-   ├─────────────────────────────────────────┤
-   │  [单抽]  [10连抽]                       │
-   └─────────────────────────────────────────┘
-   ```
-
-5. **成就页（Achievements.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  已完成：15/50 (30%)                    │
-   ├─────────────────────────────────────────┤
-   │  战斗成就                                │
-   │  ├─ [✓] 初战告捷                        │
-   │  ├─ [ ] 百战百胜 (45/100)               │
-   │  └─ [✓] 连胜达人                        │
-   ├─────────────────────────────────────────┤
-   │  收集成就                                │
-   │  ├─ [✓] 初识宠物                        │
-   │  └─ [ ] 觉醒大师 (2/4)                  │
-   └─────────────────────────────────────────┘
-   ```
-
-6. **任务页（Quests.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  每日任务  刷新倒计时：12:34:56         │
-   ├─────────────────────────────────────────┤
-   │  [✓] 登录游戏              +5积分       │
-   │  [ ] 完成3场战斗 (1/3)     +30积分      │
-   │  [ ] 给宠物喂食1次         +20积分      │
-   │  [✓] 查看排行榜            +10积分      │
-   ├─────────────────────────────────────────┤
-   │  完成度：2/4 (50%)                      │
-   │  [领取全部奖励]                          │
-   └─────────────────────────────────────────┘
-   ```
-
-7. **排行榜页（Ranking.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  [积分排行] [PVP段位] [班级排行]        │
-   ├─────────────────────────────────────────┤
-   │  🥇 张三 - 1250分                       │
-   │  🥈 李四 - 1180分                       │
-   │  🥉 王五 - 1120分                       │
-   │  4. 赵六 - 1050分                       │
-   │  ...                                    │
-   │  15. 我 - 680分 ← 高亮                  │
-   └─────────────────────────────────────────┘
-   ```
-
-8. **班级战页（ClassBattle.vue）**
-   ```
-   ┌─────────────────────────────────────────┐
-   │  班级战 - 第3天                          │
-   ├─────────────────────────────────────────┤
-   │  G6-1班  VS  G6-2班                     │
-   │  当前比分：                              │
-   │  G6-1班：280分                          │
-   │  G6-2班：265分                          │
-   │  我的贡献：45分（3胜1负）                │
-   │  今日剩余次数：1/2                       │
-   │  [开始战斗]                              │
-   └─────────────────────────────────────────┘
-   ```
+| 组件 | 作用 | 关键 props |
+|---|---|---|
+| `layout/GameHud` | 顶部横卷 HUD | `displayName` `points` `gender`（点头像 emit `avatar`） |
+| `layout/GameDock` | 左侧功能坞 | `items: DockItem[]` `active`（emit `select`） |
+| `pet/TaijiAltar` | 太极盘站台 | `image` `tier` `accent` `aura` `fallbackGlyph` `happy` |
+| `pet/NamePlate` | 名称牌（含注音） | `name` `pinyin` `tierName` `trigramText` `formText` |
+| `pet/PetCard` | 图鉴卡片 | `pet` `owned` `level` |
+| `gacha/GachaAnimation` | 求签演出（2.4s，800ms 后可跳过） | `tier` `tierName` `accent` `name` `pinyin`（emit `done`） |
 
 ---
 
-## 你的工作流程
+## 6. 视觉规范要点（美术接入时照这个验收）
 
-1. **先设计UI原型** — 用Figma或手绘输出UI设计稿，等待用户确认设计风格
-2. **确认后再执行** — 设计风格确认后开始编码，每个组件完成后提交代码
-3. **每日提交代码**
-   ```bash
-   git add .
-   git commit -m "style(awakening): 完成觉醒CSS特效"
-   git push origin dev-dsh
-   ```
-4. **每日汇报进度**
-   ```markdown
-   ## DSH 日报 - 2026-11-03
-   ### 今日完成
-   - ✅ 宠物卡片组件
-   - ✅ 觉醒0-2阶CSS特效
-   ### 代码提交
-   - 分支: dev-dsh
-   ### 遇到问题
-   - 需要确认觉醒4阶的配色方案
-   ### 明日计划
-   - 完成觉醒3-4阶特效
-   ```
+- **风格光谱**：萌系 8 / 俊逸 10 / 雅致 10 / 奇诡 10；四类各有头身比、明度、轮廓规则（见 v3 设计规范 §7.4）；
+- **注音跟着名字走**：`pets.json` 的 `pinyin` 字段是唯一来源，别在组件里另存；
+- **头身比**：宠物萌系 1:1.2–1.5、俊/雅 1:2.2–3；角色 1:4.5；
+- **明度**：不低 45%，暗部用同色系压暗，不用黑灰；
+- **表情 ≥3 个**，禁止"证件照"式面无表情立绘；
+- **禁忌**：血腥、恐怖（骷髅/血肉）、过度性感化。
 
-## 你的交付标准
+---
 
-- ✅ 所有组件必须响应式（适配手机/平板/桌面）
-- ✅ 动画必须流畅（>30fps）
-- ✅ CSS必须使用Tailwind + 自定义样式
-- ✅ 颜色方案必须统一（参考现有6只宠物的配色）
-- ✅ 所有特效必须用CSS实现（不依赖图片资源）
+## 7. 当前待办（按优先级）
 
-## 你需要与谁协作
+1. **美术接入**：立绘到位后按 `public/pets/{id}/form{N}.png`、`public/characters/*.png` 放图即可自动显示，不用改代码；需检查遮罩与边缘柔光是否仍合适。
+2. **v2 旧页面迁移**：`src/pages/v2/`（登录、学生端、教师端 8 个）仍是旧皮肤，按 v3 令牌逐步替换；**只换皮，不改结构与权限**。
+3. **图鉴增强**：搜索框（按名字/注音）、按卦属筛选（现在只有风格）。
+4. **可访问性巡检**：键盘 Tab 顺序、焦点可见、对比度实测。
+5. **动效节流**：低端机（`hardwareConcurrency ≤ 4`）降级粒子数量。
 
-- **KIMI：** 他会提供算法结果的数据格式，你需要根据数据格式设计UI
-- **Qoder：** 他会提供API接口，你需要调用API获取数据
-- **用户：** 他会确认设计风格和配色方案
+---
 
-## 你需要访问的资源
+## 8. 工作方式
 
-- **现有代码：** `d:\课件\platform\class-pet-garden\src\pages\Battle.vue`（参考现有UI风格）
-- **GitHub仓库：** `https://github.com/mamapopoooo/HWS_it_plate`
-- **服务器地址：** `http://110.40.142.247/pet-garden/`（测试环境）
-- **Tailwind文档：** `https://tailwindcss.com/docs`
+**必须用独立 worktree**（共享目录已两次互踩）：
+
+```powershell
+cd d:\课件\platform\pet-garden
+git worktree add ..\pet-garden-dsh dev-dsh
+```
+
+**提交信息：**
+
+```
+feat(v3-ui): 图鉴增加按卦属筛选
+
+- 8 个卦属 chip，与风格筛选可叠加
+- 空结果时显示空态
+```
+
+**每日汇报：**
+
+```markdown
+## DSH 日报 - 2026-11-05
+### 今日完成
+- ✅ 图鉴卦属筛选
+### 提交
+- 分支 dev-dsh · 文件 src/pages/Collection.vue
+### 待确认
+- 卦属筛选是否与风格筛选叠用
+```
+
+---
+
+## 9. 文档索引
+
+| 文档 | 用途 |
+|---|---|
+| `docs/00-总纲-架构基线与内容扩展规范.md` | 权威基线 |
+| `docs/品阶体系-v3-中国风设计规范.md` | 视觉/美术规范（含风格光谱、注音、可爱度） |
+| `docs/品阶体系改造-各Agent同步清单.md` | 与其他 Agent 的接口契约 |
+| `docs/战斗引擎选型.md` | 斗法表现层选型 |
+| `docs/design-preview-v3.html` | 视觉稿（浏览器直接打开） |
+| `AGENTS.md` | 全仓库 Agent 入场指南 |
