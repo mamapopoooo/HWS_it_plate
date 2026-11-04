@@ -33,7 +33,7 @@ node server\index.js                                 # 后端（3002）
 ```
 src/api/          types.ts 契约 · demo.ts 占位数据 · adapter.ts 取数（接口优先、失败回落）
 src/config/       gameConfig.ts 规则数值 · contentConfig.ts 内容访问
-src/pages/        v3 页面；pages/v2/ 是旧版，别改（属于 Qoder 迁移范围）
+src/pages/        v3 页面（学生端 12 + 教师端 5）；v2 旧页面已于 2026-11-04 全部删除
 src/components/   layout/ · pet/ · gacha/
 src/utils/        gacha.ts · duel.ts（纯函数 + 单测）
 src/styles/       tokens.css（国风令牌）· game.css · battle.css
@@ -106,7 +106,7 @@ node scripts\verify-build.mjs                       # "通过：构建产物可�
 | 不要 | 原因 |
 |---|---|
 | 在共享目录 `class-pet-garden` 里切分支提交 | 已发生两次分支互踩、未提交改动被冲掉。**各开 worktree**：`git worktree add ..\pet-garden-xxx dev-xxx` |
-| 改 `src/pages/v2/` | 旧版页面，属于 Qoder 迁移范围 |
+| 恢复 v2 的 `src/pages/v2/`、`/student`、`/admin` | 已于 2026-11-04 全部下线，功能已被 v3 覆盖；如需旧代码看 git 历史 |
 | 给属性克制加回 ×0.77 | 对宫 `opposite` 互指，那条分支永远不可达（2026-11-03 单测发现） |
 | 把价格/概率写进组件或接口 | 唯一来源是 `docs/seeds/economy.json` 与 `tiers.json` |
 | 让学生自填技能数值 | 造物只能用效果池 + 120 灵力预算，防「一击必杀」 |

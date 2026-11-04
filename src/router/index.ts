@@ -32,24 +32,8 @@ const router = createRouter({
     { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue'), meta: ADMIN },
     { path: '/teacher/content', name: 'content-admin', component: () => import('@/pages/ContentAdmin.vue'), meta: ADMIN },
 
-    // 登录（v3 国风版；v2 登录页保留在 pages/v2 仅作对照，路由已切到 v3）
-    { path: '/login', name: 'login', component: () => import('@/pages/Login.vue') },
-
-    // v2.0 教师/管理员路由（内容管理仍在此；学生端已全部迁到 v3）
-    {
-      path: '/admin',
-      component: () => import('@/layouts/AdminLayout.vue'),
-      meta: { requiresAuth: true, role: 'admin' },
-      children: [
-        { path: '', name: 'admin-dashboard', component: () => import('@/pages/v2/admin/Dashboard.vue') },
-        { path: 'students', name: 'admin-students', component: () => import('@/pages/v2/admin/Students.vue') },
-        { path: 'points', name: 'admin-points', component: () => import('@/pages/v2/admin/Points.vue') },
-        { path: 'pets', name: 'admin-pets', component: () => import('@/pages/v2/admin/Pets.vue') },
-        { path: 'skins', name: 'admin-skins', component: () => import('@/pages/v2/admin/Skins.vue') },
-        { path: 'quests', name: 'admin-quests', component: () => import('@/pages/v2/admin/Quests.vue') },
-        { path: 'achievements', name: 'admin-achievements', component: () => import('@/pages/v2/admin/Achievements.vue') }
-      ]
-    }
+    // 登录（v3 国风版）
+    { path: '/login', name: 'login', component: () => import('@/pages/Login.vue') }
   ]
 })
 
@@ -74,7 +58,7 @@ router.beforeEach((to, _from, next) => {
       return
     }
     // 角色不匹配，重定向到对应首页
-    if (user?.role === 'admin') next('/admin')
+    if (user?.role === 'admin') next('/teacher')
     else if (user?.role === 'student') next('/lobby')
     else next('/login')
   } else {

@@ -48,12 +48,13 @@
 | `/events` | 节气榜文 | 活动按日期自动上下架 |
 | `/duel` | 斗法 | 国风水墨战场、飘字、卷轴战况、结算 |
 
-### 教师端（2 个页面）
+### 教师端（3 个页面）
 
 | 路由 | 页面 | 说明 |
 |---|---|---|
-| `/teacher` | 教师工作台 | 学生卡片网格、−1/+1/+3/+5 快捷加分、待同步队列 |
+| `/teacher` | 教师工作台 | 班级切换、学生卡片网格、−1/+1/+3/+5 加分、积分流水、导入学生、增删改学生 |
 | `/review` | 造物审核 | 队列 + 详情、超预算自动提示、驳回必填理由 |
+| `/teacher/content` | 内容台账 | 宠物/皮肤/任务/成就总览 + **立绘缺失检查** |
 
 > 两者都要求管理员登录；开发期可用 `?preview=1` 跳过角色校验（仅 DEV 构建生效）。
 > 旧 v1 页面（`/` 首页、`/preview`、`/battle`）已于 2026-11-04 下线；`/` 与 `/battle` 保留重定向。
@@ -81,9 +82,9 @@ class-pet-garden/
 │   ├── config/         gameConfig.ts（品阶/八卦/战力/价格）/ contentConfig.ts（商城/任务/成就/皮肤/活动）
 │   ├── styles/         tokens.css（国风令牌）/ game.css（卷轴·印章·太极盘）/ battle.css（斗法配色）
 │   ├── components/     layout/（HUD·功能坞）pet/（卡片·站台·名称牌）gacha/（求签演出）
-│   ├── pages/          v3 页面（见上方路由表）+ v2/（旧版，待迁移）
+│   ├── pages/          v3 页面（学生端 12 + 教师端 5），v2 旧页已全部删除
 │   ├── utils/          gacha.ts / duel.ts（纯函数 + 单测）
-│   └── layouts/ stores/ composables/ router/
+│   └── stores/ composables/ router/
 ├── server/             Express API（v1 /api、v2 /api/v2）
 ├── docs/
 │   ├── 00-总纲-架构基线与内容扩展规范.md        ← 权威基线，先读这份
