@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/pages/Home.vue'
-import PetPreview from '@/pages/PetPreview.vue'
-import Battle from '@/pages/Battle.vue'
 
 /** 学生端页面：需学生登录 */
 const STUDENT = { requiresAuth: true, role: 'student' as const }
@@ -11,10 +8,9 @@ const ADMIN = { requiresAuth: true, role: 'admin' as const }
 const router = createRouter({
   history: createWebHistory('/pet-garden/'),
   routes: [
-    // v1.0 路由
-    { path: '/', name: 'home', component: Home },
-    { path: '/preview', name: 'preview', component: PetPreview },
-    { path: '/battle', name: 'battle', component: Battle },
+    // v1 页面已下线（2026-11-04）。保留两条重定向，避免旧书签/退出登录跳转 404
+    { path: '/', redirect: '/lobby' },
+    { path: '/battle', redirect: '/duel' },
 
     // ===== v3.0 学生端（太极盘大厅及衍生页） =====
     { path: '/lobby', name: 'lobby', component: () => import('@/pages/GameLobby.vue'), meta: STUDENT },
