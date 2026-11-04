@@ -103,6 +103,7 @@ const dockItems: DockItem[] = [
   { key: 'shop', label: '集市', glyph: '市' },
   { key: 'quests', label: '课业', glyph: '课' },
   { key: 'achievements', label: '功名册', glyph: '印' },
+  { key: 'pets', label: '灵宠', glyph: '宠' },
 ]
 
 /** 只给已建好的页面跳转，未建的按钮保持禁用（不留死链） */
@@ -113,6 +114,7 @@ const DOCK_ROUTES: Record<string, string> = {
   shop: '/shop',
   quests: '/quests',
   achievements: '/achievements',
+  pets: '/student/pets',
 }
 
 function onDock(key: string) {

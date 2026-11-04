@@ -109,11 +109,14 @@ export function getTrigram(code: string): TrigramConfig | undefined {
 
 /**
  * 宠物某形态的立绘路径。
- * 优先级：模板 formImages → 约定路径 {id}/formN.png（缺图由组件退化为卦象占位，不报错）。
+ * 优先级：formImages[N] → formImages[1] → 约定路径 {id}/formN.png
+ * （缺图由组件退化为卦象占位，不报错）
  */
 export function formImage(pet: PetTemplate, form = 1): string {
   const custom = pet.formImages?.[String(form)]
   if (custom) return custom
+  const fallback = pet.formImages?.['1']
+  if (fallback) return fallback
   const shortId = pet.id.replace(/^pet_/, '')
   return `/pet-garden/pets/${shortId}/form${form}.png`
 }
