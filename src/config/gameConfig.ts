@@ -152,15 +152,19 @@ export function trigramGlyphs(csv: string): string {
     .join('')
 }
 
-/** 克制系数：对宫相冲（1.3 / 0.77 / 1.0），由配置推导，不写死四对常量 */
+/**
+ * 克制系数：对宫相冲。
+ *
+ * 注意：先天八卦的对宫是**互指**的（乾↔坤、震↔巽、坎↔离、艮↔兑），
+ * 所以「相冲」必然是双向的 —— 不存在单向的"克/被克"。
+ * 因此这里只返回 1.3（对宫）或 1.0（其余），不做 0.77 的减伤。
+ */
 export function elementCoefficient(atk: string, def: string): number {
   if (atk === 'all' || def === 'all') return 1
   const a = getTrigram(atk)
   const d = getTrigram(def)
   if (!a || !d) return 1
-  if (a.opposite === d.code) return 1.3
-  if (d.opposite === a.code) return 0.77
-  return 1
+  return a.opposite === d.code ? 1.3 : 1
 }
 
 /**

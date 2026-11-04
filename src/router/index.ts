@@ -56,6 +56,12 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
+  // 开发预览：DEV 模式下 ?preview=1 跳过角色校验（生产构建不生效）
+  if (import.meta.env.DEV && to.query.preview === '1') {
+    next()
+    return
+  }
+
   const token = localStorage.getItem('token')
   const userStr = localStorage.getItem('user')
   const user = userStr ? JSON.parse(userStr) : null
@@ -63,7 +69,10 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth && !token) {
     next('/login')
   } else if (to.meta.role && user?.role !== to.meta.role) {
-    if (user?.role === 'admin') next('/admin')
+    // 管理员可访问学生端页面（课堂演示），学生不可进入管理员端
+    if (to.meta.role === 'student' && user?.role === 'admin') {
+      next()
+    } else if (user?.role === 'admin') next('/admin')
     else if (user?.role === 'student') next('/student')
     else next('/login')
   } else {
