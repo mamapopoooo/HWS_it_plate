@@ -191,6 +191,7 @@ node scripts\verify-build.mjs          # 必须"通过"
 | `docs/品阶体系改造-各Agent同步清单.md` | 三个 Agent 各自改什么 + adapter 期望字段 |
 | `docs/品阶体系-v3-中国风设计规范.md` | 视觉语言、风格光谱、美术生产规范 |
 | `docs/美术生产指南-v3.md` | 立绘需求、AI 工具选型、提示词模板（当前缺口 108 张，跑 `node scripts\check-art.mjs` 复查） |
+| `docs/内容安全红线.md` | **未成年人保护**：色情/血腥/恐怖禁区与山海经文案改写原则 |
 | `docs/战斗引擎选型.md` | 为什么不上 Phaser/Cocos，特效分层怎么做 |
 | `提示词-KIMI.md` / `提示词-DSH.md` | 各 Agent 的角色提示词（v3 版） |
 | `docs/seeds/*.json` | 全部内容数据 |

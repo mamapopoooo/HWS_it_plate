@@ -123,6 +123,25 @@ if (events) {
   console.log(`活动: ${events.events.length} 个`)
 }
 
+/* 未成年人内容红线（见 docs/内容安全红线.md）：文案里不许出现凶性/血腥直白词 */
+const BANNED = ['食人', '食虎豹', '血', '尸', '骷髅', '内脏', '肢解', '自杀']
+const questsData = load('quests.json')
+const achievementsData = load('achievements.json')
+const scanTargets = [
+  ['pets.json', (pets?.pets ?? []).map((p) => `${p.id} ${p.name} ${p.description}`)],
+  ['quests.json', (questsData?.quests ?? []).map((q) => `${q.id} ${q.name}`)],
+  ['achievements.json', (achievementsData?.achievements ?? []).map((a) => `${a.id} ${a.name} ${a.desc}`)],
+  ['events.json', (events?.events ?? []).map((e) => `${e.id} ${e.name} ${e.desc}`)],
+]
+for (const [file, lines] of scanTargets) {
+  for (const line of lines) {
+    for (const word of BANNED) {
+      if (line.includes(word)) problems.push(`${file} 含敏感词「${word}」：${line.slice(0, 40)}`)
+    }
+  }
+}
+console.log(`内容安全: 已扫描 ${scanTargets.map(([f, l]) => `${f}(${l.length})`).join(' ')}`)
+
 console.log('\n=== 结果 ===')
 if (problems.length === 0) console.log('通过：种子数据一致')
 else problems.forEach((p) => console.log('问题: ' + p))

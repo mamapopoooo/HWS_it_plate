@@ -47,6 +47,16 @@ const filter = ref<ReviewStatus | 'all'>('pending')
 const activeId = ref('sub_001')
 const note = ref('')
 
+/** 未成年人内容合规（见 docs/内容安全红线.md）：四项全勾才允许通过 */
+const compliance = ref({ adult: false, gore: false, horror: false, privacy: false })
+const allClear = computed(
+  () => compliance.value.adult && compliance.value.gore && compliance.value.horror && compliance.value.privacy,
+)
+
+function resetCompliance() {
+  compliance.value = { adult: false, gore: false, horror: false, privacy: false }
+}
+
 const list = computed(() =>
   submissions.value.filter((s) => (filter.value === 'all' ? true : s.status === filter.value)),
 )
@@ -73,6 +83,7 @@ const overBudget = computed(() => powerUsed.value > CUSTOM_BUDGET)
 function select(id: string) {
   activeId.value = id
   note.value = ''
+  resetCompliance()
 }
 
 async function approve() {
@@ -100,6 +111,7 @@ async function reject() {
 
 /** 审完自动跳到队列里下一条待审 */
 function moveNext() {
+  resetCompliance()
   const next = submissions.value.find((s) => s.status === 'pending')
   if (next) activeId.value = next.id
 }
@@ -197,12 +209,38 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
           </p>
 
           <template v-if="active.status === 'pending'">
+            <!-- 未成年人内容合规：四项全勾才能通过（见 docs/内容安全红线.md） -->
+            <div class="rv__safety">
+              <div class="rv__safety-head">
+                内容合规检查
+                <span class="rv__safety-tip">面向 11–14 岁学生，四项必须全部确认</span>
+              </div>
+              <label class="rv__check">
+                <input v-model="compliance.adult" type="checkbox" />
+                不含色情或性暗示
+              </label>
+              <label class="rv__check">
+                <input v-model="compliance.gore" type="checkbox" />
+                不含血腥、暴力、内脏
+              </label>
+              <label class="rv__check">
+                <input v-model="compliance.horror" type="checkbox" />
+                不含恐怖惊悚元素
+              </label>
+              <label class="rv__check">
+                <input v-model="compliance.privacy" type="checkbox" />
+                不含本人或他人隐私信息
+              </label>
+            </div>
+
             <label class="rv__field">
               <span>审核意见（驳回必填，学生可见）</span>
               <textarea v-model="note" rows="3" placeholder="例：立绘角落有水印，请裁掉后重提" />
             </label>
             <div class="rv__ops">
-              <button class="gw-seal gw-seal--primary" @click="approve">通过</button>
+              <button class="gw-seal gw-seal--primary" :disabled="!allClear" @click="approve">
+                {{ allClear ? '通过' : '需先完成合规检查' }}
+              </button>
               <button class="gw-seal" :disabled="!note.trim()" @click="reject">驳回</button>
               <span class="rv__tip">通过后立即进入图鉴「本命」位与对战</span>
             </div>
@@ -489,6 +527,41 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   margin-top: 14px;
   font-size: 12px;
   color: var(--ink-2);
+}
+
+/* 内容合规检查 */
+.rv__safety {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(192, 57, 43, 0.05);
+  border: 1px solid rgba(192, 57, 43, 0.25);
+  border-radius: var(--r-sm);
+}
+.rv__safety-head {
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--cinnabar);
+}
+.rv__safety-tip {
+  margin-left: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+.rv__check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.rv__check input {
+  accent-color: var(--cinnabar);
 }
 .rv__field textarea {
   padding: 8px 10px;
