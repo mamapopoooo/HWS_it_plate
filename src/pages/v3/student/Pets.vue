@@ -5,7 +5,7 @@
       <div class="filter-bar">
         <button
           v-for="t in tierFilters"
-          :key="t.value"
+          :key="t.value ?? 'all'"
           :class="['filter-btn', { active: currentFilter === t.value }]"
           :style="currentFilter === t.value ? { background: t.color, borderColor: t.color } : {}"
           @click="currentFilter = t.value"
@@ -116,7 +116,7 @@ const selectedTeam = ref<string[]>([])
 const awakenResult = ref<any>(null)
 
 const tierFilters = computed(() => {
-  const filters = [{ value: null, label: '全部', color: '#8A8577' }]
+  const filters: { value: number | null; label: string; color: string }[] = [{ value: null, label: '全部', color: '#8A8577' }]
   for (const t of gameStore.tiers) {
     if (t.is_gacha || t.tier <= 4) {
       filters.push({ value: t.tier, label: t.name, color: t.bezel_color })
@@ -146,7 +146,7 @@ function getTrigramBg(code: string) {
   return `radial-gradient(circle at 50% 60%, ${c}22, ${c}08)`
 }
 function getFormName(form: number) { return FORM_NAMES[form - 1] || `第${form}相` }
-function getMaxAwaken(tier: number) { return getTier(tier)?.awaken_cap || 1 }
+function getMaxAwaken(tier: number) { return getTier(tier)?.awakenCap || 1 }
 function getAwakenCost(tier: number) {
   const costs = ECONOMY.awaken as Record<string, number>
   return costs[`tier${tier}`] || tier * 30

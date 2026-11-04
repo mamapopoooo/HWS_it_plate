@@ -80,7 +80,7 @@
                 v-for="(skill, idx) in item.skills"
                 :key="idx"
                 class="skill-chip"
-              >{{ skill.name || skill }}</span>
+              >{{ typeof skill === 'object' ? skill.name : skill }}</span>
             </div>
 
             <!-- 战力点数 -->

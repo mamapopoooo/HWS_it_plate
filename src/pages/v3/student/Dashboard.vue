@@ -104,7 +104,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePointsStore } from '@/stores/points'
 import { useGameStore } from '@/stores/game'
-import { tierName, trigramGlyphs, getTier, getTrigram, FORM_NAMES } from '@/config/gameConfig'
+import { tierName, getTier } from '@/config/gameConfig'
 
 const authStore = useAuthStore()
 const pointsStore = usePointsStore()
