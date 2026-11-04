@@ -10,6 +10,7 @@ import type {
   CharacterState,
   ClassRow,
   CustomPetSubmission,
+  EvaluationRow,
   Opponent,
   OwnedMap,
   Profile,
@@ -96,6 +97,15 @@ export const DEMO_CHARACTER: CharacterState = {
   skinId: 'skin_base_f',
   ownedSkinIds: ['skin_base_f', 'skin_school_f'],
 }
+
+/** 积分流水占位 */
+export const DEMO_EVALUATIONS: EvaluationRow[] = [
+  { id: 'e1', studentName: '李四', points: 5, reason: '作业优秀', category: '学习', timestamp: Date.now() - 6 * 60 * 1000 },
+  { id: 'e2', studentName: '王小二', points: 3, reason: '回答问题', category: '学习', timestamp: Date.now() - 22 * 60 * 1000 },
+  { id: 'e3', studentName: '张三', points: -1, reason: '迟到', category: '行为', timestamp: Date.now() - 40 * 60 * 1000 },
+  { id: 'e4', studentName: '赵六', points: 3, reason: '帮助同学', category: '行为', timestamp: Date.now() - 90 * 60 * 1000 },
+  { id: 'e5', studentName: '陈七', points: 5, reason: '课堂展示', category: '学习', timestamp: Date.now() - 3 * 60 * 60 * 1000 },
+]
 
 /** 班级占位（接口未就绪时使用） */
 export const DEMO_CLASSES: ClassRow[] = [

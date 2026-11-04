@@ -148,3 +148,13 @@ export interface ImportRow {
   name: string
   studentNo?: string
 }
+
+/** 一条积分流水 */
+export interface EvaluationRow {
+  id: string
+  studentName: string
+  points: number
+  reason: string
+  category: string
+  timestamp: number
+}

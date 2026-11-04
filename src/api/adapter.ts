@@ -15,6 +15,7 @@ import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHARACTER,
   DEMO_CLASSES,
+  DEMO_EVALUATIONS,
   DEMO_OPPONENT,
   DEMO_OWNED,
   DEMO_PROFILE,
@@ -29,6 +30,7 @@ import type {
   CharacterState,
   ClassRow,
   CustomPetSubmission,
+  EvaluationRow,
   GachaDrawn,
   Gender,
   ImportRow,
@@ -437,4 +439,41 @@ export async function createClass(name: string): Promise<ClassRow | null> {
     },
     null,
   )
+}
+
+/** 修改学生（改名 / 改学号） */
+export async function updateStudent(id: string, patch: { name?: string; studentNo?: string }): Promise<boolean> {
+  return tryPost(`/students/${id}`, patch, (d) => Boolean(asRecord(d)?.success), false)
+}
+
+/** 删除学生 */
+export async function deleteStudent(id: string): Promise<boolean> {
+  try {
+    const res = await api.delete(`/students/${id}`, { timeout: TIMEOUT })
+    if (asRecord(res.data)?.success) return ok(true)
+  } catch {
+    /* 未就绪 */
+  }
+  return mock(false)
+}
+
+function pickEvaluations(data: unknown): EvaluationRow[] | null {
+  const rows = asArray(asRecord(data)?.records)
+  if (!rows) return null
+  return rows.map((raw) => {
+    const r = asRecord(raw) ?? {}
+    return {
+      id: str(r.id),
+      studentName: str(r.student_name, '—'),
+      points: num(r.points),
+      reason: str(r.reason),
+      category: str(r.category),
+      timestamp: num(r.timestamp),
+    }
+  })
+}
+
+/** 最近积分流水（按班级） */
+export async function fetchEvaluations(classId: string, pageSize = 10): Promise<EvaluationRow[]> {
+  return tryGet(`/evaluations?classId=${classId}&pageSize=${pageSize}`, pickEvaluations, DEMO_EVALUATIONS)
 }

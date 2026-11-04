@@ -9,9 +9,9 @@
  */
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchClassStudents, fetchClasses, importStudents, syncPoints } from '@/api/adapter'
+import { fetchClassStudents, fetchClasses, fetchEvaluations, importStudents, syncPoints, updateStudent, deleteStudent } from '@/api/adapter'
 import { DEMO_CLASSES } from '@/api/demo'
-import type { ClassRow, ImportRow, PointsRecord, TeacherStudent } from '@/api/types'
+import type { ClassRow, EvaluationRow, ImportRow, PointsRecord, TeacherStudent } from '@/api/types'
 
 const router = useRouter()
 
@@ -114,6 +114,73 @@ const totalPoints = computed(() => students.value.reduce((s, x) => s + x.points,
 const avgPoints = computed(() =>
   students.value.length === 0 ? 0 : Math.round(totalPoints.value / students.value.length),
 )
+const maxPoints = computed(() => (students.value.length ? Math.max(...students.value.map((s) => s.points)) : 0))
+const minPoints = computed(() => (students.value.length ? Math.min(...students.value.map((s) => s.points)) : 0))
+
+/* ---------- 积分流水 ---------- */
+
+const showFlow = ref(false)
+const flow = ref<EvaluationRow[]>([])
+const flowLoading = ref(false)
+
+async function toggleFlow() {
+  showFlow.value = !showFlow.value
+  if (!showFlow.value) return
+  flowLoading.value = true
+  flow.value = await fetchEvaluations(activeClassId.value, 12)
+  flowLoading.value = false
+}
+
+function fmtTime(ts: number): string {
+  if (!ts) return '—'
+  const d = new Date(ts)
+  const today = new Date()
+  const sameDay =
+    d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()
+  const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return sameDay ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`
+}
+
+/* ---------- 编辑 / 删除学生 ---------- */
+
+const editingId = ref<string | null>(null)
+const editName = ref('')
+const editNo = ref('')
+const confirmDeleteId = ref<string | null>(null)
+
+function startEdit(s: TeacherStudent) {
+  editingId.value = s.id
+  editName.value = s.name
+  editNo.value = s.studentNo
+  confirmDeleteId.value = null
+}
+
+function cancelEdit() {
+  editingId.value = null
+  confirmDeleteId.value = null
+}
+
+async function saveEdit(s: TeacherStudent) {
+  const name = editName.value.trim()
+  if (!name) return
+  const studentNo = editNo.value.trim()
+  // 本地先改，再尝试同步（离线也能用）
+  s.name = name
+  s.studentNo = studentNo
+  await updateStudent(s.id, { name, studentNo })
+  cancelEdit()
+}
+
+async function removeStudent(s: TeacherStudent) {
+  // 第一下只做确认，第二下才删，避免误触
+  if (confirmDeleteId.value !== s.id) {
+    confirmDeleteId.value = s.id
+    return
+  }
+  await deleteStudent(s.id)
+  students.value = students.value.filter((x) => x.id !== s.id)
+  cancelEdit()
+}
 
 /** 加减分：本地即时反馈 + 进待同步队列 */
 function addPoints(s: TeacherStudent, delta: number) {
@@ -151,10 +218,13 @@ function back() {
       <div class="td__stats">
         <span class="td__stat">人数 <b class="num">{{ students.length }}</b></span>
         <span class="td__stat">人均 <b class="num">{{ avgPoints }}</b></span>
+        <span class="td__stat">最高 <b class="num">{{ maxPoints }}</b></span>
+        <span class="td__stat">最低 <b class="num">{{ minPoints }}</b></span>
         <span class="td__stat td__stat--hot">今日 <b class="num">{{ todayDelta > 0 ? '+' : '' }}{{ todayDelta }}</b></span>
         <button class="gw-seal td__flush" :disabled="pending.length === 0" @click="flush">
           待同步 <span class="num">{{ pending.length }}</span>
         </button>
+        <button class="gw-seal" @click="toggleFlow">{{ showFlow ? '收起流水' : '积分流水' }}</button>
         <button class="gw-seal" @click="showImport = true">导入学生</button>
         <button class="gw-seal" @click="goReview">造物审核</button>
       </div>
@@ -195,28 +265,60 @@ function back() {
       </div>
     </section>
 
+    <!-- 积分流水 -->
+    <section v-if="showFlow" class="flow gw-scroll">
+      <div class="gw-scroll-head">
+        <span>最近积分流水 · {{ className }}</span>
+        <em class="flow__hint">{{ flowLoading ? '加载中…' : `共 ${flow.length} 条` }}</em>
+      </div>
+      <p v-if="flow.length === 0" class="flow__empty">这个班还没有加分记录。</p>
+      <div v-for="r in flow" :key="r.id" class="flow__row">
+        <span class="flow__time num">{{ fmtTime(r.timestamp) }}</span>
+        <span class="flow__name">{{ r.studentName }}</span>
+        <span class="flow__reason">{{ r.reason }}</span>
+        <span class="flow__points num" :class="r.points >= 0 ? 'is-plus' : 'is-minus'">
+          {{ r.points > 0 ? '+' : '' }}{{ r.points }}
+        </span>
+      </div>
+    </section>
+
     <main class="td__grid">
       <article v-for="s in students" :key="s.id" class="stu">
         <div class="stu__top">
           <span class="stu__seal">{{ s.name.slice(-1) }}</span>
-          <div class="stu__who">
+          <button class="stu__who" title="点击编辑学生" @click="startEdit(s)">
             <span class="stu__name">{{ s.name }}</span>
-            <span class="stu__no num">{{ s.studentNo }}</span>
-          </div>
+            <span class="stu__no num">{{ s.studentNo || '—' }}</span>
+          </button>
           <span class="stu__points num">{{ s.points }}</span>
         </div>
 
-        <div class="stu__pet">
-          <span class="stu__pet-name">{{ s.petName }}</span>
-          <span class="stu__pet-lv num">Lv.{{ s.petLevel }}</span>
+        <!-- 编辑态：改名 / 改学号 / 删除 -->
+        <div v-if="editingId === s.id" class="stu__edit">
+          <input v-model="editName" class="stu__input" placeholder="姓名" />
+          <input v-model="editNo" class="stu__input num" placeholder="学号" />
+          <div class="stu__edit-ops">
+            <button class="stu__btn" @click="saveEdit(s)">保存</button>
+            <button class="stu__btn" @click="cancelEdit">取消</button>
+            <button class="stu__btn stu__btn--danger" @click="removeStudent(s)">
+              {{ confirmDeleteId === s.id ? '确认删除？' : '删除' }}
+            </button>
+          </div>
         </div>
 
-        <div class="stu__ops">
-          <button class="stu__btn stu__btn--minus" @click="addPoints(s, -1)">−1</button>
-          <button class="stu__btn" @click="addPoints(s, 1)">+1</button>
-          <button class="stu__btn" @click="addPoints(s, 3)">+3</button>
-          <button class="stu__btn stu__btn--plus" @click="addPoints(s, 5)">+5</button>
-        </div>
+        <template v-else>
+          <div class="stu__pet">
+            <span class="stu__pet-name">{{ s.petName }}</span>
+            <span class="stu__pet-lv num">Lv.{{ s.petLevel }}</span>
+          </div>
+
+          <div class="stu__ops">
+            <button class="stu__btn stu__btn--minus" @click="addPoints(s, -1)">−1</button>
+            <button class="stu__btn" @click="addPoints(s, 1)">+1</button>
+            <button class="stu__btn" @click="addPoints(s, 3)">+3</button>
+            <button class="stu__btn stu__btn--plus" @click="addPoints(s, 5)">+5</button>
+          </div>
+        </template>
       </article>
     </main>
 
@@ -357,6 +459,97 @@ function back() {
 .import__msg {
   font-size: 12px;
   color: var(--cinnabar);
+}
+
+.stu__who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.stu__who:hover .stu__name {
+  color: var(--cinnabar);
+}
+
+/* 编辑态 */
+.stu__edit {
+  display: grid;
+  gap: 4px;
+}
+.stu__input {
+  padding: 5px 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+  background: rgba(255, 253, 246, 0.92);
+  border: 1px solid rgba(28, 28, 36, 0.24);
+  border-radius: var(--r-sm);
+}
+.stu__edit-ops {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 4px;
+}
+.stu__btn--danger {
+  color: var(--cinnabar);
+  border-color: rgba(192, 57, 43, 0.45);
+}
+
+/* 积分流水面板 */
+.flow {
+  margin: 12px 20px 0;
+  padding: 12px 14px;
+}
+.flow__hint {
+  font-style: normal;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.flow__row {
+  display: grid;
+  grid-template-columns: 62px 76px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--ink-2);
+  border-bottom: 1px dashed rgba(28, 28, 36, 0.1);
+}
+.flow__time {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.flow__name {
+  font-family: var(--font-title);
+  color: var(--ink);
+}
+.flow__reason {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.flow__points {
+  text-align: right;
+  font-weight: 700;
+}
+.flow__points.is-plus {
+  color: var(--stone-green);
+}
+.flow__points.is-minus {
+  color: var(--cinnabar);
+}
+.flow__empty {
+  margin: 0;
+  padding: 10px 0;
+  font-size: 12px;
+  color: var(--ink-3);
 }
 
 /* 卡片网格：保留教师端的信息密度 */
