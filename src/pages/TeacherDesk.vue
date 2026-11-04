@@ -227,6 +227,7 @@ function back() {
         <button class="gw-seal" @click="toggleFlow">{{ showFlow ? '收起流水' : '积分流水' }}</button>
         <button class="gw-seal" @click="showImport = true">导入学生</button>
         <button class="gw-seal" @click="goReview">造物审核</button>
+        <button class="gw-seal" @click="router.push('/teacher/content')">内容台账</button>
       </div>
     </header>
 

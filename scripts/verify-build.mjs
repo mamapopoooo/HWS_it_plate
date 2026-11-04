@@ -38,6 +38,7 @@ for (const ref of refs) {
 
 /* ---------- 3. v3 页面分包齐全 ---------- */
 const EXPECTED = [
+  'Login',
   'GameLobby',
   'Collection',
   'PetDetail',
@@ -52,6 +53,7 @@ const EXPECTED = [
   'Duel',
   'TeacherDesk',
   'AdminReview',
+  'ContentAdmin',
 ]
 const files = readdirSync(ASSETS)
 for (const name of EXPECTED) {
