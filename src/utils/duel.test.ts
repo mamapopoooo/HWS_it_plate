@@ -51,6 +51,11 @@ describe('属性克制', () => {
     expect(coefAgainst('zhen,dui', 'xun')).toBe(1.3)
   })
 
+  it('双攻双防分别按双方优势选择系数', () => {
+    expect(coefAgainst('qian,dui', 'kun,zhen')).toBe(1)
+    expect(coefAgainst('zhen,xun', 'zhen,xun')).toBe(1.3)
+  })
+
   it('全属不吃克制', () => {
     expect(coefAgainst('all', 'kan')).toBe(1)
     expect(coefAgainst('li', 'all')).toBe(1)

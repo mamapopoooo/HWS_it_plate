@@ -46,7 +46,7 @@ it('防守方双属性取对自己最有利的系数，而不是攻击方最有�
 Run: `node node_modules/vitest/vitest.mjs run src/config/gameConfig.test.ts src/utils/duel.test.ts`
 Expected: 矩阵通过；双属性防御两条断言因现有实现返回 1.3 而失败。
 
-- [ ] **Step 4: 实现攻击方取优势、防守方取优势的组合规则**
+- [ ] **Step 3: 实现攻击方取优势、防守方取优势的组合规则**
 
 ```ts
 export function coefAgainst(attacker: string, defender: string): number {
@@ -63,7 +63,7 @@ export function coefAgainst(attacker: string, defender: string): number {
 Run: `node node_modules/vitest/vitest.mjs run src/config/gameConfig.test.ts src/utils/duel.test.ts`
 Expected: 全部通过，单属性与全属行为不变。
 
-- [ ] **Step 5: 提交属性模块**
+- [ ] **Step 4: 提交属性模块**
 
 ```bash
 git add src/config/gameConfig.test.ts src/utils/duel.test.ts src/utils/duel.ts docs/superpowers/plans/2026-11-04-kimi-algorithms.md
