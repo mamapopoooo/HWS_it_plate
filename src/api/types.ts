@@ -136,3 +136,15 @@ export interface PointsRecord {
   amount: number
   reason: string
 }
+
+/** 班级一行 */
+export interface ClassRow {
+  id: string
+  name: string
+}
+
+/** 待导入的学生（粘贴名单解析后） */
+export interface ImportRow {
+  name: string
+  studentNo?: string
+}

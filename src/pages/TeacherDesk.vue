@@ -7,25 +7,108 @@
  *
  * 路由暂挂 /teacher（免登录便于验收），M2 迁到 /admin 并加 role 守卫。
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchTeacherStudents, syncPoints } from '@/api/adapter'
-import { DEMO_STUDENTS } from '@/api/demo'
-import type { PointsRecord, TeacherStudent } from '@/api/types'
+import { fetchClassStudents, fetchClasses, importStudents, syncPoints } from '@/api/adapter'
+import { DEMO_CLASSES } from '@/api/demo'
+import type { ClassRow, ImportRow, PointsRecord, TeacherStudent } from '@/api/types'
 
 const router = useRouter()
 
-const students = ref<TeacherStudent[]>(DEMO_STUDENTS)
-const className = ref('G6-1 班')
+const classes = ref<ClassRow[]>(DEMO_CLASSES)
+const activeClassId = ref(DEMO_CLASSES[0]?.id ?? '')
+const students = ref<TeacherStudent[]>([])
 const todayDelta = ref(0)
 const pending = ref<PointsRecord[]>([])
 const flash = ref<string | null>(null)
 
-async function load() {
-  students.value = await fetchTeacherStudents()
+/** 导入面板 */
+const showImport = ref(false)
+const importText = ref('')
+const importMsg = ref('')
+const importing = ref(false)
+
+const className = computed(
+  () => classes.value.find((c) => c.id === activeClassId.value)?.name ?? '未选择班级',
+)
+
+async function loadClasses() {
+  classes.value = await fetchClasses()
+  if (!activeClassId.value || !classes.value.some((c) => c.id === activeClassId.value)) {
+    activeClassId.value = classes.value[0]?.id ?? ''
+  }
 }
 
-onMounted(load)
+async function loadStudents() {
+  if (!activeClassId.value) return
+  students.value = await fetchClassStudents(activeClassId.value)
+}
+
+onMounted(async () => {
+  await loadClasses()
+  await loadStudents()
+})
+
+watch(activeClassId, loadStudents)
+
+/**
+ * 解析粘贴名单：每行「学号 姓名」或只有「姓名」。
+ * 用空白或逗号分隔，忽略空行与 # 开头的注释行。
+ */
+function parseRows(text: string): ImportRow[] {
+  const rows: ImportRow[] = []
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim()
+    if (!line || line.startsWith('#')) continue
+    const parts = line.split(/[\s,，、\t]+/).filter(Boolean)
+    if (parts.length === 0) continue
+    // 学号一般是数字；若第一段是纯数字就当学号，否则整行都是姓名
+    const [first, rest] = parts
+    if (/^\d{4,}$/.test(first)) {
+      rows.push({ studentNo: first, name: rest })
+    } else {
+      rows.push({ name: parts.join(' ') })
+    }
+  }
+  return rows
+}
+
+async function doImport() {
+  const rows = parseRows(importText.value)
+  if (rows.length === 0) {
+    importMsg.value = '没解析出学生，请每行一个「学号 姓名」'
+    return
+  }
+  importing.value = true
+  importMsg.value = ''
+  const count = await importStudents(activeClassId.value, rows)
+  importing.value = false
+
+  if (count > 0) {
+    importMsg.value = `成功导入 ${count} 人`
+    await loadStudents()
+  } else {
+    // 接口未就绪：本地追加，便于教师端先行试用
+    let added = 0
+    for (const r of rows) {
+      if (!r.name) continue
+      students.value.push({
+        id: `local-${Date.now()}-${added}`,
+        name: r.name,
+        studentNo: r.studentNo ?? '',
+        points: 0,
+        petName: '—',
+        petLevel: 1,
+      })
+      added += 1
+    }
+    importMsg.value = `接口未就绪，已在本地追加 ${added} 人（联网后请重新导入）`
+  }
+  importText.value = ''
+  setTimeout(() => {
+    if (importMsg.value.startsWith('成功')) showImport.value = false
+  }, 900)
+}
 
 const totalPoints = computed(() => students.value.reduce((s, x) => s + x.points, 0))
 const avgPoints = computed(() =>
@@ -72,9 +155,45 @@ function back() {
         <button class="gw-seal td__flush" :disabled="pending.length === 0" @click="flush">
           待同步 <span class="num">{{ pending.length }}</span>
         </button>
+        <button class="gw-seal" @click="showImport = true">导入学生</button>
         <button class="gw-seal" @click="goReview">造物审核</button>
       </div>
     </header>
+
+    <!-- 班级切换 -->
+    <nav class="td__classes">
+      <span class="td__classes-label">班级</span>
+      <button
+        v-for="c in classes"
+        :key="c.id"
+        class="td__class"
+        :class="{ 'is-on': c.id === activeClassId }"
+        @click="activeClassId = c.id"
+      >
+        {{ c.name }}
+        <span class="num">{{ c.id === activeClassId ? students.length : '' }}</span>
+      </button>
+    </nav>
+
+    <!-- 导入面板 -->
+    <section v-if="showImport" class="import gw-scroll">
+      <div class="gw-scroll-head">
+        <span>批量导入学生 · {{ className }}</span>
+        <em class="import__hint">每行一个「学号 姓名」，也可只写姓名</em>
+      </div>
+      <textarea
+        v-model="importText"
+        rows="6"
+        placeholder="20260101 李四&#10;20260102 王小二&#10;张三"
+      />
+      <div class="import__ops">
+        <button class="gw-seal gw-seal--primary" :disabled="importing" @click="doImport">
+          {{ importing ? '导入中…' : '确认导入' }}
+        </button>
+        <button class="gw-seal" @click="showImport = false; importMsg = ''">取消</button>
+        <span v-if="importMsg" class="import__msg">{{ importMsg }}</span>
+      </div>
+    </section>
 
     <main class="td__grid">
       <article v-for="s in students" :key="s.id" class="stu">
@@ -169,6 +288,75 @@ function back() {
   min-height: 32px;
   padding: 4px 12px;
   font-size: 12px;
+}
+
+/* 班级切换 */
+.td__classes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px 0;
+}
+.td__classes-label {
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+}
+.td__class {
+  padding: 5px 14px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  color: var(--ink-2);
+  background: linear-gradient(180deg, var(--paper-light), var(--paper-2));
+  border: 1px solid rgba(28, 28, 36, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.td__class.is-on {
+  color: #f7efe0;
+  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  border-color: var(--cinnabar-d);
+}
+.td__class .num {
+  margin-left: 4px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* 导入面板 */
+.import {
+  margin: 12px 20px 0;
+  padding: 12px 14px;
+}
+.import__hint {
+  font-style: normal;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.import textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: rgba(255, 253, 246, 0.9);
+  border: 1px solid rgba(28, 28, 36, 0.22);
+  border-radius: var(--r-sm);
+  resize: vertical;
+}
+.import__ops {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.import__msg {
+  font-size: 12px;
+  color: var(--cinnabar);
 }
 
 /* 卡片网格：保留教师端的信息密度 */

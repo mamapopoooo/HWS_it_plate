@@ -31,8 +31,8 @@ const router = createRouter({
     { path: '/teacher', name: 'teacher', component: () => import('@/pages/TeacherDesk.vue'), meta: ADMIN },
     { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue'), meta: ADMIN },
 
-    // v2.0 登录
-    { path: '/login', name: 'login', component: () => import('@/pages/v2/Login.vue') },
+    // 登录（v3 国风版；v2 登录页保留在 pages/v2 仅作对照，路由已切到 v3）
+    { path: '/login', name: 'login', component: () => import('@/pages/Login.vue') },
 
     // v2.0 学生路由
     {

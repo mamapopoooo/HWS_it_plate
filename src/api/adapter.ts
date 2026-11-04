@@ -14,6 +14,7 @@ import type { EventDef } from '@/config/contentConfig'
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHARACTER,
+  DEMO_CLASSES,
   DEMO_OPPONENT,
   DEMO_OWNED,
   DEMO_PROFILE,
@@ -26,9 +27,11 @@ import type {
   AchievementState,
   BattleReport,
   CharacterState,
+  ClassRow,
   CustomPetSubmission,
   GachaDrawn,
   Gender,
+  ImportRow,
   Opponent,
   OwnedMap,
   PointsRecord,
@@ -369,4 +372,69 @@ export async function fetchTeacherStudents(): Promise<TeacherStudent[]> {
 /** 批量同步积分（教师端加减分） */
 export async function syncPoints(records: PointsRecord[]): Promise<boolean> {
   return tryPost('/v2/teacher/sync-points', { records }, (d) => Boolean(asRecord(d)?.success), false)
+}
+
+/* ---------------- 班级与学生（v2 接口，教师端在用） ---------------- */
+
+function pickClasses(data: unknown): ClassRow[] | null {
+  const rows = asArray(asRecord(data)?.classes)
+  if (!rows) return null
+  return rows.map((raw) => {
+    const c = asRecord(raw) ?? {}
+    return { id: str(c.id), name: str(c.name) }
+  })
+}
+
+/** 班级列表；未登录/未就绪时回落占位两个班 */
+export async function fetchClasses(): Promise<ClassRow[]> {
+  return tryGet('/classes', pickClasses, DEMO_CLASSES)
+}
+
+function pickClassStudents(data: unknown): TeacherStudent[] | null {
+  const rows = asArray(asRecord(data)?.students)
+  if (!rows) return null
+  return rows.map((raw) => {
+    const s = asRecord(raw) ?? {}
+    return {
+      id: str(s.id),
+      name: str(s.name),
+      studentNo: str(s.student_no),
+      points: num(s.total_points),
+      petName: str(s.pet_name, '—'),
+      petLevel: num(s.pet_level, 1),
+    }
+  })
+}
+
+/** 某班学生名单 */
+export async function fetchClassStudents(classId: string): Promise<TeacherStudent[]> {
+  return tryGet(`/classes/${classId}/students`, pickClassStudents, DEMO_STUDENTS)
+}
+
+/** 批量导入学生：body { classId, students: [{ name, studentNo }] } */
+export async function importStudents(classId: string, rows: ImportRow[]): Promise<number> {
+  return tryPost(
+    '/students/import',
+    { classId, students: rows },
+    (d) => {
+      const t = asRecord(d)
+      if (!t || !t.success) return null
+      return num(t.imported, rows.length)
+    },
+    0,
+  )
+}
+
+/** 新建班级；失败返回 null（占位模式由调用方本地造一个） */
+export async function createClass(name: string): Promise<ClassRow | null> {
+  return tryPost(
+    '/classes',
+    { name },
+    (d) => {
+      const c = asRecord(d)
+      if (!c || !c.id) return null
+      return { id: str(c.id), name: str(c.name, name) }
+    },
+    null,
+  )
 }

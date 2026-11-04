@@ -8,6 +8,7 @@ import type {
   AchievementState,
   BoughtMap,
   CharacterState,
+  ClassRow,
   CustomPetSubmission,
   Opponent,
   OwnedMap,
@@ -95,6 +96,12 @@ export const DEMO_CHARACTER: CharacterState = {
   skinId: 'skin_base_f',
   ownedSkinIds: ['skin_base_f', 'skin_school_f'],
 }
+
+/** 班级占位（接口未就绪时使用） */
+export const DEMO_CLASSES: ClassRow[] = [
+  { id: 'demo-g6-1', name: 'G6-1 班' },
+  { id: 'demo-g7-2', name: 'G7-2 班' },
+]
 
 /** 教师端：占位班级名单（接口未就绪时使用） */
 export const DEMO_STUDENTS: TeacherStudent[] = [
