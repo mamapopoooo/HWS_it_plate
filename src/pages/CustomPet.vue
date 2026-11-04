@@ -14,6 +14,7 @@ import {
   CUSTOM_SKILL_COUNT,
   SKILL_EFFECTS,
 } from '@/config/contentConfig'
+import { checkImage } from '@/utils/nsfw'
 
 const router = useRouter()
 
@@ -25,6 +26,11 @@ const pinyin = ref('')
 const picked = ref<string[]>([])
 const preview = ref('')
 const status = ref<'idle' | 'pending' | 'approved' | 'rejected'>('idle')
+
+/** 图片检测（NSFW）：上传后先在本机跑一遍，未通过则不允许提交 */
+const checking = ref(false)
+const checkMsg = ref('')
+const checkPassed = ref(false)
 
 const used = computed(() =>
   picked.value.reduce((sum, code) => sum + (SKILL_EFFECTS.find((e) => e.code === code)?.cost ?? 0), 0),
@@ -41,6 +47,8 @@ const canSubmit = computed(
     petName.value.trim().length > 0 &&
     pinyin.value.trim().length > 0 &&
     picked.value.length > 0 &&
+    Boolean(preview.value) &&
+    checkPassed.value &&
     !overBudget.value,
 )
 
@@ -55,10 +63,28 @@ function toggle(code: string) {
   picked.value.push(code)
 }
 
-function onFile(e: Event) {
+async function onFile(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
+
+  checking.value = true
+  checkPassed.value = false
+  checkMsg.value = '正在检测图片…'
+
+  const verdict = await checkImage(file)
+  checking.value = false
+
+  if (!verdict.ok) {
+    checkMsg.value = verdict.reason ?? '图片未通过检测，请换一张'
+    input.value = ''
+    return
+  }
+
+  checkPassed.value = true
+  checkMsg.value = verdict.checked
+    ? '图片检测通过'
+    : (verdict.reason ?? '已跳过本地检测，交由老师审核')
   if (preview.value) URL.revokeObjectURL(preview.value)
   preview.value = URL.createObjectURL(file)
 }
@@ -103,9 +129,19 @@ function back() {
         </div>
 
         <label class="gw-seal cp__upload">
-          上传立绘
-          <input type="file" accept="image/png,image/webp" hidden :disabled="status !== 'idle'" @change="onFile" />
+          {{ checking ? '检测中…' : preview ? '更换立绘' : '上传立绘' }}
+          <input
+            type="file"
+            accept="image/png,image/webp"
+            hidden
+            :disabled="status !== 'idle' || checking"
+            @change="onFile"
+          />
         </label>
+
+        <p v-if="checkMsg" class="cp__check" :class="{ 'is-ok': checkPassed, 'is-bad': !checkPassed && !checking }">
+          {{ checkMsg }}
+        </p>
 
         <ul class="cp__rules">
           <li>1024×1024，PNG 透明底</li>
@@ -274,6 +310,27 @@ function back() {
 }
 .cp__upload {
   cursor: pointer;
+}
+.cp__check {
+  margin: 0;
+  padding: 5px 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--ink-3);
+  background: rgba(255, 253, 246, 0.75);
+  border: 1px solid rgba(28, 28, 36, 0.16);
+  border-radius: var(--r-sm);
+}
+.cp__check.is-ok {
+  color: var(--stone-green);
+  border-color: rgba(62, 124, 89, 0.3);
+  background: rgba(62, 124, 89, 0.08);
+}
+.cp__check.is-bad {
+  color: var(--cinnabar);
+  border-color: rgba(192, 57, 43, 0.3);
+  background: rgba(192, 57, 43, 0.08);
 }
 .cp__rules {
   margin: 0;

@@ -110,6 +110,7 @@ node scripts\verify-build.mjs                       # "通过：构建产物可�
 | 给属性克制加回 ×0.77 | 对宫 `opposite` 互指，那条分支永远不可达（2026-11-03 单测发现） |
 | 把价格/概率写进组件或接口 | 唯一来源是 `docs/seeds/economy.json` 与 `tiers.json` |
 | 让学生自填技能数值 | 造物只能用效果池 + 120 灵力预算，防「一击必杀」 |
+| 绕过 UGC 图片检测 | 上传必须走 `src/utils/nsfw.ts` 的 `checkImage()`；红线见 `docs/内容安全红线.md` |
 | 引入 Phaser / Cocos | 回合制无物理需求，且与 Vue 状态双份维护。见 `docs/战斗引擎选型.md` |
 | 删改 v1 遗留的 `server/routes/`（v1 部分） | 还在服务旧数据，迁移完成后再清 |
 

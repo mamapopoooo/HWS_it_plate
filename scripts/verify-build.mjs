@@ -67,23 +67,27 @@ for (const gone of ['Home-', 'PetPreview-']) {
   if (files.some((f) => f.startsWith(gone))) problems.push(`产物里仍有 v1 分包: ${gone}*.js`)
 }
 
-/* ---------- 5. 体积 ---------- */
-let jsBytes = 0
+/* ---------- 5. 体积（区分首屏与懒加载） ---------- */
+const entryNames = new Set(refs.map((r) => r.replace(/^\/pet-garden\//, '').replace(/^assets\//, '')))
+let entryBytes = 0
+let lazyBytes = 0
 let cssBytes = 0
 for (const f of files) {
   const size = statSync(join(ASSETS, f)).size
-  if (f.endsWith('.js')) jsBytes += size
   if (f.endsWith('.css')) cssBytes += size
+  if (!f.endsWith('.js')) continue
+  if (entryNames.has(f)) entryBytes += size
+  else lazyBytes += size
 }
 const kb = (n) => (n / 1024).toFixed(1)
 
-// vite.config.ts 里默认 500KB 告警；这里按 gzip 后估算更贴近真实传输
-if (jsBytes > 1200 * 1024) warnings.push(`JS 总量 ${kb(jsBytes)}KB，建议拆分或懒加载`)
+// 首屏 JS 控制在 400KB 内；懒加载（NSFW 模型等）不计入首屏
+if (entryBytes > 400 * 1024) warnings.push(`首屏 JS ${kb(entryBytes)}KB，超过 400KB 预算`)
 if (cssBytes > 200 * 1024) warnings.push(`CSS 总量 ${kb(cssBytes)}KB，偏大`)
 
 /* ---------- 输出 ---------- */
 console.log(`产物文件: ${files.length} 个`)
-console.log(`JS ${kb(jsBytes)}KB · CSS ${kb(cssBytes)}KB`)
+console.log(`首屏 JS ${kb(entryBytes)}KB · 懒加载 JS ${kb(lazyBytes)}KB · CSS ${kb(cssBytes)}KB`)
 console.log(`页面分包: ${EXPECTED.filter((n) => files.some((f) => f.startsWith(n + '-'))).length}/${EXPECTED.length}`)
 
 if (warnings.length > 0) {
