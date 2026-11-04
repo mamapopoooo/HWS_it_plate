@@ -263,7 +263,9 @@ Expected: 收入、消耗与抽数投影通过。
 
 - [ ] **Step 3: 生成并检查 20 教学月 CSV**
 
-脚本遍历 G6/G7、1–20 月、低收入/中位收入/高收入，输出收入、70–85% 目标消耗、结余、年级抽价和累计抽数；另输出 G7 第 10 月作为一年节点。
+脚本遍历 G6/G7、1–20 教学月及低收入/中位收入/高收入情景，共输出 120 数据行。G6 三档月收入为 30/60/90，G7 为 15/30/45；低收入和高收入分别为中位收入的 50%/150%，仅为本报告情景假设，并非总纲新增规则。每行分别以 70%、77.5%、85% 调用 `simulateEconomy`，CSV 使用 UTF-8 BOM 写入 `docs/economy-simulation-20-months.csv`。
+
+列含义：`grade`、`month`、`scenario`、`monthly_income` 分别为年级、教学月、情景和月收入；`total_income` 为累计总收入；`single_price`、`ten_price` 为单抽、十连价格；`income_equivalent_pulls` 为累计总收入除以单抽价后向下取整的等效抽数；`target_spending_70/77_5/85` 与 `target_saving_70/77_5/85` 分别为三档消耗比例下的目标消耗与结余。G7 第 10 月作为一年节点包含在 120 行中，不额外增加数据行。
 
 Run: `node scripts/generate-economy-report.mjs`
 Expected: 生成 `docs/economy-simulation-20-months.csv`，G6 第 20 月中位情景为 240 抽，G7 第 10 月中位情景为 100 抽。
