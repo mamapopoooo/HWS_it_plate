@@ -89,6 +89,13 @@ describe('八卦与克制', () => {
     expect(elementCoefficient('qian', 'qian')).toBe(1)
   })
 
+  it.each(TRIGRAMS.flatMap((atk) => TRIGRAMS.map((def) => ({ atk, def }))))(
+    '$atk.code 对 $def.code 的系数符合对宫表',
+    ({ atk, def }) => {
+      expect(elementCoefficient(atk.code, def.code)).toBe(atk.opposite === def.code ? 1.3 : 1)
+    },
+  )
+
   it('全属（太极）不吃克制', () => {
     expect(elementCoefficient('all', 'kan')).toBe(1)
     expect(elementCoefficient('li', 'all')).toBe(1)
