@@ -1,10 +1,9 @@
-import tiersSeed from '../../docs/seeds/tiers.json' with { type: 'json' }
-import petsSeed from '../../docs/seeds/pets.json' with { type: 'json' }
-import economySeed from '../../docs/seeds/economy.json' with { type: 'json' }
+import { readFileSync } from 'node:fs'
 
-export const TIERS = tiersSeed.tiers
-export const PETS = petsSeed.pets
-export const ECONOMY = economySeed
+const loadSeed = (name) => JSON.parse(readFileSync(new URL(`../../docs/seeds/${name}.json`, import.meta.url), 'utf8'))
+export const TIERS = loadSeed('tiers').tiers
+export const PETS = loadSeed('pets').pets
+export const ECONOMY = loadSeed('economy')
 
 /** 创建服务端抽卡状态。 */
 export function createDrawState({ pulls = 0, owned = [] } = {}) {

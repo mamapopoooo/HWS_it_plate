@@ -178,7 +178,7 @@ function seededRandom(seed) {
   }
 }
 
-it('10000 次品阶抽取误差不超过 ±0.5%', () => {
+it('固定种子 20261104 的 LCG 抽取 10000 次，各品阶频率误差均不超过二项分布四倍标准误', () => {
   const rng = seededRandom(20261104)
   const counts = new Map([[1, 0], [2, 0], [3, 0], [4, 0]])
   for (let index = 0; index < 10000; index++) {
@@ -186,7 +186,8 @@ it('10000 次品阶抽取误差不超过 ±0.5%', () => {
     counts.set(tier, counts.get(tier) + 1)
   }
   for (const tier of TIERS.filter((item) => item.isGacha)) {
-    expect(Math.abs(counts.get(tier.tier) / 10000 - tier.gachaRate)).toBeLessThanOrEqual(0.005)
+    const tolerance = 4 * Math.sqrt(tier.gachaRate * (1 - tier.gachaRate) / 10000)
+    expect(Math.abs(counts.get(tier.tier) / 10000 - tier.gachaRate)).toBeLessThanOrEqual(tolerance)
   }
 })
 ```
