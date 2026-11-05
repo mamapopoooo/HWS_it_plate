@@ -168,7 +168,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="lobby gw-paper">
+  <div class="lobby gw-paper gw-lobby-bg">
+    <!-- 云气层：两团极淡的云以不同速度横移，营造"云在走"的呼吸感（纯 CSS，无额外素材） -->
+    <div class="lobby__fx" aria-hidden="true">
+      <i class="cloud cloud--a" />
+      <i class="cloud cloud--b" />
+    </div>
+
     <GameHud
       :display-name="profile.displayName"
       :grade="profile.grade"
@@ -300,10 +306,66 @@ onUnmounted(() => {
 <style scoped>
 .lobby {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
   overflow: hidden;
+}
+
+/* ---------- 云气层 ---------- */
+.lobby__fx {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cloud {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+  background: radial-gradient(closest-side, rgba(255, 253, 246, 0.92), rgba(255, 253, 246, 0));
+  will-change: transform;
+}
+.cloud--a {
+  width: 46%;
+  height: 24%;
+  left: -12%;
+  top: 20%;
+  opacity: 0.55;
+  animation: cloud-drift-a 110s linear infinite;
+}
+.cloud--b {
+  width: 34%;
+  height: 16%;
+  right: -10%;
+  top: 54%;
+  opacity: 0.38;
+  animation: cloud-drift-b 150s linear infinite;
+}
+@keyframes cloud-drift-a {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(34vw, -2vh, 0);
+  }
+}
+@keyframes cloud-drift-b {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-28vw, 1.5vh, 0);
+  }
+}
+
+/* 减少动态：关掉云气动画（系统级无障碍设置） */
+@media (prefers-reduced-motion: reduce) {
+  .cloud {
+    animation: none;
+  }
 }
 
 .lobby__mt {
