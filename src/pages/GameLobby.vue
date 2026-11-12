@@ -30,6 +30,19 @@ import {
 
 const router = useRouter()
 
+/**
+ * 背景模式（可用 URL 参数对比效果）：
+ *   ?bg=breath  静态图 + 镜头呼吸（默认）
+ *   ?bg=video   循环视频
+ *   ?bg=still   纯静态
+ *   ?bgui=1     显示右下角切换条（开发环境默认显示）
+ */
+const bgMode = ref<'breath' | 'still' | 'video'>('breath')
+const bgSwitch = ref(false)
+const baseUrl = import.meta.env.BASE_URL
+const videoUrl = `${baseUrl}backgrounds/lobby.mp4`
+const posterUrl = `${baseUrl}backgrounds/lobby.jpg`
+
 /** 玩家档案：由 adapter 填充（真接口优先，未就绪回落占位） */
 const profile = ref<Profile>(DEMO_PROFILE)
 
@@ -37,6 +50,11 @@ const profile = ref<Profile>(DEMO_PROFILE)
 const activeEventList = ref<EventDef[]>(activeEvents())
 
 onMounted(async () => {
+  const q = new URLSearchParams(window.location.search)
+  const bg = q.get('bg')
+  if (bg === 'video' || bg === 'still' || bg === 'breath') bgMode.value = bg
+  bgSwitch.value = q.has('bgui') || import.meta.env.DEV
+
   profile.value = await fetchProfile()
   const list = await fetchEvents()
   activeEventList.value = list.filter((e) => eventPhase(e) === 'active')
@@ -168,7 +186,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="lobby gw-paper gw-lobby-bg">
+  <div class="lobby gw-paper">
+    <!-- 背景层：静态图 / 镜头呼吸 / 循环视频，三选一（?bg=breath|still|video） -->
+    <div class="lobby__bg" :class="`is-${bgMode}`" aria-hidden="true">
+      <video
+        v-if="bgMode === 'video'"
+        class="lobby__bg-video"
+        :src="videoUrl"
+        :poster="posterUrl"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      />
+    </div>
+
     <!-- 云气层：两团极淡的云以不同速度横移，营造"云在走"的呼吸感（纯 CSS，无额外素材） -->
     <div class="lobby__fx" aria-hidden="true">
       <i class="cloud cloud--a" />
@@ -300,6 +333,13 @@ onUnmounted(() => {
     <!-- 水墨远山压在最底层 -->
     <div class="gw-mountain lobby__mt" aria-hidden="true" />
     <div class="gw-mountain gw-mountain--near lobby__mt" aria-hidden="true" />
+
+    <!-- 背景对比切换条（开发环境或 ?bgui=1 时显示） -->
+    <div v-if="bgSwitch" class="bg-switch" role="group" aria-label="背景效果对比">
+      <button :class="{ 'is-on': bgMode === 'breath' }" @click="bgMode = 'breath'">镜头呼吸</button>
+      <button :class="{ 'is-on': bgMode === 'video' }" @click="bgMode = 'video'">循环视频</button>
+      <button :class="{ 'is-on': bgMode === 'still' }" @click="bgMode = 'still'">纯静态</button>
+    </div>
   </div>
 </template>
 
@@ -311,6 +351,70 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 100dvh;
   overflow: hidden;
+}
+
+/* ---------- 背景层 ---------- */
+.lobby__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url('/pet-garden/backgrounds/lobby.jpg');
+  background-size: cover;
+  background-position: center 46%;
+  background-repeat: no-repeat;
+}
+/* 宣纸遮罩：左侧压亮保功能坞可读，右侧留出山水 */
+.lobby__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(242, 232, 213, 0.96) 0%,
+      rgba(242, 232, 213, 0.86) 18%,
+      rgba(242, 232, 213, 0.5) 38%,
+      rgba(242, 232, 213, 0.28) 62%,
+      rgba(242, 232, 213, 0.52) 100%
+    ),
+    linear-gradient(180deg, rgba(242, 232, 213, 0.72) 0%, rgba(242, 232, 213, 0) 26%);
+}
+
+/* 镜头呼吸：极缓推近 + 微移，28s 一个来回，肉眼几乎察觉不到跳动 */
+.lobby__bg.is-breath {
+  animation: lobby-breathe 28s ease-in-out infinite alternate;
+  transform-origin: 52% 46%;
+  will-change: transform;
+}
+@keyframes lobby-breathe {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.045) translate3d(-1.1%, -0.7%, 0);
+  }
+}
+
+.lobby__bg-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 竖屏：遮罩改成上下渐变 */
+@media (max-width: 760px) {
+  .lobby__bg {
+    background-position: center 40%;
+  }
+  .lobby__bg::after {
+    background-image: linear-gradient(
+      180deg,
+      rgba(242, 232, 213, 0.9) 0%,
+      rgba(242, 232, 213, 0.45) 45%,
+      rgba(242, 232, 213, 0.9) 100%
+    );
+  }
 }
 
 /* ---------- 云气层 ---------- */
@@ -361,11 +465,43 @@ onUnmounted(() => {
   }
 }
 
-/* 减少动态：关掉云气动画（系统级无障碍设置） */
+/* 减少动态：关掉云气与呼吸动画（系统级无障碍设置） */
 @media (prefers-reduced-motion: reduce) {
   .cloud {
     animation: none;
   }
+  .lobby__bg.is-breath {
+    animation: none;
+  }
+}
+
+/* 背景对比切换条 */
+.bg-switch {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 50;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 253, 246, 0.92);
+  border: 1px solid rgba(28, 28, 36, 0.22);
+  border-radius: 999px;
+  box-shadow: var(--sh-paper);
+}
+.bg-switch button {
+  padding: 5px 12px;
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.bg-switch button.is-on {
+  color: #f7efe0;
+  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
 }
 
 .lobby__mt {

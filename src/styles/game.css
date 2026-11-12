@@ -14,36 +14,6 @@
     repeating-linear-gradient(90deg, rgba(120, 110, 90, 0.025) 0 1px, transparent 1px 4px);
 }
 
-/* 大厅：水墨山水实景底。上叠宣纸渐变，保证文字可读、左侧功能坞与右侧信息不糊 */
-.gw-lobby-bg {
-  background-color: var(--paper);
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(242, 232, 213, 0.96) 0%,
-      rgba(242, 232, 213, 0.86) 18%,
-      rgba(242, 232, 213, 0.5) 38%,
-      rgba(242, 232, 213, 0.28) 62%,
-      rgba(242, 232, 213, 0.52) 100%
-    ),
-    linear-gradient(180deg, rgba(242, 232, 213, 0.72) 0%, rgba(242, 232, 213, 0) 26%),
-    url('/pet-garden/backgrounds/lobby.jpg');
-  background-size: cover, cover, cover;
-  background-position: center, center, center 46%;
-  background-repeat: no-repeat;
-}
-
-/* 竖屏（手机）：同一张图铺满，掩膜整体调亮 */
-@media (max-width: 760px) {
-  .gw-lobby-bg {
-    background-image:
-      linear-gradient(180deg, rgba(242, 232, 213, 0.9) 0%, rgba(242, 232, 213, 0.45) 45%, rgba(242, 232, 213, 0.9) 100%),
-      url('/pet-garden/backgrounds/lobby.jpg');
-    background-size: cover, cover;
-    background-position: center, center 40%;
-  }
-}
-
 /* ========== 卷轴面板 ========== */
 .gw-scroll {
   position: relative;
