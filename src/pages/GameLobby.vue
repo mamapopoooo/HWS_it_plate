@@ -40,8 +40,15 @@ const router = useRouter()
 const bgMode = ref<'breath' | 'still' | 'video'>('video')
 const bgSwitch = ref(false)
 const baseUrl = import.meta.env.BASE_URL
-const videoUrl = `${baseUrl}backgrounds/lobby.mp4`
-const posterUrl = `${baseUrl}backgrounds/lobby.jpg`
+/**
+ * 背景素材版本号：换视频/海报时 +1。
+ *
+ * 原因：vite 对静态资源发的是 Cache-Control: immutable（一年），
+ * 同名替换文件后浏览器仍用旧缓存，会让人以为"改了没生效"。
+ */
+const BG_VERSION = '3'
+const videoUrl = `${baseUrl}backgrounds/lobby.mp4?v=${BG_VERSION}`
+const posterUrl = `${baseUrl}backgrounds/lobby.jpg?v=${BG_VERSION}`
 
 /** 玩家档案：由 adapter 填充（真接口优先，未就绪回落占位） */
 const profile = ref<Profile>(DEMO_PROFILE)
