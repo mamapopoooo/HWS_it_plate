@@ -209,7 +209,7 @@ const styleVars = computed(() => ({
   left: 0;
   font-size: 18px;
   font-style: normal;
-  color: #d4546b;
+  color: #8a8a8a;
   animation: gw-heart 1.4s var(--e-out) var(--d) forwards;
 }
 

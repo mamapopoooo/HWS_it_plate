@@ -153,7 +153,7 @@ let happyTimer: ReturnType<typeof setTimeout> | undefined
 
 const current = computed<PetView | null>(() => demoPets.value[activeTier.value] ?? null)
 const currentTier = computed(() => getTier(activeTier.value))
-const accent = computed(() => currentTier.value?.bezelColor ?? '#c9a227')
+const accent = computed(() => currentTier.value?.bezelColor ?? '#a0a0a0')
 const aura = computed(() => Math.min(1, 0.2 + activeTier.value * 0.16))
 const power = computed(() =>
   current.value ? calcPower(current.value.tier, current.value.level, current.value.awaken) : 0,
@@ -358,8 +358,9 @@ onUnmounted(() => {
   background-size: cover;
   background-position: center 46%;
   background-repeat: no-repeat;
+  filter: grayscale(1) contrast(1.06) brightness(1.02);
 }
-/* 宣纸遮罩：左侧压亮保功能坞可读，右侧留出山水 */
+/* 遮罩：左侧压亮保功能坞可读，右侧留出山水 */
 .lobby__bg::after {
   content: '';
   position: absolute;
@@ -367,13 +368,13 @@ onUnmounted(() => {
   background-image:
     linear-gradient(
       90deg,
-      rgba(233, 233, 227, 0.9) 0%,
-      rgba(233, 233, 227, 0.7) 18%,
-      rgba(233, 233, 227, 0.34) 38%,
-      rgba(233, 233, 227, 0.14) 62%,
-      rgba(233, 233, 227, 0.38) 100%
+      rgba(244, 244, 244, 0.9) 0%,
+      rgba(244, 244, 244, 0.7) 18%,
+      rgba(244, 244, 244, 0.34) 38%,
+      rgba(244, 244, 244, 0.14) 62%,
+      rgba(244, 244, 244, 0.38) 100%
     ),
-    linear-gradient(180deg, rgba(233, 233, 227, 0.6) 0%, rgba(233, 233, 227, 0) 26%);
+    linear-gradient(180deg, rgba(244, 244, 244, 0.6) 0%, rgba(244, 244, 244, 0) 26%);
 }
 
 /* 镜头呼吸：极缓推近 + 微移，28s 一个来回，肉眼几乎察觉不到跳动 */
@@ -406,9 +407,9 @@ onUnmounted(() => {
   .lobby__bg::after {
     background-image: linear-gradient(
       180deg,
-      rgba(233, 233, 227, 0.9) 0%,
-      rgba(233, 233, 227, 0.45) 45%,
-      rgba(233, 233, 227, 0.9) 100%
+      rgba(244, 244, 244, 0.9) 0%,
+      rgba(244, 244, 244, 0.45) 45%,
+      rgba(244, 244, 244, 0.9) 100%
     );
   }
 }
@@ -496,8 +497,8 @@ onUnmounted(() => {
   cursor: pointer;
 }
 .bg-switch button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 
 .lobby__body {
@@ -544,9 +545,9 @@ onUnmounted(() => {
   color: var(--ink);
 }
 .stage__tab.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
-  box-shadow: 0 2px 6px rgba(142, 42, 32, 0.3);
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
+  box-shadow: 0 2px 6px rgba(71, 71, 71, 0.3);
 }
 
 .stage__meta {
@@ -572,20 +573,20 @@ onUnmounted(() => {
   color: var(--ink-2);
 }
 .stage__style[data-style='meng'] {
-  color: #b5637d;
-  background: rgba(212, 84, 107, 0.1);
+  color: #7e7e7e;
+  background: rgba(125, 125, 125, 0.1);
 }
 .stage__style[data-style='jun'] {
   color: var(--stone-blue);
-  background: rgba(46, 92, 138, 0.1);
+  background: rgba(83, 83, 83, 0.1);
 }
 .stage__style[data-style='ya'] {
   color: var(--stone-green);
-  background: rgba(62, 124, 89, 0.1);
+  background: rgba(101, 101, 101, 0.1);
 }
 .stage__style[data-style='qi'] {
   color: var(--trigram-zhen);
-  background: rgba(109, 76, 159, 0.1);
+  background: rgba(95, 95, 95, 0.1);
 }
 .stage__touch {
   padding: 5px 14px;
@@ -739,7 +740,7 @@ onUnmounted(() => {
   font-size: 11px;
   color: var(--stone-blue);
   cursor: pointer;
-  border-bottom: 1px dotted rgba(46, 92, 138, 0.5);
+  border-bottom: 1px dotted rgba(83, 83, 83, 0.5);
 }
 
 /* ---------- 底部 ---------- */
@@ -751,7 +752,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 14px;
   padding: 12px 18px;
-  background: linear-gradient(0deg, rgba(220, 220, 214, 0.94), rgba(233, 233, 227, 0.4));
+  background: linear-gradient(0deg, rgba(220, 220, 214, 0.94), rgba(244, 244, 244, 0.4));
   border-top: 1px solid rgba(28, 28, 36, 0.16);
 }
 

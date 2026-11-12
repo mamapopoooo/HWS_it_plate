@@ -264,7 +264,7 @@ function onSelect(pet: PetTemplate) {
   color: var(--ink-3);
 }
 .col__tab.is-on {
-  background: linear-gradient(180deg, #fffdf6, var(--paper-light));
+  background: linear-gradient(180deg, #fbfbfb, var(--paper-light));
   border-color: var(--cinnabar);
   box-shadow: inset 0 3px 0 var(--cinnabar);
 }
@@ -292,8 +292,8 @@ function onSelect(pet: PetTemplate) {
   cursor: pointer;
 }
 .col__filter.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .col__owned {
@@ -386,7 +386,7 @@ function onSelect(pet: PetTemplate) {
   font-size: 11px;
 }
 .col__styles em[data-style='meng'] {
-  color: #b5637d;
+  color: #7e7e7e;
 }
 .col__styles em[data-style='jun'] {
   color: var(--stone-blue);

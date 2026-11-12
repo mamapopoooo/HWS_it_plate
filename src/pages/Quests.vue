@@ -167,9 +167,9 @@ function back() {
 .qz__wallet {
   padding: 6px 14px;
   font-size: 13px;
-  color: #8a6a0b;
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  background: rgba(201, 162, 39, 0.12);
+  color: #696969;
+  border: 1px solid rgba(160, 160, 160, 0.45);
+  background: rgba(160, 160, 160, 0.12);
   border-radius: var(--r-sm);
 }
 
@@ -202,7 +202,7 @@ function back() {
 .task.is-done .task__dot {
   background: var(--stone-green);
   border-color: var(--stone-green);
-  box-shadow: 0 0 6px rgba(62, 124, 89, 0.6);
+  box-shadow: 0 0 6px rgba(101, 101, 101, 0.6);
 }
 .task__name {
   flex: 1;

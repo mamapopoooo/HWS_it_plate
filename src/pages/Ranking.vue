@@ -227,8 +227,8 @@ function back() {
   cursor: pointer;
 }
 .rk__grades button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 
 /* ---------- 榜单切换 ---------- */
@@ -249,8 +249,8 @@ function back() {
   cursor: pointer;
 }
 .rk__tabs button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 
@@ -282,10 +282,10 @@ function back() {
 }
 .podium__item--2 {
   padding-bottom: 22px;
-  border-top: 4px solid #b8b8a8;
+  border-top: 4px solid #b6b6b6;
 }
 .podium__item--3 {
-  border-top: 4px solid #b87333;
+  border-top: 4px solid #808080;
 }
 
 /* 角色放大立绘位（无美术时用姓氏印章代替，尺寸就是最终立绘的预留尺寸） */
@@ -296,21 +296,21 @@ function back() {
   height: 120px;
   font-family: var(--font-title);
   font-size: 44px;
-  color: #f7efe0;
+  color: #f7f7f7;
   border-radius: 50%;
   box-shadow: inset 0 0 0 3px rgba(255, 253, 246, 0.4), 0 8px 18px rgba(28, 28, 36, 0.22);
 }
 .podium__avatar--male {
-  background: linear-gradient(160deg, #3f6d8f, #24455c);
+  background: linear-gradient(160deg, #636363, #3e3e3e);
 }
 .podium__avatar--female {
-  background: linear-gradient(160deg, #ce6772, #8e2a3f);
+  background: linear-gradient(160deg, #878787, #4a4a4a);
 }
 .podium__item--1 .podium__avatar {
   width: 140px;
   height: 140px;
   font-size: 52px;
-  box-shadow: inset 0 0 0 3px rgba(255, 215, 0, 0.6), 0 0 26px rgba(201, 162, 39, 0.45);
+  box-shadow: inset 0 0 0 3px rgba(202, 202, 202, 0.6), 0 0 26px rgba(160, 160, 160, 0.45);
 }
 
 .podium__name {
@@ -367,15 +367,15 @@ function back() {
   height: 42px;
   font-family: var(--font-title);
   font-size: 18px;
-  color: #f7efe0;
+  color: #f7f7f7;
   border-radius: 50%;
   box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.35);
 }
 .mid__avatar--male {
-  background: linear-gradient(160deg, #3f6d8f, #24455c);
+  background: linear-gradient(160deg, #636363, #3e3e3e);
 }
 .mid__avatar--female {
-  background: linear-gradient(160deg, #ce6772, #8e2a3f);
+  background: linear-gradient(160deg, #878787, #4a4a4a);
 }
 .mid__info {
   flex: 1;
@@ -439,12 +439,12 @@ function back() {
 
 /* 自己高亮 */
 .is-me {
-  background: rgba(201, 162, 39, 0.14);
-  border-color: rgba(201, 162, 39, 0.5);
+  background: rgba(160, 160, 160, 0.14);
+  border-color: rgba(160, 160, 160, 0.5);
   box-shadow: inset 3px 0 0 var(--gold);
 }
 .rest__row.is-me {
-  background: rgba(201, 162, 39, 0.12);
+  background: rgba(160, 160, 160, 0.12);
 }
 
 /* 底部固定的"我" */
@@ -456,10 +456,10 @@ function back() {
   gap: 10px;
   margin: 8px 20px 0;
   padding: 10px 16px;
-  background: linear-gradient(180deg, #fff7e2, #f3e6c4);
+  background: linear-gradient(180deg, #f6f6f6, #e6e6e6);
   border: 1px solid var(--gold);
   border-radius: var(--r-md);
-  box-shadow: 0 6px 18px rgba(201, 162, 39, 0.28);
+  box-shadow: 0 6px 18px rgba(160, 160, 160, 0.28);
 }
 .me__rank {
   font-size: 12px;

@@ -143,11 +143,11 @@ async function submit() {
   font-size: 17px;
   line-height: 1.1;
   letter-spacing: 0.05em;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #2b2b2b, var(--cinnabar-d));
   border-radius: 6px;
   transform: rotate(-4deg);
-  box-shadow: inset 0 0 0 2px rgba(247, 239, 224, 0.4);
+  box-shadow: inset 0 0 0 2px rgba(240, 240, 240, 0.4);
 }
 .login__head h1 {
   margin: 0;
@@ -185,8 +185,8 @@ async function submit() {
   transition: color var(--d-quick), background var(--d-quick);
 }
 .login__tabs button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 
 .login__form {
@@ -209,7 +209,7 @@ async function submit() {
   border-radius: var(--r-sm);
 }
 .login__field input:focus {
-  outline: 2px solid rgba(192, 57, 43, 0.45);
+  outline: 2px solid rgba(96, 96, 96, 0.45);
   outline-offset: 1px;
 }
 
@@ -224,8 +224,8 @@ async function submit() {
   padding: 6px 10px;
   font-size: 12px;
   color: var(--cinnabar);
-  background: rgba(192, 57, 43, 0.08);
-  border: 1px solid rgba(192, 57, 43, 0.3);
+  background: rgba(96, 96, 96, 0.08);
+  border: 1px solid rgba(96, 96, 96, 0.3);
   border-radius: var(--r-sm);
 }
 

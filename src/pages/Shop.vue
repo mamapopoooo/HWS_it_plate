@@ -143,9 +143,9 @@ function back() {
 .sp__wallet {
   padding: 6px 14px;
   font-size: 13px;
-  color: #8a6a0b;
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  background: rgba(201, 162, 39, 0.12);
+  color: #696969;
+  border: 1px solid rgba(160, 160, 160, 0.45);
+  background: rgba(160, 160, 160, 0.12);
   border-radius: var(--r-sm);
   white-space: nowrap;
 }
@@ -167,8 +167,8 @@ function back() {
   cursor: pointer;
 }
 .sp__tabs button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 
@@ -196,8 +196,8 @@ function back() {
   height: 48px;
   font-family: var(--font-title);
   font-size: 24px;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #8a7a5c, #5c4d36);
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #7b7b7b, #4f4f4f);
   border-radius: 8px;
   box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.3);
 }
@@ -223,9 +223,9 @@ function back() {
   gap: 4px;
   align-self: flex-start;
   padding: 3px 10px;
-  color: #8a6a0b;
-  background: radial-gradient(circle at 30% 30%, #fff6d8, #f0dfa8);
-  border: 1px solid rgba(201, 162, 39, 0.55);
+  color: #696969;
+  background: radial-gradient(circle at 30% 30%, #f5f5f5, #dedede);
+  border: 1px solid rgba(160, 160, 160, 0.55);
   border-radius: 999px;
   font-size: 13px;
 }

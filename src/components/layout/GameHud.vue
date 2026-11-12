@@ -74,16 +74,16 @@ const onAvatar = () => emit('avatar')
   font-family: var(--font-title);
   font-size: 22px;
   line-height: 1;
-  color: #f7efe0;
+  color: #f7f7f7;
   border-radius: 5px;
   transform: rotate(-3deg);
-  box-shadow: inset 0 0 0 2px rgba(247, 239, 224, 0.4), 0 2px 6px rgba(142, 42, 32, 0.3);
+  box-shadow: inset 0 0 0 2px rgba(240, 240, 240, 0.4), 0 2px 6px rgba(71, 71, 71, 0.3);
 }
 .hud__seal--male {
-  background: linear-gradient(160deg, #3f6d8f, #24455c);
+  background: linear-gradient(160deg, #636363, #3e3e3e);
 }
 .hud__seal--female {
-  background: linear-gradient(160deg, #ce6772, #8e2a3f);
+  background: linear-gradient(160deg, #878787, #4a4a4a);
 }
 .hud__seal b {
   position: absolute;
@@ -94,7 +94,7 @@ const onAvatar = () => emit('avatar')
   font-size: 11px;
   font-weight: 700;
   line-height: 1.4;
-  color: #2a1f00;
+  color: #1f1f1f;
   background: var(--gold);
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 999px;
@@ -144,9 +144,9 @@ const onAvatar = () => emit('avatar')
   white-space: nowrap;
 }
 .hud__stat--gold {
-  color: #8a6a0b;
-  background: rgba(201, 162, 39, 0.12);
-  border-color: rgba(201, 162, 39, 0.45);
+  color: #696969;
+  background: rgba(160, 160, 160, 0.12);
+  border-color: rgba(160, 160, 160, 0.45);
 }
 
 .hud__gear {

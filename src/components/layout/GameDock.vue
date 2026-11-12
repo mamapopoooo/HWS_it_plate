@@ -41,7 +41,7 @@ const emit = defineEmits<{ (e: 'select', key: string): void }>()
   align-items: center;
   gap: 14px;
   padding: 16px 10px;
-  background: linear-gradient(90deg, rgba(232, 220, 194, 0.95), rgba(242, 232, 213, 0.35));
+  background: linear-gradient(90deg, rgba(228, 228, 228, 0.95), rgba(233, 233, 233, 0.35));
   border-right: 1px solid rgba(28, 28, 36, 0.14);
 }
 
@@ -67,10 +67,10 @@ const emit = defineEmits<{ (e: 'select', key: string): void }>()
   box-shadow: var(--sh-lift);
 }
 .dock__btn.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
-  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, 0.35), 0 3px 10px rgba(142, 42, 32, 0.35);
+  box-shadow: inset 0 0 0 1.5px rgba(240, 240, 240, 0.35), 0 3px 10px rgba(71, 71, 71, 0.35);
 }
 .dock__btn:disabled {
   opacity: 0.45;
@@ -85,7 +85,7 @@ const emit = defineEmits<{ (e: 'select', key: string): void }>()
     padding: 10px 8px;
     border-right: 0;
     border-top: 1px solid rgba(28, 28, 36, 0.14);
-    background: linear-gradient(0deg, rgba(232, 220, 194, 0.9), rgba(242, 232, 213, 0.4));
+    background: linear-gradient(0deg, rgba(228, 228, 228, 0.9), rgba(233, 233, 233, 0.4));
   }
   .dock__btn {
     width: 52px;

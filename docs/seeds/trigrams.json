@@ -1,14 +1,14 @@
 {
   "_comment": "配置层：八卦八属性。克制由 opposite 自动推导，代码里不写四对常量。",
   "trigrams": [
-    { "code": "qian", "name": "乾", "symbol": "☰", "element": "天", "color": "#2E5C8A", "colorDark": "#17324C", "opposite": "kun",  "sortOrder": 1 },
-    { "code": "kun",  "name": "坤", "symbol": "☷", "element": "地", "color": "#C8A165", "colorDark": "#6E5836", "opposite": "qian", "sortOrder": 2 },
-    { "code": "zhen", "name": "震", "symbol": "☳", "element": "雷", "color": "#6D4C9F", "colorDark": "#3B2A57", "opposite": "xun",  "sortOrder": 3 },
-    { "code": "xun",  "name": "巽", "symbol": "☴", "element": "风", "color": "#3E7C59", "colorDark": "#22452F", "opposite": "zhen", "sortOrder": 4 },
-    { "code": "kan",  "name": "坎", "symbol": "☵", "element": "水", "color": "#1F4E79", "colorDark": "#102A41", "opposite": "li",   "sortOrder": 5 },
-    { "code": "li",   "name": "离", "symbol": "☲", "element": "火", "color": "#C0392B", "colorDark": "#6B1F17", "opposite": "kan",  "sortOrder": 6 },
-    { "code": "gen",  "name": "艮", "symbol": "☶", "element": "山", "color": "#8C6239", "colorDark": "#4C3520", "opposite": "dui",  "sortOrder": 7 },
-    { "code": "dui",  "name": "兑", "symbol": "☱", "element": "泽", "color": "#3E9E8F", "colorDark": "#20564D", "opposite": "gen",  "sortOrder": 8 }
+    { "code": "qian", "name": "乾", "symbol": "☰", "element": "天", "color": "#1a1a1a", "colorDark": "#000000", "opposite": "kun",  "sortOrder": 1 },
+    { "code": "kun",  "name": "坤", "symbol": "☷", "element": "地", "color": "#6e6e6e", "colorDark": "#3a3a3a", "opposite": "qian", "sortOrder": 2 },
+    { "code": "zhen", "name": "震", "symbol": "☳", "element": "雷", "color": "#2e2e2e", "colorDark": "#141414", "opposite": "xun",  "sortOrder": 3 },
+    { "code": "xun",  "name": "巽", "symbol": "☴", "element": "风", "color": "#565656", "colorDark": "#2c2c2c", "opposite": "zhen", "sortOrder": 4 },
+    { "code": "kan",  "name": "坎", "symbol": "☵", "element": "水", "color": "#3f3f3f", "colorDark": "#1e1e1e", "opposite": "li",   "sortOrder": 5 },
+    { "code": "li",   "name": "离", "symbol": "☲", "element": "火", "color": "#808080", "colorDark": "#454545", "opposite": "kan",  "sortOrder": 6 },
+    { "code": "gen",  "name": "艮", "symbol": "☶", "element": "山", "color": "#4a4a4a", "colorDark": "#242424", "opposite": "dui",  "sortOrder": 7 },
+    { "code": "dui",  "name": "兑", "symbol": "☱", "element": "泽", "color": "#999999", "colorDark": "#565656", "opposite": "gen",  "sortOrder": 8 }
   ],
   "legacyElementMap": {
     "fire": "li", "water": "kan", "grass": "xun",

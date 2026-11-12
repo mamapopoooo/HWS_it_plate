@@ -68,7 +68,7 @@ function back() {
 }
 
 function accentOf(tier: number): string {
-  return getTier(tier)?.bezelColor ?? '#8a8577'
+  return getTier(tier)?.bezelColor ?? '#858585'
 }
 </script>
 
@@ -211,14 +211,14 @@ function accentOf(tier: number): string {
 .gk__shard {
   padding: 6px 12px;
   border-radius: var(--r-sm);
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  background: rgba(201, 162, 39, 0.12);
-  color: #8a6a0b;
+  border: 1px solid rgba(160, 160, 160, 0.45);
+  background: rgba(160, 160, 160, 0.12);
+  color: #696969;
   white-space: nowrap;
 }
 .gk__shard {
-  border-color: rgba(62, 124, 89, 0.4);
-  background: rgba(62, 124, 89, 0.1);
+  border-color: rgba(101, 101, 101, 0.4);
+  background: rgba(101, 101, 101, 0.1);
   color: var(--stone-green);
 }
 
@@ -256,7 +256,7 @@ function accentOf(tier: number): string {
   transition: width var(--d-base) var(--e-out);
 }
 .gk__bar--gold > em {
-  background: linear-gradient(90deg, var(--gold), #e8c766);
+  background: linear-gradient(90deg, var(--gold), #c6c6c6);
 }
 .gk__pity-note {
   font-size: 11px;
@@ -330,7 +330,7 @@ function accentOf(tier: number): string {
   padding: 1px 6px;
   font-family: var(--font-title);
   font-size: 10px;
-  color: #f7efe0;
+  color: #f7f7f7;
   background: var(--accent);
   border-radius: 2px;
 }

@@ -63,7 +63,7 @@ defineProps<{
   font-family: var(--font-title);
   font-size: 11px;
   letter-spacing: 0.1em;
-  color: #f7efe0;
+  color: #f7f7f7;
   padding: 2px 7px;
   border-radius: 2px;
   background: var(--accent);

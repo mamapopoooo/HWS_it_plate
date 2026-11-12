@@ -195,9 +195,9 @@ function back() {
 .chr__wallet {
   padding: 6px 14px;
   font-size: 13px;
-  color: #8a6a0b;
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  background: rgba(201, 162, 39, 0.12);
+  color: #696969;
+  border: 1px solid rgba(160, 160, 160, 0.45);
+  background: rgba(160, 160, 160, 0.12);
   border-radius: var(--r-sm);
 }
 
@@ -231,10 +231,10 @@ function back() {
 }
 /* 立绘缺失时的占位：姓氏印章，尺寸就是正式立绘的预留位 */
 .chr__avatar--female {
-  background: linear-gradient(180deg, #d98b93, #8e2a3f);
+  background: linear-gradient(180deg, #a3a3a3, #4a4a4a);
 }
 .chr__avatar--male {
-  background: linear-gradient(180deg, #6a94b3, #24455c);
+  background: linear-gradient(180deg, #8b8b8b, #3e3e3e);
 }
 .chr__seal {
   font-family: var(--font-title);
@@ -283,8 +283,8 @@ function back() {
   cursor: pointer;
 }
 .chr__gender button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 
 /* ---------- 衣橱 ---------- */
@@ -329,29 +329,29 @@ function back() {
 }
 .skin.is-wearing {
   border-color: var(--gold);
-  box-shadow: inset 0 0 0 2px rgba(201, 162, 39, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(160, 160, 160, 0.45);
 }
 .skin__swatch {
   width: 44px;
   height: 58px;
   border-radius: 6px;
-  background: linear-gradient(180deg, #dcd2c0, #b9ad97);
+  background: linear-gradient(180deg, #d3d3d3, #aeaeae);
   box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.5);
 }
 .skin__swatch[data-theme='base'] {
-  background: linear-gradient(180deg, #e6ded0, #c3b8a2);
+  background: linear-gradient(180deg, #dfdfdf, #b9b9b9);
 }
 .skin__swatch[data-theme='school'] {
-  background: linear-gradient(180deg, #8fb2cc, #3f6d8f);
+  background: linear-gradient(180deg, #aaaaaa, #636363);
 }
 .skin__swatch[data-theme='hanfu'] {
-  background: linear-gradient(180deg, #b7d3bd, #3e7c59);
+  background: linear-gradient(180deg, #c8c8c8, #656565);
 }
 .skin__swatch[data-theme='season'] {
-  background: linear-gradient(180deg, #e8c98a, #c9a227);
+  background: linear-gradient(180deg, #cbcbcb, #a0a0a0);
 }
 .skin__swatch[data-theme='graduate'] {
-  background: linear-gradient(180deg, #cdb9e6, #6d4c9f);
+  background: linear-gradient(180deg, #c4c4c4, #5f5f5f);
 }
 .skin__name {
   font-family: var(--font-title);
@@ -363,7 +363,7 @@ function back() {
   color: var(--ink-3);
 }
 .skin.is-wearing .skin__price {
-  color: #8a6a0b;
+  color: #696969;
   font-weight: 700;
 }
 

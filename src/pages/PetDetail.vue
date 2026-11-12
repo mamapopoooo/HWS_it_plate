@@ -46,7 +46,7 @@ watch(
 )
 
 const image = computed(() => (pet.value ? formImage(pet.value, form.value) : ''))
-const accent = computed(() => tier.value?.bezelColor ?? '#8a8577')
+const accent = computed(() => tier.value?.bezelColor ?? '#858585')
 
 /** 觉醒一次的价格（按品阶） */
 const awakenCost = computed(() => {
@@ -217,7 +217,7 @@ function back() {
   padding: 3px 10px;
   font-family: var(--font-title);
   font-size: 12px;
-  color: #f7efe0;
+  color: #f7f7f7;
   border-radius: 3px;
 }
 .pd__tag--ghost {
@@ -245,7 +245,7 @@ function back() {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  background: radial-gradient(circle at 50% 40%, #fffdf6, var(--paper-2));
+  background: radial-gradient(circle at 50% 40%, #fbfbfb, var(--paper-2));
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-top: 4px solid var(--accent);
   border-radius: var(--r-md);
@@ -282,8 +282,8 @@ function back() {
   cursor: pointer;
 }
 .pd__form.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .pd__form-hint {
