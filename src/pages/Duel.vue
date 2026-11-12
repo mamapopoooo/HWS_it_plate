@@ -307,7 +307,7 @@ function back() {
   gap: 16px;
   padding: 12px 20px;
   border-bottom: 1px solid rgba(28, 28, 36, 0.16);
-  background: linear-gradient(180deg, rgba(242, 232, 213, 0.96), rgba(242, 232, 213, 0.6));
+  background: linear-gradient(180deg, rgba(233, 233, 227, 0.96), rgba(233, 233, 227, 0.6));
 }
 .duel__back {
   padding: 7px 14px;
@@ -621,7 +621,7 @@ function back() {
   justify-items: center;
   gap: 6px;
   padding: 26px 34px;
-  background: linear-gradient(180deg, #fbf5e8, #e8dcc2);
+  background: linear-gradient(180deg, #f5f5f0, #dcdcd4);
   border: 1px solid rgba(28, 28, 36, 0.3);
   border-radius: var(--r-lg);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);

@@ -50,8 +50,6 @@ async function submit() {
 
 <template>
   <div class="login gw-paper">
-    <div class="gw-mountain login__mt" aria-hidden="true" />
-    <div class="gw-mountain gw-mountain--near login__mt" aria-hidden="true" />
 
     <main class="login__card gw-scroll">
       <header class="login__head">
@@ -120,9 +118,7 @@ async function submit() {
   padding: 24px 16px;
   overflow: hidden;
 }
-.login__mt {
-  z-index: 0;
-}
+
 
 .login__card {
   position: relative;

@@ -37,7 +37,7 @@ const router = useRouter()
  *   ?bg=still   纯静态
  *   ?bgui=1     显示右下角切换条（开发环境默认显示）
  */
-const bgMode = ref<'breath' | 'still' | 'video'>('breath')
+const bgMode = ref<'breath' | 'still' | 'video'>('video')
 const bgSwitch = ref(false)
 const baseUrl = import.meta.env.BASE_URL
 const videoUrl = `${baseUrl}backgrounds/lobby.mp4`
@@ -330,10 +330,6 @@ onUnmounted(() => {
       <button class="gw-seal" @click="() => router.push('/ranking')">封神榜</button>
     </footer>
 
-    <!-- 水墨远山压在最底层 -->
-    <div class="gw-mountain lobby__mt" aria-hidden="true" />
-    <div class="gw-mountain gw-mountain--near lobby__mt" aria-hidden="true" />
-
     <!-- 背景对比切换条（开发环境或 ?bgui=1 时显示） -->
     <div v-if="bgSwitch" class="bg-switch" role="group" aria-label="背景效果对比">
       <button :class="{ 'is-on': bgMode === 'breath' }" @click="bgMode = 'breath'">镜头呼吸</button>
@@ -371,13 +367,13 @@ onUnmounted(() => {
   background-image:
     linear-gradient(
       90deg,
-      rgba(242, 232, 213, 0.96) 0%,
-      rgba(242, 232, 213, 0.86) 18%,
-      rgba(242, 232, 213, 0.5) 38%,
-      rgba(242, 232, 213, 0.28) 62%,
-      rgba(242, 232, 213, 0.52) 100%
+      rgba(233, 233, 227, 0.9) 0%,
+      rgba(233, 233, 227, 0.7) 18%,
+      rgba(233, 233, 227, 0.34) 38%,
+      rgba(233, 233, 227, 0.14) 62%,
+      rgba(233, 233, 227, 0.38) 100%
     ),
-    linear-gradient(180deg, rgba(242, 232, 213, 0.72) 0%, rgba(242, 232, 213, 0) 26%);
+    linear-gradient(180deg, rgba(233, 233, 227, 0.6) 0%, rgba(233, 233, 227, 0) 26%);
 }
 
 /* 镜头呼吸：极缓推近 + 微移，28s 一个来回，肉眼几乎察觉不到跳动 */
@@ -410,9 +406,9 @@ onUnmounted(() => {
   .lobby__bg::after {
     background-image: linear-gradient(
       180deg,
-      rgba(242, 232, 213, 0.9) 0%,
-      rgba(242, 232, 213, 0.45) 45%,
-      rgba(242, 232, 213, 0.9) 100%
+      rgba(233, 233, 227, 0.9) 0%,
+      rgba(233, 233, 227, 0.45) 45%,
+      rgba(233, 233, 227, 0.9) 100%
     );
   }
 }
@@ -502,10 +498,6 @@ onUnmounted(() => {
 .bg-switch button.is-on {
   color: #f7efe0;
   background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
-}
-
-.lobby__mt {
-  z-index: 0;
 }
 
 .lobby__body {
@@ -759,7 +751,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 14px;
   padding: 12px 18px;
-  background: linear-gradient(0deg, rgba(232, 220, 194, 0.96), rgba(242, 232, 213, 0.4));
+  background: linear-gradient(0deg, rgba(220, 220, 214, 0.94), rgba(233, 233, 227, 0.4));
   border-top: 1px solid rgba(28, 28, 36, 0.16);
 }
 
