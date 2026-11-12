@@ -164,17 +164,25 @@ node scripts\verify-build.mjs                        # 产物自检（部署前�
 ## 八、部署（手工，无 CI）
 
 ```powershell
-node node_modules\vue-tsc\bin\vue-tsc.js --noEmit
-node node_modules\vite\bin\vite.js build
-node scripts\verify-build.mjs          # 必须"通过"
-# 上传 dist/ 与 server/ 到服务器，重启 node server/index.js
+bash deploy.sh              # 构建 + 类型检查 + 产物自检 + 传输 + 线上校验
+bash deploy.sh --no-build   # 跳过构建，直接部署现有 dist/
+bash deploy.sh --check-only # 只校验线上，不传输（怀疑白屏时先跑这条）
 ```
+
+脚本存在的理由是 2026-11-04 的一次白屏事故：手动 `scp` 让线上 `index.html` 与 `assets/` 来自两次不同构建，`index.html` 引用了根本不存在的 `index-BlQSroqt.js`。**不要绕过脚本手工传文件**。脚本做四件事：
+
+1. `npm run build`（含 `vue-tsc`）+ `verify-build.mjs`，任一步失败即中止；
+2. 打成**单个 tar 包**上传 —— Git Bash 没有 `rsync`，而 `scp -r` 曾出现 87 个 chunk 只传上去 2 个的半传情况；
+3. 服务器上 `sudo rsync --delete` 同步，旧 chunk 与历史残留目录一并清掉，同步前自动留回滚包 `/tmp/pet-garden-webroot-backup.tgz`；
+4. 部署后逐条校验：`index.html` 引用的每个 assets 线上必须返回 200，本地与线上 assets 文件数必须相等，4 个 v3 公开 API 必须 200。任一不过 → 退出码 1 并打印回滚命令。
+
+> nginx 已对 `/pet-garden/index.html` 单独设 `no-cache`，带 hash 的 `assets/` 仍保留一年强缓存。
 
 | 项 | 值 |
 |---|---|
-| 服务器 | Ubuntu · `110.40.142.247` |
+| 服务器 | Ubuntu · `110.40.142.247`（用户 `ubuntu`，密钥 `~/.ssh/hw_server_key`） |
 | 前端路径 | `/var/www/hw-platform/pet-garden/` |
-| API 路径 | `/opt/pet-garden-server/` |
+| API 路径 | `/opt/pet-garden-server/`（PM2 进程 `pet-garden-api`） |
 | 端口 | 3002（API），Nginx 反代前端 |
 | 访问 | `http://110.40.142.247/pet-garden/` |
 
