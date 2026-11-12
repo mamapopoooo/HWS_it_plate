@@ -1,12 +1,20 @@
 // API 封装层
-const BASE_URL = '/api/v2'
+//
+// 基址必须跟着 Vite 的 base 走：Vite 配置了 base: '/pet-garden/'，
+// 开发期只有 '/pet-garden/api' 会被代理到后端（见 vite.config.ts），
+// 生产期由 Nginx 把 /pet-garden/api 转到 3002。写死 '/api/v2' 会打到 Vite 自己，
+// 拿到一段非 JSON 文本，前端就会报 "Unexpected token ..." 之类。
+const API_ROOT = `${import.meta.env.BASE_URL}api`.replace(/\/+$/, '')
+
+/** v2 业务接口（训练师/宠物/战斗/商城…）挂在 /api/v2 下 */
+const V2 = `${API_ROOT}/v2`
 
 function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
 async function request<T = any>(
-  path: string,
+  url: string,
   options: RequestInit = {}
 ): Promise<T> {
   const token = getToken()
@@ -18,36 +26,58 @@ async function request<T = any>(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers
-  })
+  const res = await fetch(url, { ...options, headers })
 
-  const data = await res.json()
+  // 后端没起来 / 被代理转成 HTML 时，不要直接 res.json()，否则报 "Unexpected token"
+  const text = await res.text()
+  let data: any = {}
+  if (text) {
+    try {
+      data = JSON.parse(text)
+    } catch {
+      if (res.status === 401) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = `${import.meta.env.BASE_URL}login`
+      }
+      throw new Error(
+        res.ok
+          ? '接口返回的不是 JSON，确认后端已在 3002 启动'
+          : `接口异常（HTTP ${res.status}），确认后端已在 3002 启动`
+      )
+    }
+  }
 
   if (!res.ok) {
     if (res.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/pet-garden/login'
+      window.location.href = `${import.meta.env.BASE_URL}login`
     }
     throw new Error(data.error || '请求失败')
   }
 
-  return data
+  return data as T
+}
+
+/** 认证类接口挂在 /api 下（不是 /api/v2） */
+const auth = {
+  get: <T = any>(path: string) => request<T>(`${API_ROOT}${path}`, { method: 'GET' }),
+  post: <T = any>(path: string, body?: any) =>
+    request<T>(`${API_ROOT}${path}`, { method: 'POST', body: JSON.stringify(body) }),
 }
 
 export const api = {
-  get: <T = any>(path: string) => request<T>(path, { method: 'GET' }),
+  get: <T = any>(path: string) => request<T>(`${V2}${path}`, { method: 'GET' }),
   post: <T = any>(path: string, body?: any) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+    request<T>(`${V2}${path}`, { method: 'POST', body: JSON.stringify(body) }),
 
-  // 认证
+  // 认证（/api/auth/*）
   studentLogin: (studentNo: string, realName: string) =>
-    api.post('/auth/student/login', { studentNo, realName }),
+    auth.post('/auth/student/login', { studentNo, realName }),
   adminLogin: (username: string, password: string) =>
-    api.post('/auth/admin/login', { username, password }),
-  getMe: () => api.get('/auth/me'),
+    auth.post('/auth/admin/login', { username, password }),
+  getMe: () => auth.get('/auth/me'),
 
   // 训练师
   getTrainer: () => api.get('/trainer/me'),
@@ -111,5 +141,5 @@ export const api = {
   createPet: (data: any) => api.post('/admin/pets/create', data),
   createSkin: (data: any) => api.post('/admin/skins/create', data),
   createQuest: (data: any) => api.post('/admin/quests/create', data),
-  createAchievement: (data: any) => api.post('/admin/achievements/create', data)
+  createAchievement: (data: any) => api.post('/admin/achievements/create', data),
 }
