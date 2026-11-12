@@ -86,6 +86,8 @@ npx vitest run         → 10 files / 207 tests 全过
 ```
 `npx vite build` + `node scripts/verify-build.mjs` + `node scripts/check-mojibake.mjs` 在本基线通过。
 
+> **给审核者的提醒**：这 207 项测的几乎都是纯函数（`gameConfig` / `gacha` / `duel` / `level` / `password` / `garbled`），**没有一项覆盖 `/api/v3/roster` 的字段映射**。所以上面那行绿灯不能作为名单管理可用的证据——§七 的 #2 就是从这条缝里漏出去的。
+
 ---
 
 ## 三、P0：学生登录有三套实现，直接合并会让名单登录失效
@@ -120,10 +122,10 @@ npx vitest run         → 10 files / 207 tests 全过
 - 连带影响：我给顶栏做的 `today_battles` 子查询（`server/routes/game-v2.js:140`，按 `player_a_id/player_b_id/created_at` 统计）列是存在的、查询能跑，但数出来永远是 0——不是顶栏的 bug，是没数据。
 - 修法二选一（等 Codex 定）：把 `game.js:313` 改成写 v2 列，或加一条补列迁移。**我没有动它**，因为跨了 KIMI 的战斗模块边界。
 
-### P1 — `xlsx` 依赖来自外网 CDN，生产 `npm ci` 可达性未验证
-- `package.json:29`：`"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"`。
-- 服务器拉不到这个 tgz，**教师端"上传表格导入名单"整条功能在生产就不可用**。本地能装不等于生产能装。
-- 建议：把 tgz vendoring 进仓库或换内网镜像，然后在服务器上实跑一次 `npm ci` 再宣布可用。
+### ~~P1~~ → P3 — `xlsx` 依赖挂在 CDN：我上一轮把这条写重了（已更正）
+- 实情：`xlsx` 只被 `src/pages/v3/admin/Students.vue:211` 前端引入，由 Vite 在**构建机**打进 bundle；`deploy.sh:47` 是本地 `npm run build` 后传静态产物，**远程不装前端依赖**。所以"生产拉不到 tgz → 导入功能不可用"这个推断不成立，Codex 的反驳是对的。
+- 残留风险只有一条：它挂在 `dependencies`（`package.json:29`）而不是 `devDependencies`，所以服务器若用同一份 manifest 跑 `npm ci`（哪怕 `--omit=dev`）仍会去访问 `cdn.sheetjs.com`。
+- 建议：挪进 `devDependencies` 即可彻底摘掉，不需要 vendoring。
 
 ### P2 — 与 origin/dev 重叠的文件 5 个
 `server/index.js`、`src/api/index.ts`、`src/components/layout/GameHud.vue`、`src/pages/GameLobby.vue`、`src/pages/Login.vue`——我在 dev-qoder 上改过，origin/dev 上也有别人的改动（尤其 `7f1a532` 动了 `server/index.js` + `server/routes/auth.js`）。逐文件三方比对时这几处优先看。
@@ -155,3 +157,41 @@ npx vite build && node scripts/verify-build.mjs
 node scripts/check-mojibake.mjs
 node server/index.js          # 默认 3002，可 PORT= 覆盖
 ```
+
+---
+
+## 七、对 Codex《GitHub插件增量复审》的逐条核对（2026-11-12）
+
+复审意见 6 条，我逐条对源码 + 实库验过：**5 条成立，1 条（xlsx）是他们驳对我驳错**。
+用户决定：**这一轮代码一条都不动**，等 Codex 出整合方案；本节只交核对结论。
+
+| # | 复审条目 | 判定 | 核对证据 |
+|---|---|---|---|
+| 1 | 登录整合阻塞 | **成立**，与本文 §三 同源 | 本地库 `SELECT COUNT(*) FROM users WHERE substr(username,1,4)='stu_'` → **0 条**。生产库未连（冻结中），该数字必须在生产重新盘点后再定迁移方案 |
+| 2 | 名单查询字段错 → 恒 0 / 恒未登录 | **成立，且已是用户可见缺陷** | 见下 §7.1 |
+| 3 | 学号唯一索引吞错仍记版本 9 | **成立**（本机侥幸已建成） | 见下 §7.2 |
+| 4 | 转班后年级不一致 | **成立** | 见下 §7.3 |
+| 5 | 年级回退写 0 | **逻辑成立，当前数据不触发** | `parseGrade` 只认 `G\d` 或「X年级」。现库班级为「六年级A班…七年级E班」，`students.grade` 分布 6:143 / 7:109，**无 0**。真隐患是 `Number(body.grade) \|\| parseGrade(...)` 连显式 0 一起吞 |
+| 6 | 简表导入清空已有档案 | **成立，上线前最易踩** | 见下 §7.4 |
+| — | xlsx CDN 可达性 | **他们对，我写重了** | 已把本文 §四 该条从 P1 降为 P3 并改正 |
+
+### 7.1 #2 — 教师端名单页两列是死的（我的漏检）
+`server/routes/roster.js:82` 的 SELECT 写的是 `u.game_points AS gamePoints`，而映射 `:108` 读的是 `r.game_points`；`last_login_at` **根本没进 SELECT**，`:112` 却读 `r.last_login_at`。
+实库跑同一条查询确认返回列名里只有 `gamePoints`，没有 `game_points`，也没有 `last_login_at` → `gamePoints` 恒走 `?? 0`，`loggedIn` 恒 false。
+前端 `src/pages/v3/admin/Students.vue:79` 渲染 `s.gamePoints`、`:82-83` 用它决定「已登录 / 未登录」徽章 → **教师看到的是全员 0 分、全员未登录**。
+修法：SELECT 补 `u.game_points`、`u.last_login_at`（或把映射改成读别名 `r.gamePoints`），并加一条断言映射键名的回归测试——**光看界面发现不了，整列同值看起来像正常数据**。
+
+### 7.2 #3 — 唯一索引是这道约束的**唯一**防线
+`server/game/migrate-roster.js:37-39` 的 `try { CREATE UNIQUE INDEX } catch {}` 之后照样 `markApplied(9)`。
+补一条他们没写的关键事实：实库 `students` 建表语句是 `student_no TEXT`，**表级没有 UNIQUE**，所以这个索引失败就等于约束完全不存在。本机库里它建成了（重复学号 0 组），所以现网无恙，但生产灌库若有重复就会「报成功、无约束」。
+修法：先 `SELECT student_no, COUNT(*) ... HAVING COUNT(*)>1` 预检，有重复直接抛错中止；建索引不再 catch；只有两步都成功才 `markApplied`。
+
+### 7.3 #4 — 转班会把年级滚回去
+`roster.js:268` 只 `UPDATE students SET class_id = ?`，`:278` 用 `parseGrade('', className)` 更新 `users.grade`，`students.grade` 保留旧值；而学生下次登录时 `server/routes/game-v2.js:53` 又 `UPDATE users SET ... grade = student.grade`，用 `students` 的旧值覆盖回去。
+按项目自己定的口径「students 是花名册权威源」，**权威源没更新才是根因**：转班应在同事务里同步 `students.grade`，登录覆盖才安全。
+
+### 7.4 #6 — 导入语义**已由用户定案**（修复时照这个做）
+现状：`server/game/import-roster.js:82` 对已存在的学号，把缺失字段直接写成 `name_en=''`、`gender=''`、`course=''`、`class_id=NULL`、`grade=0`。现库 252 人 `name_en` 是全填的，教师只要传一份「学号 + 姓名」两列简表，**英文名和班级就被清空**。
+
+> **用户决定：按「只更新表格里出现的列」实现**——列缺席 = 保持原值，永不清空；要故意清空某列走单条编辑界面。
+> 落地要点：`importRoster` 需按行的**键存在性**（不是值真假）拼 UPDATE 列，`dryRun` 相应该报「本次会写入哪些列 / 哪些列被跳过」，否则教师无从判断。
