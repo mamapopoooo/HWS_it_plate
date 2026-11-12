@@ -5,7 +5,7 @@
  * 每个函数都是「先试真实接口，失败则回落占位数据」——
  * 所以 Qoder 的 /api/v2 就绪后，前端不需要改任何页面，刷新即生效。
  *
- * 端点前缀：/pet-garden/api + /v2/*（见 00-总纲 §12）。
+ * 端点前缀：/api + /v2/*（见 00-总纲 §12），与 src/api/v3.ts 的 /api/v3 同源。
  */
 import { reactive } from 'vue'
 import { useAuth } from '@/composables/useAuth'
@@ -75,21 +75,34 @@ async function tryGet<T>(url: string, pick: (data: unknown) => T | null, fallbac
     const res = await api.get(url, { timeout: TIMEOUT })
     const value = pick(res.data)
     if (value !== null) return ok(value)
-  } catch {
-    /* 接口未就绪 → 走占位 */
+  } catch (err) {
+    // 回落是设计，但静默回落会长期掩盖前缀/路由错误（曾因此全站跑占位数据）。
+    console.warn(`[adapter] GET ${url} 未取到真实数据，回落占位：`, err)
+  }
+  return mock(fallback)
+}
+
+async function trySend<T>(
+  method: 'post' | 'put',
+  url: string,
+  body: unknown,
+  pick: (data: unknown) => T | null,
+  fallback: T
+): Promise<T> {
+  try {
+    const res = method === 'put'
+      ? await api.put(url, body, { timeout: TIMEOUT })
+      : await api.post(url, body, { timeout: TIMEOUT })
+    const value = pick(res.data)
+    if (value !== null) return ok(value)
+  } catch (err) {
+    console.warn(`[adapter] ${method.toUpperCase()} ${url} 未取到真实数据，回落占位：`, err)
   }
   return mock(fallback)
 }
 
 async function tryPost<T>(url: string, body: unknown, pick: (data: unknown) => T | null, fallback: T): Promise<T> {
-  try {
-    const res = await api.post(url, body, { timeout: TIMEOUT })
-    const value = pick(res.data)
-    if (value !== null) return ok(value)
-  } catch {
-    /* 同上 */
-  }
-  return mock(fallback)
+  return trySend('post', url, body, pick, fallback)
 }
 
 /* ---------------- 档案与钱包 ---------------- */
@@ -97,19 +110,24 @@ async function tryPost<T>(url: string, body: unknown, pick: (data: unknown) => T
 function pickProfile(data: unknown): Profile | null {
   const t = asRecord(asRecord(data)?.trainer)
   if (!t) return null
-  const nickname = str(t.nickname, str(t.real_name, '同学们'))
   const realName = str(t.real_name, '')
+  // 角色昵称来自 characters；没建角色时只显示真名，不能再拿真名顶两个位置（曾渲染成「张三 · 张三」）
+  const nickname = str(t.character_nickname, '')
+  const rosterGender = str(t.roster_gender, '')
   return {
     userId: str(t.user_id),
-    displayName: realName ? `${nickname} · ${realName}` : nickname,
-    nickname,
+    displayName: nickname && nickname !== realName ? `${nickname} · ${realName}` : realName || nickname || '同学们',
+    nickname: nickname || realName || '同学们',
     realName,
     grade: num(t.grade, 6) === 7 ? 7 : 6,
+    className: str(t.class_name, ''),
     realm: str(t.title, '练气'),
     trainerLevel: num(t.level, 1),
     points: num(t.game_points),
-    shards: num(t.fragments),
-    gender: (str(t.gender, 'female') === 'male' ? 'male' : 'female') as Gender,
+    todayPoints: num(t.today_points),
+    duelsToday: num(t.today_battles),
+    shards: num(t.fragment_total, num(t.fragments)),
+    gender: (rosterGender ? rosterGender === '男' : str(t.gender, '') === 'male') ? 'male' : 'female',
   }
 }
 
@@ -292,7 +310,8 @@ export async function drawOnServer(kind: 'single' | 'ten'): Promise<GachaDrawn[]
         fragments: num(r.fragments),
       }
     })
-  } catch {
+  } catch (err) {
+    console.warn('[adapter] POST /v2/gacha/draw 失败，改用本地求签：', err)
     return null
   }
 }
@@ -441,9 +460,9 @@ export async function createClass(name: string): Promise<ClassRow | null> {
   )
 }
 
-/** 修改学生（改名 / 改学号） */
+/** 修改学生（改名 / 改学号）——服务端是 PUT，早先写成 POST 一直没生效 */
 export async function updateStudent(id: string, patch: { name?: string; studentNo?: string }): Promise<boolean> {
-  return tryPost(`/students/${id}`, patch, (d) => Boolean(asRecord(d)?.success), false)
+  return trySend('put', `/students/${id}`, patch, (d) => Boolean(asRecord(d)?.success), false)
 }
 
 /** 删除学生 */
@@ -451,8 +470,8 @@ export async function deleteStudent(id: string): Promise<boolean> {
   try {
     const res = await api.delete(`/students/${id}`, { timeout: TIMEOUT })
     if (asRecord(res.data)?.success) return ok(true)
-  } catch {
-    /* 未就绪 */
+  } catch (err) {
+    console.warn(`[adapter] DELETE /students/${id} 失败：`, err)
   }
   return mock(false)
 }

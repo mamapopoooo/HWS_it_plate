@@ -75,13 +75,13 @@ async function submit() {
         <template v-if="mode === 'student'">
           <label class="login__field">
             <span>学号</span>
-            <input v-model="studentNo" autocomplete="username" placeholder="例：20260101" />
+            <input v-model="studentNo" autocomplete="username" placeholder="例：2026241" />
           </label>
           <label class="login__field">
             <span>姓名</span>
-            <input v-model="realName" autocomplete="name" placeholder="例：李四" />
+            <input v-model="realName" autocomplete="name" placeholder="中文名或英文名均可" />
           </label>
-          <p class="login__hint">学生免密登录：学号 + 姓名即可，名单由老师导入。</p>
+          <p class="login__hint">学生免密登录：学号 + 姓名（<b>中文或英文都行</b>），名单由老师导入。登不进就找老师核对学号。</p>
         </template>
 
         <template v-else>

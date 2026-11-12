@@ -6,6 +6,7 @@ import { initDb, db } from './db.js'
 import { calculateLevel } from './utils/level.js'
 import { migrateV2 } from './game/migrate-v2.js'
 import { migrateV3 } from './game/migrate-v3.js'
+import { migrateRoster } from './game/migrate-roster.js'
 import { importSeeds } from './game/import-seeds.js'
 
 // 导入路由
@@ -20,9 +21,10 @@ import customPetsRoutes from './routes/custom-pets.js'
 import gameRoutes from './routes/game.js'
 import gameV2Routes from './routes/game-v2.js'
 import gameV3Routes from './routes/game-v3.js'
+import rosterRoutes from './routes/roster.js'
 
 const app = express()
-const PORT = 3002
+const PORT = Number(process.env.PORT) || 3002
 
 // 课程平台地址（可在 settings 表中配置，默认空）
 function getPlatformUrl() {
@@ -45,6 +47,7 @@ app.use(express.json())
 initDb()
 migrateV2()
 migrateV3()
+migrateRoster()
 importSeeds()
 
 // 创建默认游客用户
@@ -91,6 +94,7 @@ app.use('/api/custom-pets', customPetsRoutes)
 app.use('/api/game', gameRoutes)
 app.use('/api/v2', gameV2Routes)
 app.use('/api/v3', gameV3Routes)
+app.use('/api/v3/roster', rosterRoutes)
 
 // 健康检查（公开）
 app.get('/api/health', (req, res) => {

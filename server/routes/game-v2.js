@@ -5,32 +5,54 @@ import { db } from '../db.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { generateToken } from '../utils/token.js'
 import { hashPassword, verifyPassword } from '../utils/password.js'
+import { normalizeName } from '../game/import-roster.js'
 
 const router = Router()
 
 // ========== 认证接口 ==========
 
-// 学生登录（学号+姓名免密）
+// 学生登录：学号 + 姓名（中文名或英文名任一匹配），名单是唯一准入依据
+//
+// 不再自动建号：以前任何学号都能登录，名单形同虚设，还会以 grade=6 兜底写脏数据。
+// 英文名重名率很高（同一个英文名在名单里能有好几个），所以姓名不能当标识符，必须先按学号定位再验名。
 router.post('/auth/student/login', (req, res) => {
-  const { studentNo, realName } = req.body
-  if (!studentNo || !realName) {
-    return res.status(400).json({ error: '缺少学号或姓名' })
+  const studentNo = String(req.body.studentNo || '').trim()
+  const inputName = String(req.body.realName || '').trim()
+  if (!studentNo || !inputName) {
+    return res.status(400).json({ error: '请输入学号和姓名' })
   }
 
-  let user = db.prepare('SELECT * FROM users WHERE username = ? AND role = ?').get(studentNo, 'student')
+  const student = db.prepare('SELECT * FROM students WHERE student_no = ?').get(studentNo)
+  if (!student) {
+    return res.status(401).json({ error: '名单里没有这个学号，请核对后重试或找老师' })
+  }
 
+  const typed = normalizeName(inputName)
+  const matched = typed === normalizeName(student.name) || typed === normalizeName(student.name_en)
+  if (!matched) {
+    return res.status(401).json({ error: '姓名和学号对不上，请找老师核对名单' })
+  }
+
+  const className = (() => {
+    const row = db.prepare('SELECT name FROM classes WHERE id = ?').get(student.class_id)
+    return row ? row.name : ''
+  })()
+
+  // 名单是事实来源，每次登录把身份行同步成名单的样子（game_points 等游戏数据不动）
+  let user = db.prepare("SELECT * FROM users WHERE username = ? AND role = 'student'").get(studentNo)
+  const now = Date.now()
   if (!user) {
-    // 自动创建学生账号
     const userId = uuidv4()
-    const now = Date.now()
     db.prepare(`
-      INSERT INTO users (id, username, password_hash, role, real_name, grade, is_guest, created_at, game_points, last_login_at)
-      VALUES (?, ?, ?, 'student', ?, 6, 0, ?, 0, ?)
-    `).run(userId, studentNo, '', realName, now, now)
+      INSERT INTO users (id, username, password_hash, role, real_name, name_en, grade, class_id_ref, is_guest, created_at, game_points, last_login_at)
+      VALUES (?, ?, '', 'student', ?, ?, ?, ?, 0, ?, 0, ?)
+    `).run(userId, studentNo, student.name, student.name_en, student.grade, student.class_id, now, now)
     user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId)
   } else {
-    // 更新最后登录时间
-    db.prepare('UPDATE users SET last_login_at = ? WHERE id = ?').run(Date.now(), user.id)
+    db.prepare(`
+      UPDATE users SET real_name = ?, name_en = ?, grade = ?, class_id_ref = ?, last_login_at = ? WHERE id = ?
+    `).run(student.name, student.name_en, student.grade, student.class_id, now, user.id)
+    user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id)
   }
 
   // 确保训练师记录存在
@@ -47,8 +69,10 @@ router.post('/auth/student/login', (req, res) => {
       id: user.id,
       username: user.username,
       realName: user.real_name,
+      nameEn: user.name_en,
       role: user.role,
       grade: user.grade,
+      className,
       gamePoints: user.game_points
     }
   })
@@ -102,13 +126,24 @@ router.get('/auth/me', authMiddleware, (req, res) => {
 // ========== 训练师接口 ==========
 
 // 获取我的训练师信息
+// 顶栏要的班级、今日功名、今日斗法、灵纹都不在 trainers 里，这里一次性算好带上，
+// 免得前端再发四个请求或干脆写死假数据。派生字段一律用子查询，避免 JOIN 把行数乘开。
 router.get('/trainer/me', authMiddleware, (req, res) => {
+  const todayStart = new Date().setHours(0, 0, 0, 0)
   const trainer = db.prepare(`
-    SELECT t.*, u.username, u.real_name, u.grade, u.game_points
+    SELECT t.*, u.username, u.real_name, u.name_en, u.grade, u.game_points,
+      (SELECT nickname FROM characters WHERE user_id = t.user_id LIMIT 1) AS character_nickname,
+      (SELECT name FROM classes WHERE id = u.class_id_ref) AS class_name,
+      (SELECT gender FROM students WHERE student_no = u.username LIMIT 1) AS roster_gender,
+      COALESCE((SELECT SUM(amount) FROM game_points_records r
+                WHERE r.user_id = t.user_id AND r.created_at >= ?), 0) AS today_points,
+      (SELECT COUNT(*) FROM battle_records b
+        WHERE (b.player_a_id = t.user_id OR b.player_b_id = t.user_id) AND b.created_at >= ?) AS today_battles,
+      COALESCE((SELECT SUM(count) FROM player_fragments f WHERE f.user_id = t.user_id), 0) AS fragment_total
     FROM trainers t
     JOIN users u ON t.user_id = u.id
     WHERE t.user_id = ?
-  `).get(req.userId)
+  `).get(todayStart, todayStart, req.userId)
 
   if (!trainer) {
     return res.status(404).json({ error: '训练师信息不存在' })

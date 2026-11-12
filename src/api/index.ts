@@ -26,7 +26,10 @@ async function request<T = any>(
   const data = await res.json()
 
   if (!res.ok) {
-    if (res.status === 401) {
+    // 401 有两种含义：登录本身失败（账号名单不对）和 token 过期。
+    // 前者必须把服务端的文案交给登录页显示，不能当过期处理强刷页面。
+    const isLoginCall = path.startsWith('/auth/')
+    if (res.status === 401 && !isLoginCall) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/pet-garden/login'

@@ -12,8 +12,10 @@ const user = ref<User | null>(null)
 const token = ref<string>(localStorage.getItem('token') || '')
 
 // 创建带认证的 axios 实例（单例）
+// baseURL 用 /api 而不是 /pet-garden/api：生产由 nginx 代理 /api/ → :3002，
+// 与 00-总纲 §12、src/api/v3.ts 的 /api/v3 保持同一前缀。
 const api = axios.create({
-  baseURL: '/pet-garden/api'
+  baseURL: '/api'
 })
 
 // 请求拦截器：自动添加 Authorization header

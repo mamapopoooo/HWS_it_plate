@@ -25,7 +25,8 @@
     "pinia": "^2.1.0",
     "uuid": "^9.0.0",
     "vue": "^3.4.0",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
