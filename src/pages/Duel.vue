@@ -164,8 +164,6 @@ function back() {
 
 <template>
   <div class="duel gw-paper">
-    <div class="gw-mountain duel__mt" aria-hidden="true" />
-    <div class="gw-mountain gw-mountain--near duel__mt" aria-hidden="true" />
 
     <header class="duel__head">
       <button class="duel__back" @click="back">← 大厅</button>
@@ -295,9 +293,6 @@ function back() {
   overflow: hidden;
 }
 
-.duel__mt {
-  z-index: 0;
-}
 
 .duel__head {
   position: relative;
