@@ -143,8 +143,8 @@ function onKey(e: KeyboardEvent) {
   position: absolute;
   inset: 10px 0 0;
   border-radius: 10px 10px 14px 14px;
-  background: linear-gradient(100deg, #a9784f, #d9b083 42%, #8d613c);
-  box-shadow: inset 0 0 0 2px rgba(255, 241, 214, 0.35), 0 10px 20px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(100deg, #828282, #b7b7b7 42%, #6a6a6a);
+  box-shadow: inset 0 0 0 2px rgba(242, 242, 242, 0.35), 0 10px 20px rgba(0, 0, 0, 0.35);
 }
 /* 竹节 */
 .tube__body::after {
@@ -152,8 +152,8 @@ function onKey(e: KeyboardEvent) {
   position: absolute;
   inset: 30% 6% auto;
   height: 2px;
-  background: rgba(90, 58, 32, 0.5);
-  box-shadow: 0 30px 0 rgba(90, 58, 32, 0.5);
+  background: rgba(65, 65, 65, 0.5);
+  box-shadow: 0 30px 0 rgba(65, 65, 65, 0.5);
 }
 .tube__lip {
   position: absolute;
@@ -162,7 +162,7 @@ function onKey(e: KeyboardEvent) {
   right: 2px;
   height: 16px;
   border-radius: 8px;
-  background: linear-gradient(180deg, #f0d8b4, #b98d5e);
+  background: linear-gradient(180deg, #dbdbdb, #959595);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
@@ -173,8 +173,8 @@ function onKey(e: KeyboardEvent) {
   width: 22px;
   height: 96px;
   border-radius: 4px;
-  background: linear-gradient(180deg, #dff7ea, #86c9a6 60%, #4f9678);
-  box-shadow: 0 0 18px rgba(126, 200, 165, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background: linear-gradient(180deg, #eeeeee, #b1b1b1 60%, #7d7d7d);
+  box-shadow: 0 0 18px rgba(174, 174, 174, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   opacity: 0;
   transform: translateY(20px);
 }
@@ -182,7 +182,7 @@ function onKey(e: KeyboardEvent) {
   position: absolute;
   inset: 12px 6px;
   border-radius: 2px;
-  background: repeating-linear-gradient(180deg, rgba(30, 80, 60, 0.35) 0 2px, transparent 2px 10px);
+  background: repeating-linear-gradient(180deg, rgba(63, 63, 63, 0.35) 0 2px, transparent 2px 10px);
 }
 
 /* ---------- 光爆 ---------- */
@@ -228,9 +228,9 @@ function onKey(e: KeyboardEvent) {
   min-width: 220px;
   padding: 16px 28px;
   text-align: center;
-  background: linear-gradient(180deg, #fbf5e8, #e8dcc2);
-  border-left: 6px solid #6b4a2c;
-  border-right: 6px solid #6b4a2c;
+  background: linear-gradient(180deg, #f5f5f5, #dddddd);
+  border-left: 6px solid #505050;
+  border-right: 6px solid #505050;
   border-radius: 3px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(255, 253, 246, 0.8);
 }
@@ -245,7 +245,7 @@ function onKey(e: KeyboardEvent) {
   font-family: var(--font-title);
   font-size: 12px;
   letter-spacing: 0.1em;
-  color: #f7efe0;
+  color: #f7f7f7;
   background: var(--accent);
   border-radius: 2px;
 }
@@ -278,7 +278,7 @@ function onKey(e: KeyboardEvent) {
   bottom: 18px;
   padding: 6px 14px;
   font-size: 12px;
-  color: #fbf5e8;
+  color: #f5f5f5;
   background: rgba(255, 253, 246, 0.14);
   border: 1px solid rgba(255, 253, 246, 0.3);
   border-radius: 999px;

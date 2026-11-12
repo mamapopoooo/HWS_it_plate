@@ -19,12 +19,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #FF9F43, #FF6B9D);
+  background: linear-gradient(180deg, #b1b1b1, #9d9d9d);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #FF8C2B, #FF5A8D);
+  background: linear-gradient(180deg, #a3a3a3, #919191);
 }
 
 /* 卡片悬浮效果 */
@@ -59,7 +59,7 @@ body {
     inset: -2px;
     border-radius: inherit;
     padding: 2px;
-    background: linear-gradient(135deg, #FF9F43, #FF6B9D, #A855F7);
+    background: linear-gradient(135deg, #b1b1b1, #9d9d9d, #808080);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -76,7 +76,7 @@ body {
     position: absolute;
     width: 20px;
     height: 20px;
-    background: radial-gradient(circle, #FFD700 0%, transparent 70%);
+    background: radial-gradient(circle, #cacaca 0%, transparent 70%);
     border-radius: 50%;
     animation: sparkle 1.5s ease-in-out infinite;
   }

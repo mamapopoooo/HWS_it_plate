@@ -307,9 +307,9 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   white-space: nowrap;
 }
 .rv__stat--pending {
-  color: #8a6a0b;
-  border-color: rgba(201, 162, 39, 0.5);
-  background: rgba(201, 162, 39, 0.12);
+  color: #696969;
+  border-color: rgba(160, 160, 160, 0.5);
+  background: rgba(160, 160, 160, 0.12);
 }
 
 .rv__body {
@@ -346,8 +346,8 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   cursor: pointer;
 }
 .rv__filters button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 
@@ -369,7 +369,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
 }
 .entry.is-on {
   border-color: var(--gold);
-  box-shadow: inset 0 0 0 2px rgba(201, 162, 39, 0.35);
+  box-shadow: inset 0 0 0 2px rgba(160, 160, 160, 0.35);
 }
 .entry__seal {
   display: grid;
@@ -379,8 +379,8 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   flex: none;
   font-family: var(--font-title);
   font-size: 16px;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #2b2b2b, var(--cinnabar-d));
   border-radius: 4px;
   transform: rotate(-3deg);
 }
@@ -535,8 +535,8 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   gap: 4px;
   margin-top: 14px;
   padding: 10px 12px;
-  background: rgba(192, 57, 43, 0.05);
-  border: 1px solid rgba(192, 57, 43, 0.25);
+  background: rgba(96, 96, 96, 0.05);
+  border: 1px solid rgba(96, 96, 96, 0.25);
   border-radius: var(--r-sm);
 }
 .rv__safety-head {
@@ -598,13 +598,13 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
 }
 .rv__done[data-status='approved'] {
   color: var(--stone-green);
-  border-color: rgba(62, 124, 89, 0.45);
-  background: rgba(62, 124, 89, 0.1);
+  border-color: rgba(101, 101, 101, 0.45);
+  background: rgba(101, 101, 101, 0.1);
 }
 .rv__done[data-status='rejected'] {
   color: var(--cinnabar);
-  border-color: rgba(192, 57, 43, 0.45);
-  background: rgba(192, 57, 43, 0.08);
+  border-color: rgba(96, 96, 96, 0.45);
+  background: rgba(96, 96, 96, 0.08);
 }
 
 .rv__empty {

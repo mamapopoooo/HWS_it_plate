@@ -10,15 +10,15 @@
 .duel-page {
   --duel-bg: #14110e;
   --duel-panel: #1f1a14;
-  --duel-panel-2: #2a231a;
-  --duel-panel-3: #362c20;
-  --duel-line: rgba(201, 162, 39, 0.28);
-  --duel-text: #ede4d3;
-  --duel-sub: #a99e8a;
-  --duel-gold: #d8b558;
-  --duel-cinnabar: #c0392b;
-  --duel-jade: #7fa88a;
-  --duel-steel: #2e5c8a;
+  --duel-panel-2: #242424;
+  --duel-panel-3: #2e2e2e;
+  --duel-line: rgba(160, 160, 160, 0.28);
+  --duel-text: #e5e5e5;
+  --duel-sub: #9f9f9f;
+  --duel-gold: #b5b5b5;
+  --duel-cinnabar: #1f1f1f;
+  --duel-jade: #989898;
+  --duel-steel: #535353;
 
   font-family: var(--font-body);
   color: var(--duel-text);
@@ -65,14 +65,14 @@
 
 /* ---------- 战场背景（替换蓝绿渐变） ---------- */
 .duel-page [class*='from-blue-900'] {
-  background-image: radial-gradient(circle at 50% 32%, #2a333a 0%, #141a1d 62%, #0c1012 100%);
+  background-image: radial-gradient(circle at 50% 32%, #313131 0%, #141a1d 62%, #0c1012 100%);
 }
 
 /* ---------- 按钮：朱砂漆章 ---------- */
 .duel-page [class*='bg-orange-500'],
 .duel-page [class*='bg-orange-600'] {
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
-  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, 0.32), 0 4px 12px rgba(142, 42, 32, 0.3);
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
+  box-shadow: inset 0 0 0 1.5px rgba(240, 240, 240, 0.32), 0 4px 12px rgba(71, 71, 71, 0.3);
   border-radius: 4px;
   font-family: var(--font-title);
   letter-spacing: 0.08em;
@@ -82,28 +82,28 @@
 }
 .duel-page [class*='bg-blue-600'],
 .duel-page [class*='bg-blue-500'] {
-  background: linear-gradient(180deg, #3f6d8f, #24455c);
-  box-shadow: inset 0 0 0 1.5px rgba(237, 228, 211, 0.28);
+  background: linear-gradient(180deg, #636363, #3e3e3e);
+  box-shadow: inset 0 0 0 1.5px rgba(229, 229, 229, 0.28);
   border-radius: 4px;
   font-family: var(--font-title);
 }
 
 /* ---------- 血条：玉 vs 朱砂 ---------- */
 .duel-page [class*='bg-green-500'] {
-  background: linear-gradient(90deg, #5f9a7c, #9ccbb0);
-  box-shadow: 0 0 8px rgba(127, 168, 138, 0.5);
+  background: linear-gradient(90deg, #858585, #bababa);
+  box-shadow: 0 0 8px rgba(152, 152, 152, 0.5);
 }
 .duel-page [class*='bg-red-500'] {
-  background: linear-gradient(90deg, #b8402f, #d9745f);
-  box-shadow: 0 0 8px rgba(192, 57, 43, 0.5);
+  background: linear-gradient(90deg, #626262, #909090);
+  box-shadow: 0 0 8px rgba(96, 96, 96, 0.5);
 }
 
 /* ---------- 边框 ---------- */
 .duel-page [class*='border-orange-500'] {
-  border-color: rgba(201, 162, 39, 0.75);
+  border-color: rgba(160, 160, 160, 0.75);
 }
 .duel-page [class*='border-orange-400'] {
-  border-color: rgba(201, 162, 39, 0.85);
+  border-color: rgba(160, 160, 160, 0.85);
 }
 .duel-page [class*='border-gray-600'],
 .duel-page [class*='border-gray-700'] {
@@ -112,7 +112,7 @@
 
 /* ---------- 角色卡与选中态 ---------- */
 .duel-page [class*='bg-orange-900'] {
-  background-color: rgba(142, 42, 32, 0.35);
+  background-color: rgba(71, 71, 71, 0.35);
 }
 .duel-page [class*='rounded-lg'] {
   border-radius: 5px;

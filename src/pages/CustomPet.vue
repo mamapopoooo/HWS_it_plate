@@ -256,14 +256,14 @@ function back() {
   white-space: nowrap;
 }
 .cp__status[data-status='pending'] {
-  color: #8a6a0b;
-  border-color: rgba(201, 162, 39, 0.5);
-  background: rgba(201, 162, 39, 0.12);
+  color: #696969;
+  border-color: rgba(160, 160, 160, 0.5);
+  background: rgba(160, 160, 160, 0.12);
 }
 .cp__status[data-status='approved'] {
   color: var(--stone-green);
-  border-color: rgba(62, 124, 89, 0.5);
-  background: rgba(62, 124, 89, 0.12);
+  border-color: rgba(101, 101, 101, 0.5);
+  background: rgba(101, 101, 101, 0.12);
 }
 
 .cp__body {
@@ -324,13 +324,13 @@ function back() {
 }
 .cp__check.is-ok {
   color: var(--stone-green);
-  border-color: rgba(62, 124, 89, 0.3);
-  background: rgba(62, 124, 89, 0.08);
+  border-color: rgba(101, 101, 101, 0.3);
+  background: rgba(101, 101, 101, 0.08);
 }
 .cp__check.is-bad {
   color: var(--cinnabar);
-  border-color: rgba(192, 57, 43, 0.3);
-  background: rgba(192, 57, 43, 0.08);
+  border-color: rgba(96, 96, 96, 0.3);
+  background: rgba(96, 96, 96, 0.08);
 }
 .cp__rules {
   margin: 0;
@@ -426,7 +426,7 @@ function back() {
 }
 .effect.is-picked {
   border-color: var(--gold);
-  box-shadow: inset 0 0 0 2px rgba(201, 162, 39, 0.4);
+  box-shadow: inset 0 0 0 2px rgba(160, 160, 160, 0.4);
 }
 .effect:disabled {
   opacity: 0.6;

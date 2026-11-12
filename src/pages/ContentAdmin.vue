@@ -293,14 +293,14 @@ function back() {
   padding: 4px 10px;
   font-size: 11px;
   color: var(--cinnabar);
-  border: 1px solid rgba(192, 57, 43, 0.35);
-  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(96, 96, 96, 0.35);
+  background: rgba(96, 96, 96, 0.08);
   border-radius: var(--r-sm);
 }
 .ca__badge.is-ok {
   color: var(--stone-green);
-  border-color: rgba(62, 124, 89, 0.35);
-  background: rgba(62, 124, 89, 0.08);
+  border-color: rgba(101, 101, 101, 0.35);
+  background: rgba(101, 101, 101, 0.08);
 }
 
 .ca__tabs {
@@ -320,8 +320,8 @@ function back() {
   cursor: pointer;
 }
 .ca__tab.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .ca__tab b {
@@ -361,8 +361,8 @@ function back() {
   cursor: pointer;
 }
 .ca__chip.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .ca__count {
@@ -388,7 +388,7 @@ function back() {
   font-family: var(--font-title);
   font-weight: 600;
   color: var(--ink);
-  background: rgba(232, 220, 194, 0.8);
+  background: rgba(228, 228, 228, 0.8);
   white-space: nowrap;
 }
 .ca__table tr:last-child td {

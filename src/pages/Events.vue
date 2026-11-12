@@ -170,8 +170,8 @@ function back() {
   cursor: pointer;
 }
 .ev__tabs button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 .ev__tabs b {
   font-weight: 700;
@@ -208,7 +208,7 @@ function back() {
 .card__banner {
   position: relative;
   height: 96px;
-  background-image: linear-gradient(120deg, #d9c9a8, #b9a888);
+  background-image: linear-gradient(120deg, #cacaca, #a9a9a9);
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid rgba(28, 28, 36, 0.14);
@@ -220,15 +220,15 @@ function back() {
   padding: 2px 10px;
   font-family: var(--font-title);
   font-size: 11px;
-  color: #f7efe0;
-  background: rgba(142, 42, 32, 0.9);
+  color: #f7f7f7;
+  background: rgba(71, 71, 71, 0.9);
   border-radius: 2px;
 }
 .card[data-phase='upcoming'] .card__phase {
-  background: rgba(46, 92, 138, 0.9);
+  background: rgba(83, 83, 83, 0.9);
 }
 .card[data-phase='ended'] .card__phase {
-  background: rgba(74, 74, 90, 0.85);
+  background: rgba(76, 76, 76, 0.85);
 }
 
 .card__body {

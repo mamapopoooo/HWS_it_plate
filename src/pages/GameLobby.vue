@@ -30,6 +30,26 @@ import {
 
 const router = useRouter()
 
+/**
+ * 背景模式（可用 URL 参数对比效果）：
+ *   ?bg=breath  静态图 + 镜头呼吸（默认）
+ *   ?bg=video   循环视频
+ *   ?bg=still   纯静态
+ *   ?bgui=1     显示右下角切换条（开发环境默认显示）
+ */
+const bgMode = ref<'breath' | 'still' | 'video'>('video')
+const bgSwitch = ref(false)
+const baseUrl = import.meta.env.BASE_URL
+/**
+ * 背景素材版本号：换视频/海报时 +1。
+ *
+ * 原因：vite 对静态资源发的是 Cache-Control: immutable（一年），
+ * 同名替换文件后浏览器仍用旧缓存，会让人以为"改了没生效"。
+ */
+const BG_VERSION = '3'
+const videoUrl = `${baseUrl}backgrounds/lobby.mp4?v=${BG_VERSION}`
+const posterUrl = `${baseUrl}backgrounds/lobby.jpg?v=${BG_VERSION}`
+
 /** 玩家档案：由 adapter 填充（真接口优先，未就绪回落占位） */
 const profile = ref<Profile>(DEMO_PROFILE)
 
@@ -37,6 +57,11 @@ const profile = ref<Profile>(DEMO_PROFILE)
 const activeEventList = ref<EventDef[]>(activeEvents())
 
 onMounted(async () => {
+  const q = new URLSearchParams(window.location.search)
+  const bg = q.get('bg')
+  if (bg === 'video' || bg === 'still' || bg === 'breath') bgMode.value = bg
+  bgSwitch.value = q.has('bgui') || import.meta.env.DEV
+
   profile.value = await fetchProfile()
   const list = await fetchEvents()
   activeEventList.value = list.filter((e) => eventPhase(e) === 'active')
@@ -137,7 +162,7 @@ let happyTimer: ReturnType<typeof setTimeout> | undefined
 
 const current = computed<PetView | null>(() => demoPets.value[activeTier.value] ?? null)
 const currentTier = computed(() => getTier(activeTier.value))
-const accent = computed(() => currentTier.value?.bezelColor ?? '#c9a227')
+const accent = computed(() => currentTier.value?.bezelColor ?? '#a0a0a0')
 const aura = computed(() => Math.min(1, 0.2 + activeTier.value * 0.16))
 const power = computed(() =>
   current.value ? calcPower(current.value.tier, current.value.level, current.value.awaken) : 0,
@@ -170,7 +195,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="lobby gw-paper gw-lobby-bg">
+  <div class="lobby gw-paper">
+    <!-- 背景层：静态图 / 镜头呼吸 / 循环视频，三选一（?bg=breath|still|video） -->
+    <div class="lobby__bg" :class="`is-${bgMode}`" aria-hidden="true">
+      <video
+        v-if="bgMode === 'video'"
+        class="lobby__bg-video"
+        :src="videoUrl"
+        :poster="posterUrl"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      />
+    </div>
+
     <!-- 云气层：两团极淡的云以不同速度横移，营造"云在走"的呼吸感（纯 CSS，无额外素材） -->
     <div class="lobby__fx" aria-hidden="true">
       <i class="cloud cloud--a" />
@@ -299,9 +339,12 @@ onUnmounted(() => {
       <button class="gw-seal" @click="() => router.push('/ranking')">封神榜</button>
     </footer>
 
-    <!-- 水墨远山压在最底层 -->
-    <div class="gw-mountain lobby__mt" aria-hidden="true" />
-    <div class="gw-mountain gw-mountain--near lobby__mt" aria-hidden="true" />
+    <!-- 背景对比切换条（开发环境或 ?bgui=1 时显示） -->
+    <div v-if="bgSwitch" class="bg-switch" role="group" aria-label="背景效果对比">
+      <button :class="{ 'is-on': bgMode === 'breath' }" @click="bgMode = 'breath'">镜头呼吸</button>
+      <button :class="{ 'is-on': bgMode === 'video' }" @click="bgMode = 'video'">循环视频</button>
+      <button :class="{ 'is-on': bgMode === 'still' }" @click="bgMode = 'still'">纯静态</button>
+    </div>
   </div>
 </template>
 
@@ -313,6 +356,71 @@ onUnmounted(() => {
   flex-direction: column;
   min-height: 100dvh;
   overflow: hidden;
+}
+
+/* ---------- 背景层 ---------- */
+.lobby__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: url('/pet-garden/backgrounds/lobby.jpg');
+  background-size: cover;
+  background-position: center 46%;
+  background-repeat: no-repeat;
+  filter: grayscale(1) contrast(1.06) brightness(1.02);
+}
+/* 遮罩：左侧压亮保功能坞可读，右侧留出山水 */
+.lobby__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(244, 244, 244, 0.9) 0%,
+      rgba(244, 244, 244, 0.7) 18%,
+      rgba(244, 244, 244, 0.34) 38%,
+      rgba(244, 244, 244, 0.14) 62%,
+      rgba(244, 244, 244, 0.38) 100%
+    ),
+    linear-gradient(180deg, rgba(244, 244, 244, 0.6) 0%, rgba(244, 244, 244, 0) 26%);
+}
+
+/* 镜头呼吸：极缓推近 + 微移，28s 一个来回，肉眼几乎察觉不到跳动 */
+.lobby__bg.is-breath {
+  animation: lobby-breathe 28s ease-in-out infinite alternate;
+  transform-origin: 52% 46%;
+  will-change: transform;
+}
+@keyframes lobby-breathe {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.045) translate3d(-1.1%, -0.7%, 0);
+  }
+}
+
+.lobby__bg-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 竖屏：遮罩改成上下渐变 */
+@media (max-width: 760px) {
+  .lobby__bg {
+    background-position: center 40%;
+  }
+  .lobby__bg::after {
+    background-image: linear-gradient(
+      180deg,
+      rgba(244, 244, 244, 0.9) 0%,
+      rgba(244, 244, 244, 0.45) 45%,
+      rgba(244, 244, 244, 0.9) 100%
+    );
+  }
 }
 
 /* ---------- 云气层 ---------- */
@@ -363,15 +471,43 @@ onUnmounted(() => {
   }
 }
 
-/* 减少动态：关掉云气动画（系统级无障碍设置） */
+/* 减少动态：关掉云气与呼吸动画（系统级无障碍设置） */
 @media (prefers-reduced-motion: reduce) {
   .cloud {
     animation: none;
   }
+  .lobby__bg.is-breath {
+    animation: none;
+  }
 }
 
-.lobby__mt {
-  z-index: 0;
+/* 背景对比切换条 */
+.bg-switch {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 50;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 253, 246, 0.92);
+  border: 1px solid rgba(28, 28, 36, 0.22);
+  border-radius: 999px;
+  box-shadow: var(--sh-paper);
+}
+.bg-switch button {
+  padding: 5px 12px;
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.bg-switch button.is-on {
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
 }
 
 .lobby__body {
@@ -418,9 +554,9 @@ onUnmounted(() => {
   color: var(--ink);
 }
 .stage__tab.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
-  box-shadow: 0 2px 6px rgba(142, 42, 32, 0.3);
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
+  box-shadow: 0 2px 6px rgba(71, 71, 71, 0.3);
 }
 
 .stage__meta {
@@ -446,20 +582,20 @@ onUnmounted(() => {
   color: var(--ink-2);
 }
 .stage__style[data-style='meng'] {
-  color: #b5637d;
-  background: rgba(212, 84, 107, 0.1);
+  color: #7e7e7e;
+  background: rgba(125, 125, 125, 0.1);
 }
 .stage__style[data-style='jun'] {
   color: var(--stone-blue);
-  background: rgba(46, 92, 138, 0.1);
+  background: rgba(83, 83, 83, 0.1);
 }
 .stage__style[data-style='ya'] {
   color: var(--stone-green);
-  background: rgba(62, 124, 89, 0.1);
+  background: rgba(101, 101, 101, 0.1);
 }
 .stage__style[data-style='qi'] {
   color: var(--trigram-zhen);
-  background: rgba(109, 76, 159, 0.1);
+  background: rgba(95, 95, 95, 0.1);
 }
 .stage__touch {
   padding: 5px 14px;
@@ -613,7 +749,7 @@ onUnmounted(() => {
   font-size: 11px;
   color: var(--stone-blue);
   cursor: pointer;
-  border-bottom: 1px dotted rgba(46, 92, 138, 0.5);
+  border-bottom: 1px dotted rgba(83, 83, 83, 0.5);
 }
 
 /* ---------- 底部 ---------- */
@@ -625,7 +761,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 14px;
   padding: 12px 18px;
-  background: linear-gradient(0deg, rgba(232, 220, 194, 0.96), rgba(242, 232, 213, 0.4));
+  background: linear-gradient(0deg, rgba(220, 220, 214, 0.94), rgba(244, 244, 244, 0.4));
   border-top: 1px solid rgba(28, 28, 36, 0.16);
 }
 

@@ -6,50 +6,50 @@
 
 :root {
   /* ---------- 宣纸与墨 ---------- */
-  --paper: #f2e8d5;
-  --paper-2: #e8dcc2;
-  --paper-3: #dccdae;
-  --paper-light: #fbf5e8;
-  --ink: #1c1c24;
-  --ink-2: #4a4a5a;
-  --ink-3: #8a8577;
+  --paper: #f2f2f2;
+  --paper-2: #e4e4e4;
+  --paper-3: #cfcfcf;
+  --paper-light: #fafafa;
+  --ink: #111111;
+  --ink-2: #3a3a3a;
+  --ink-3: #767676;
 
   /* ---------- 国风强调色 ---------- */
-  --cinnabar: #c0392b;
-  --cinnabar-d: #8e2a20;
-  --gold: #c9a227;
-  --jade: #7fa88a;
-  --gamboge: #e8b33a;
-  --stone-blue: #2e5c8a;
-  --stone-green: #3e7c59;
+  --cinnabar: #1f1f1f;
+  --cinnabar-d: #0d0d0d;
+  --gold: #8a8a8a;
+  --jade: #6b6b6b;
+  --gamboge: #9a9a9a;
+  --stone-blue: #454545;
+  --stone-green: #3d3d3d;
 
   /* ---------- 八卦八色（与 trigrams.json 一致） ---------- */
-  --trigram-qian: #2e5c8a;
-  --trigram-kun: #c8a165;
-  --trigram-zhen: #6d4c9f;
-  --trigram-xun: #3e7c59;
-  --trigram-kan: #1f4e79;
-  --trigram-li: #c0392b;
-  --trigram-gen: #8c6239;
-  --trigram-dui: #3e9e8f;
+  --trigram-qian: #454545;
+  --trigram-kun: #a6a6a6;
+  --trigram-zhen: #5f5f5f;
+  --trigram-xun: #3d3d3d;
+  --trigram-kan: #454545;
+  --trigram-li: #1f1f1f;
+  --trigram-gen: #6a6a6a;
+  --trigram-dui: #808080;
 
   /* ---------- 四象四色 ---------- */
-  --sx-qinglong: #2e7d6b;
-  --sx-baihu: #b8b8a8;
-  --sx-zhuque: #c1392b;
-  --sx-xuanwu: #2a3b5c;
+  --sx-qinglong: #636363;
+  --sx-baihu: #b6b6b6;
+  --sx-zhuque: #606060;
+  --sx-xuanwu: #3a3a3a;
 
   /* ---------- 五阶外框（与 tiers.json bezelColor 一致） ---------- */
-  --tier-1: #8a8577;
-  --tier-2: #3e7c59;
-  --tier-3: #c9a227;
-  --tier-4: #2e5c8a;
-  --tier-5: #6b5b2e;
+  --tier-1: #767676;
+  --tier-2: #3d3d3d;
+  --tier-3: #8a8a8a;
+  --tier-4: #454545;
+  --tier-5: #5b5b5b;
 
   /* ---------- 语义 ---------- */
-  --ok: #3e7c59;
-  --warn: #e8b33a;
-  --bad: #c0392b;
+  --ok: #3d3d3d;
+  --warn: #9a9a9a;
+  --bad: #1f1f1f;
 
   /* ---------- 字体 ---------- */
   --font-title: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Songti SC', 'SimSun', serif;

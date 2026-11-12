@@ -114,7 +114,7 @@ function onClick() {
   padding: 1px 6px;
   font-family: var(--font-title);
   font-size: 10px;
-  color: #f7efe0;
+  color: #f7f7f7;
   background: var(--bezel, var(--ink-3));
   border-radius: 2px;
 }
@@ -141,7 +141,7 @@ function onClick() {
   font-family: var(--font-title);
   font-size: 26px;
   color: color-mix(in srgb, var(--bezel, var(--ink-3)) 70%, var(--ink));
-  background: radial-gradient(circle at 50% 45%, #fffdf6, var(--paper-3));
+  background: radial-gradient(circle at 50% 45%, #fbfbfb, var(--paper-3));
   border: 1px dashed color-mix(in srgb, var(--bezel, var(--ink-3)) 45%, transparent);
   border-radius: 50%;
 }
@@ -173,7 +173,7 @@ function onClick() {
   font-size: 9px;
 }
 .card__style[data-style='meng'] {
-  color: #b5637d;
+  color: #7e7e7e;
 }
 .card__style[data-style='jun'] {
   color: var(--stone-blue);
@@ -196,7 +196,7 @@ function onClick() {
 
 /* 未获得：剪影感 */
 .is-locked {
-  background: linear-gradient(180deg, #efe9dc, #e2d8c4);
+  background: linear-gradient(180deg, #e9e9e9, #d9d9d9);
 }
 .is-locked .card__name {
   color: var(--ink-3);
@@ -204,6 +204,6 @@ function onClick() {
 .is-locked .card__glyph {
   color: rgba(28, 28, 36, 0.22);
   border-color: rgba(28, 28, 36, 0.14);
-  background: radial-gradient(circle at 50% 45%, #f3ecdd, #e4dac6);
+  background: radial-gradient(circle at 50% 45%, #ececec, #dbdbdb);
 }
 </style>

@@ -164,8 +164,6 @@ function back() {
 
 <template>
   <div class="duel gw-paper">
-    <div class="gw-mountain duel__mt" aria-hidden="true" />
-    <div class="gw-mountain gw-mountain--near duel__mt" aria-hidden="true" />
 
     <header class="duel__head">
       <button class="duel__back" @click="back">← 大厅</button>
@@ -295,9 +293,6 @@ function back() {
   overflow: hidden;
 }
 
-.duel__mt {
-  z-index: 0;
-}
 
 .duel__head {
   position: relative;
@@ -307,7 +302,7 @@ function back() {
   gap: 16px;
   padding: 12px 20px;
   border-bottom: 1px solid rgba(28, 28, 36, 0.16);
-  background: linear-gradient(180deg, rgba(242, 232, 213, 0.96), rgba(242, 232, 213, 0.6));
+  background: linear-gradient(180deg, rgba(244, 244, 244, 0.96), rgba(244, 244, 244, 0.6));
 }
 .duel__back {
   padding: 7px 14px;
@@ -380,7 +375,7 @@ function back() {
   width: 168px;
   height: 200px;
   flex: none;
-  background: radial-gradient(circle at 50% 45%, rgba(255, 253, 246, 0.9), rgba(232, 220, 194, 0.5));
+  background: radial-gradient(circle at 50% 45%, rgba(255, 253, 246, 0.9), rgba(228, 228, 228, 0.5));
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: 10px;
   box-shadow: inset 0 0 0 3px rgba(255, 253, 246, 0.45);
@@ -424,7 +419,7 @@ function back() {
   padding: 1px 6px;
   font-family: var(--font-title);
   font-size: 10px;
-  color: #f7efe0;
+  color: #f7f7f7;
   background: var(--cinnabar);
   border-radius: 2px;
 }
@@ -445,11 +440,11 @@ function back() {
 .fighter__bar > i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #b8402f, #d9745f);
+  background: linear-gradient(90deg, #626262, #909090);
   transition: width var(--d-base) var(--e-out);
 }
 .fighter__bar--jade > i {
-  background: linear-gradient(90deg, #5f9a7c, #9ccbb0);
+  background: linear-gradient(90deg, #858585, #bababa);
 }
 .fighter__nums {
   font-size: 11px;
@@ -493,7 +488,7 @@ function back() {
 }
 .float[data-kind='crit'] {
   font-size: 34px;
-  color: #8e2a20;
+  color: #0d0d0d;
 }
 .float[data-kind='miss'] {
   color: var(--ink-3);
@@ -519,11 +514,11 @@ function back() {
   height: 86px;
   font-family: var(--font-title);
   font-size: 40px;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #ce4436, #8e2a20);
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #2b2b2b, #0d0d0d);
   border-radius: 8px;
   transform: rotate(-6deg);
-  box-shadow: inset 0 0 0 3px rgba(247, 239, 224, 0.4), 0 10px 24px rgba(142, 42, 32, 0.3);
+  box-shadow: inset 0 0 0 3px rgba(240, 240, 240, 0.4), 0 10px 24px rgba(71, 71, 71, 0.3);
   opacity: 0.9;
 }
 .duel__ground {
@@ -621,7 +616,7 @@ function back() {
   justify-items: center;
   gap: 6px;
   padding: 26px 34px;
-  background: linear-gradient(180deg, #fbf5e8, #e8dcc2);
+  background: linear-gradient(180deg, #f5f5f0, #dcdcd4);
   border: 1px solid rgba(28, 28, 36, 0.3);
   border-radius: var(--r-lg);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);

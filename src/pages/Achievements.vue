@@ -193,8 +193,8 @@ function back() {
   cursor: pointer;
 }
 .ach__tabs button.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 
@@ -230,9 +230,9 @@ function back() {
   width: 64px;
   height: 64px;
   border-radius: 6px;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #ce4436, var(--cinnabar-d));
-  box-shadow: inset 0 0 0 2px rgba(247, 239, 224, 0.4), 0 4px 10px rgba(142, 42, 32, 0.3);
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #2b2b2b, var(--cinnabar-d));
+  box-shadow: inset 0 0 0 2px rgba(240, 240, 240, 0.4), 0 4px 10px rgba(71, 71, 71, 0.3);
   transform: rotate(-3deg);
 }
 .seal__glyph {
@@ -266,8 +266,8 @@ function back() {
 
 /* 未解锁：灰化 + 虚线 */
 .seal.is-locked .seal__body {
-  color: #b9b2a2;
-  background: linear-gradient(180deg, #efe9dc, #e2d8c4);
+  color: #b2b2b2;
+  background: linear-gradient(180deg, #e9e9e9, #d9d9d9);
   box-shadow: inset 0 0 0 2px rgba(28, 28, 36, 0.12);
   filter: grayscale(1);
 }

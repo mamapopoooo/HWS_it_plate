@@ -384,8 +384,8 @@ function back() {
 }
 .td__stat--hot {
   color: var(--cinnabar);
-  border-color: rgba(192, 57, 43, 0.35);
-  background: rgba(192, 57, 43, 0.08);
+  border-color: rgba(96, 96, 96, 0.35);
+  background: rgba(96, 96, 96, 0.08);
 }
 .td__flush {
   min-height: 32px;
@@ -418,8 +418,8 @@ function back() {
   cursor: pointer;
 }
 .td__class.is-on {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .td__class .num {
@@ -499,7 +499,7 @@ function back() {
 }
 .stu__btn--danger {
   color: var(--cinnabar);
-  border-color: rgba(192, 57, 43, 0.45);
+  border-color: rgba(96, 96, 96, 0.45);
 }
 
 /* 积分流水面板 */
@@ -590,8 +590,8 @@ function back() {
   flex: none;
   font-family: var(--font-title);
   font-size: 14px;
-  color: #f7efe0;
-  background: linear-gradient(160deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(160deg, #2b2b2b, var(--cinnabar-d));
   border-radius: 4px;
   transform: rotate(-3deg);
 }
@@ -647,13 +647,13 @@ function back() {
   transform: scale(0.95);
 }
 .stu__btn--plus {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
 }
 .stu__btn--minus {
   color: var(--stone-blue);
-  border-color: rgba(46, 92, 138, 0.35);
+  border-color: rgba(83, 83, 83, 0.35);
 }
 
 /* 飘字反馈 */
@@ -665,10 +665,10 @@ function back() {
   padding: 8px 20px;
   font-family: var(--font-title);
   font-size: 18px;
-  color: #f7efe0;
-  background: rgba(142, 42, 32, 0.92);
+  color: #f7f7f7;
+  background: rgba(71, 71, 71, 0.92);
   border-radius: 999px;
-  box-shadow: 0 8px 20px rgba(142, 42, 32, 0.35);
+  box-shadow: 0 8px 20px rgba(71, 71, 71, 0.35);
   pointer-events: none;
 }
 .fade-enter-active,

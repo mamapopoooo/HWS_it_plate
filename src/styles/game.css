@@ -8,46 +8,16 @@
 .gw-paper {
   background-color: var(--paper);
   background-image:
-    radial-gradient(circle at 18% 22%, rgba(200, 180, 140, 0.22), transparent 42%),
-    radial-gradient(circle at 82% 74%, rgba(176, 166, 148, 0.2), transparent 46%),
-    repeating-linear-gradient(0deg, rgba(120, 110, 90, 0.035) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(120, 110, 90, 0.025) 0 1px, transparent 1px 4px);
-}
-
-/* 大厅：水墨山水实景底。上叠宣纸渐变，保证文字可读、左侧功能坞与右侧信息不糊 */
-.gw-lobby-bg {
-  background-color: var(--paper);
-  background-image:
-    linear-gradient(
-      90deg,
-      rgba(242, 232, 213, 0.96) 0%,
-      rgba(242, 232, 213, 0.86) 18%,
-      rgba(242, 232, 213, 0.5) 38%,
-      rgba(242, 232, 213, 0.28) 62%,
-      rgba(242, 232, 213, 0.52) 100%
-    ),
-    linear-gradient(180deg, rgba(242, 232, 213, 0.72) 0%, rgba(242, 232, 213, 0) 26%),
-    url('/pet-garden/backgrounds/lobby.jpg');
-  background-size: cover, cover, cover;
-  background-position: center, center, center 46%;
-  background-repeat: no-repeat;
-}
-
-/* 竖屏（手机）：同一张图铺满，掩膜整体调亮 */
-@media (max-width: 760px) {
-  .gw-lobby-bg {
-    background-image:
-      linear-gradient(180deg, rgba(242, 232, 213, 0.9) 0%, rgba(242, 232, 213, 0.45) 45%, rgba(242, 232, 213, 0.9) 100%),
-      url('/pet-garden/backgrounds/lobby.jpg');
-    background-size: cover, cover;
-    background-position: center, center 40%;
-  }
+    radial-gradient(circle at 18% 22%, rgba(96, 100, 96, 0.22), transparent 42%),
+    radial-gradient(circle at 82% 74%, rgba(96, 100, 96, 0.2), transparent 46%),
+    repeating-linear-gradient(0deg, rgba(111, 111, 111, 0.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(111, 111, 111, 0.025) 0 1px, transparent 1px 4px);
 }
 
 /* ========== 卷轴面板 ========== */
 .gw-scroll {
   position: relative;
-  background: linear-gradient(180deg, var(--paper-light), #efe4cc);
+  background: linear-gradient(180deg, var(--paper-light), #dcdcd4);
   border: 1px solid rgba(28, 28, 36, 0.26);
   border-radius: var(--r-sm);
   box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.75), var(--sh-paper);
@@ -61,7 +31,7 @@
   right: -4px;
   height: 5px;
   border-radius: 3px;
-  background: linear-gradient(180deg, #8a6a4a, #5c4530);
+  background: linear-gradient(180deg, #707070, #494949);
   box-shadow: 0 1px 2px rgba(28, 28, 36, 0.3);
 }
 .gw-scroll::before {
@@ -97,7 +67,7 @@
   font-size: 15px;
   letter-spacing: 0.14em;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--paper-light), #e3d6bb);
+  background: linear-gradient(180deg, var(--paper-light), #d7d7d7);
   border: 1px solid rgba(28, 28, 36, 0.3);
   border-radius: var(--r-sm);
   box-shadow: var(--sh-inset), 0 3px 8px rgba(28, 28, 36, 0.14);
@@ -118,10 +88,10 @@
   filter: grayscale(0.4);
 }
 .gw-seal--primary {
-  color: #f7efe0;
-  background: linear-gradient(180deg, #ce4436, var(--cinnabar-d));
+  color: #f7f7f7;
+  background: linear-gradient(180deg, #2b2b2b, var(--cinnabar-d));
   border-color: var(--cinnabar-d);
-  box-shadow: inset 0 0 0 1.5px rgba(247, 239, 224, 0.38), 0 4px 12px rgba(142, 42, 32, 0.32);
+  box-shadow: inset 0 0 0 1.5px rgba(240, 240, 240, 0.38), 0 4px 12px rgba(71, 71, 71, 0.32);
 }
 .gw-seal__hint {
   font-family: var(--font-body);
@@ -179,15 +149,15 @@
 .gw-dais {
   position: absolute;
   border-radius: 50%;
-  border: 1.5px solid rgba(201, 162, 39, 0.55);
-  box-shadow: 0 0 24px rgba(201, 162, 39, 0.22), inset 0 0 24px rgba(201, 162, 39, 0.16);
+  border: 1.5px solid rgba(160, 160, 160, 0.55);
+  box-shadow: 0 0 24px rgba(160, 160, 160, 0.22), inset 0 0 24px rgba(160, 160, 160, 0.16);
 }
 .gw-dais::after {
   content: '';
   position: absolute;
   inset: 14% 10%;
   border-radius: 50%;
-  border: 1px dashed rgba(201, 162, 39, 0.4);
+  border: 1px dashed rgba(160, 160, 160, 0.4);
 }
 
 /* ========== 水墨晕开 ========== */
@@ -220,23 +190,9 @@
   animation: gw-drift 34s ease-in-out infinite alternate;
 }
 
-/* ========== 水墨远山 ========== */
-.gw-mountain {
-  position: absolute;
-  left: -6%;
-  right: -6%;
-  bottom: 0;
-  height: 42%;
-  background: linear-gradient(180deg, rgba(28, 28, 36, 0.16), rgba(28, 28, 36, 0.04));
-  clip-path: polygon(0 100%, 0 62%, 9% 44%, 18% 58%, 27% 34%, 38% 52%, 47% 30%, 58% 50%, 68% 36%, 78% 54%, 88% 40%, 100% 58%, 100% 100%);
-  pointer-events: none;
-}
-.gw-mountain--near {
-  height: 30%;
-  background: linear-gradient(180deg, rgba(28, 28, 36, 0.22), rgba(28, 28, 36, 0.06));
-  clip-path: polygon(0 100%, 0 74%, 12% 58%, 24% 72%, 36% 50%, 50% 68%, 62% 54%, 74% 70%, 86% 56%, 100% 72%, 100% 100%);
-  filter: blur(0.6px);
-}
+
+
+
 
 /* ========== 关键帧 ========== */
 @keyframes gw-spin {
