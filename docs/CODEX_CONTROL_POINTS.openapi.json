@@ -1,0 +1,101 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CODEX-CONTROL classroom points integration reservation",
+    "version": "0.1.0-draft",
+    "description": "Draft only. No route is installed by this document. Existing POST must gain idempotency before clients enable uploads."
+  },
+  "x-owner": "CODEX-CONTROL; backend implementation owned by Qoder",
+  "x-production-enabled": false,
+  "security": [{"adminBearer": []}],
+  "paths": {
+    "/api/v2/teacher/sync-points/capabilities": {
+      "get": {
+        "summary": "Reserved read-only contract capability check; currently not implemented",
+        "responses": {
+          "200": {
+            "description": "Backend explicitly supports durable idempotency and per-record ACK",
+            "content": {"application/json": {"schema": {
+              "type": "object",
+              "required": ["contractVersion", "idempotent", "perRecordAck", "maxBatchSize"],
+              "properties": {
+                "contractVersion": {"type": "string", "enum": ["lab-control.points.v1"]},
+                "idempotent": {"type": "boolean", "enum": [true]},
+                "perRecordAck": {"type": "boolean", "enum": [true]},
+                "maxBatchSize": {"type": "integer", "minimum": 1}
+              }
+            }}}
+          },
+          "401": {"description": "Authentication required"},
+          "403": {"description": "Not an authorized administrator"},
+          "404": {"description": "Not supported; keep client upload disabled"}
+        }
+      }
+    },
+    "/api/v2/teacher/sync-points": {
+      "post": {
+        "summary": "Proposed additive extension to existing POST; not safe for retries until implemented",
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {
+            "type": "object",
+            "required": ["contractVersion", "deviceId", "records"],
+            "properties": {
+              "contractVersion": {"type": "string", "enum": ["lab-control.points.v1"]},
+              "deviceId": {"type": "string", "minLength": 1},
+              "records": {"type": "array", "minItems": 1, "items": {"$ref": "#/components/schemas/PointEvent"}}
+            }
+          }}}
+        },
+        "responses": {
+          "200": {"description": "Per-record results required; a legacy success/synced response is insufficient", "content": {"application/json": {"schema": {
+            "type": "object", "required": ["success", "synced", "contractVersion", "results"],
+            "properties": {
+              "success": {"type": "boolean"},
+              "synced": {"type": "integer", "minimum": 0},
+              "contractVersion": {"type": "string", "enum": ["lab-control.points.v1"]},
+              "results": {"type": "array", "items": {"$ref": "#/components/schemas/EventResult"}}
+            }
+          }}}},
+          "401": {"description": "Pause until reauthenticated"},
+          "403": {"description": "Stop unauthorized scope"},
+          "409": {"description": "Same event ID with different content; manual reconciliation required"},
+          "422": {"description": "Invalid student, class or amount; do not retry blindly"},
+          "429": {"description": "Respect Retry-After"},
+          "503": {"description": "Retry original event IDs with backoff only after capability confirmation"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {"adminBearer": {"type": "http", "scheme": "bearer"}},
+    "schemas": {
+      "PointEvent": {
+        "type": "object",
+        "required": ["eventId", "studentNo", "classId", "lessonId", "amount", "reason", "category", "timestamp", "sourceSequence"],
+        "properties": {
+          "eventId": {"type": "string", "format": "uuid"},
+          "studentNo": {"type": "string", "minLength": 1, "description": "School student number, never seat/IP; preserve leading zeros"},
+          "classId": {"type": "string", "minLength": 1},
+          "lessonId": {"type": "string", "minLength": 1},
+          "amount": {"type": "integer", "not": {"enum": [0]}, "description": "Signed delta; policy bounds and negative-balance rule remain pending"},
+          "reason": {"type": "string", "minLength": 1},
+          "category": {"type": "string", "enum": ["discipline"]},
+          "timestamp": {"type": "integer", "format": "int64", "minimum": 0},
+          "sourceSequence": {"type": "integer", "format": "int64", "minimum": 1},
+          "reversesEventId": {"type": "string", "format": "uuid"}
+        }
+      },
+      "EventResult": {
+        "type": "object", "required": ["eventId", "status"],
+        "properties": {
+          "eventId": {"type": "string", "format": "uuid"},
+          "status": {"type": "string", "enum": ["applied", "duplicate", "rejected", "retryable"]},
+          "recordId": {"type": "string"},
+          "appliedAmount": {"type": "integer"},
+          "errorCode": {"type": "string"}
+        }
+      }
+    }
+  }
+}
