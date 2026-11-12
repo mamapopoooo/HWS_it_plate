@@ -605,7 +605,7 @@ router.get('/gacha/rates', (req, res) => {
 // 获取每日任务
 router.get('/quests/daily', authMiddleware, (req, res) => {
   const today = new Date().setHours(0, 0, 0, 0)
-  const quests = db.prepare('SELECT * FROM quests WHERE type = "daily" AND is_active = 1 ORDER BY sort_order').all()
+  const quests = db.prepare(`SELECT * FROM quests WHERE type = 'daily' AND is_active = 1 ORDER BY sort_order`).all()
   const progress = db.prepare(`
     SELECT quest_id, progress, completed, claimed
     FROM player_quests WHERE user_id = ? AND last_reset = ?
@@ -618,7 +618,7 @@ router.get('/quests/daily', authMiddleware, (req, res) => {
 router.get('/quests/weekly', authMiddleware, (req, res) => {
   const now = new Date()
   const weekStart = new Date(now.setDate(now.getDate() - now.getDay())).setHours(0, 0, 0, 0)
-  const quests = db.prepare('SELECT * FROM quests WHERE type = "weekly" AND is_active = 1 ORDER BY sort_order').all()
+  const quests = db.prepare(`SELECT * FROM quests WHERE type = 'weekly' AND is_active = 1 ORDER BY sort_order`).all()
   const progress = db.prepare(`
     SELECT quest_id, progress, completed, claimed
     FROM player_quests WHERE user_id = ? AND last_reset = ?

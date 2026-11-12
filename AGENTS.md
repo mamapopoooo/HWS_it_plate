@@ -41,13 +41,21 @@ docs/seeds/       全部内容数据（唯一来源）
 server/           Express；算法与迁移归 KIMI / Qoder
 ```
 
-**分工：**
+**分工（2026-11-12 起调整）：**
 
-| Agent | 只改 |
-|---|---|
-| **DSH**（UI/UX） | `src/pages/` `src/components/` `src/styles/` `docs/` 设计稿 |
-| **KIMI**（算法） | `server/game/` 与 `src/utils/*.ts` 的算法与测试 |
-| **Qoder**（全栈） | `server/` 迁移与路由、`docs/seeds/` 灌库 |
+| Agent | 职责 | 只改 |
+|---|---|---|
+| **GPT** | **总审核把控** + **美工**（出图、立绘、背景素材） | 审阅所有分支与 PR；产出 `public/` 下的美术资源；不改业务代码 |
+| **Codex** | **最终整合与修正**（合分支、解冲突、修 P0） | 以整合分支为准，统一收口 `server/` 与 `src/api/` 的契约 |
+| **DSH**（本角色） | UI/UX 实现 | `src/pages/` `src/components/` `src/styles/` `docs/` 设计稿 |
+| **KIMI** | 算法 | `server/game/` 与 `src/utils/*.ts` 的算法与测试 |
+| **Qoder** | 名单 / 教师端功能（已交接） | 成果在 `origin/dev-qoder`，等 Codex 合并 |
+
+**协作要点：**
+
+- 各人提交在自己的 `dev-xxx` 分支，**由 Codex 统一合并**；不要直接在 `dev` / `main` 上改。
+- 交接与技术决策写在 `docs/` 下的交接清单里（见 `docs/交接-Codex总审核清单.md`）。
+- **P0 待决**：学生登录存在三套实现（`auth.js` / `game-v2.js` / qoder 的 roster 版），合并前必须统一，否则名单登录失效、同一学生会生成两条 `users` 行。
 
 ---
 

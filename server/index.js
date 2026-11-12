@@ -24,7 +24,7 @@ import gameV2Routes from './routes/game-v2.js'
 import gameV3Routes from './routes/game-v3.js'
 
 const app = express()
-const PORT = 3002
+const PORT = Number(process.env.PORT) || 3002
 
 // 课程平台地址（可在 settings 表中配置，默认空）
 function getPlatformUrl() {
@@ -226,7 +226,7 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason)
 })
 
-// 启动服务器
+// 启动服务器（端口可用 PORT 环境变量覆盖，便于并行调试）
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)
   console.log(`📅 ${new Date().toLocaleString()}`)
