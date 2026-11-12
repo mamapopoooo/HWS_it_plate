@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { initDb, db } from './db.js'
 import { calculateLevel } from './utils/level.js'
+import { hashPassword } from './utils/password.js'
+import { ensureUserColumns } from './utils/userSchema.js'
 import { migrateV2 } from './game/migrate-v2.js'
 
 // 导入路由
@@ -41,6 +43,20 @@ app.use(express.json())
 // 初始化数据库
 initDb()
 migrateV2()
+
+// 补齐 users 的 v3 列（role / real_name / grade）
+ensureUserColumns()
+
+// 没有任何管理员时，自动创建一个教师账号（可用环境变量覆盖）
+const adminCount = db.prepare("SELECT COUNT(*) AS n FROM users WHERE role = 'admin'").get().n
+if (adminCount === 0) {
+  const adminName = process.env.ADMIN_USERNAME || 'admin'
+  const adminPass = process.env.ADMIN_PASSWORD || 'wangchong2026'
+  db.prepare(
+    'INSERT INTO users (id, username, password_hash, is_guest, role, real_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+  ).run(uuidv4(), adminName, hashPassword(adminPass), 0, 'admin', '王老师', Date.now())
+  console.log(`✅ 已创建教师账号：${adminName} / ${adminPass}（请尽快在教师端修改）`)
+}
 
 // 创建默认游客用户
 const guestUser = db.prepare('SELECT id FROM users WHERE username = ?').get('guest')

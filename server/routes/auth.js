@@ -2,86 +2,137 @@ import { Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'
 import { hashPassword, verifyPassword } from '../utils/password.js'
-import { generateToken, verifyToken } from '../utils/token.js'
+import { generateToken } from '../utils/token.js'
 import { authMiddleware } from '../middleware/auth.js'
+import { ensureUserColumns } from '../utils/userSchema.js'
 
 const router = Router()
 
-// 注册
+// 老库补列（role / real_name / grade），登录与路由守卫都依赖 role
+ensureUserColumns()
+
+/** 统一的用户返回结构，字段名与前端 src/api/types.ts 对齐 */
+function toPublicUser(row) {
+  return {
+    id: row.id,
+    username: row.username,
+    realName: row.real_name || row.username,
+    role: row.role || 'admin',
+    grade: row.grade ?? null,
+    isGuest: !!row.is_guest,
+  }
+}
+
+// 注册（教师自助注册，注册出来就是管理员）
 router.post('/register', (req, res) => {
   const { username, password } = req.body
 
   if (!username || !password) {
     return res.status(400).json({ error: '用户名和密码不能为空' })
   }
-
   if (username.length < 3 || username.length > 20) {
     return res.status(400).json({ error: '用户名长度3-20字符' })
   }
-
   if (password.length < 6) {
     return res.status(400).json({ error: '密码至少6位' })
   }
 
-  // 检查用户名是否已存在
   const existingUser = db.prepare('SELECT id FROM users WHERE username = ?').get(username)
   if (existingUser) {
     return res.status(400).json({ error: '用户名已存在' })
   }
 
   const userId = uuidv4()
-  const passwordHash = hashPassword(password)
+  db.prepare(
+    'INSERT INTO users (id, username, password_hash, is_guest, role, real_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+  ).run(userId, username, hashPassword(password), 0, 'admin', username, Date.now())
 
-  db.prepare('INSERT INTO users (id, username, password_hash, is_guest, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(userId, username, passwordHash, 0, Date.now())
-
-  const token = generateToken(userId)
-  res.json({
-    success: true,
-    token,
-    user: { id: userId, username, isGuest: false }
-  })
+  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(userId)
+  res.json({ success: true, token: generateToken(userId), user: toPublicUser(row) })
 })
 
-// 登录
+/**
+ * 教师登录（前端 POST /api/auth/admin/login）
+ * 账号 + 密码 → 返回带 role='admin' 的用户
+ */
+router.post('/admin/login', (req, res) => {
+  const { username, password } = req.body
+  if (!username || !password) {
+    return res.status(400).json({ error: '账号和密码不能为空' })
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username)
+  if (!user || !verifyPassword(password, user.password_hash)) {
+    return res.status(401).json({ error: '账号或密码错误' })
+  }
+  if ((user.role || 'admin') !== 'admin') {
+    return res.status(403).json({ error: '这是学生账号，请用学号在「学生登录」进入' })
+  }
+
+  res.json({ success: true, token: generateToken(user.id), user: toPublicUser(user) })
+})
+
+/**
+ * 学生登录（前端 POST /api/auth/student/login）
+ * 学号 + 姓名免密：匹配 students 表，首次登录自动为其建一条 users 记录。
+ */
+router.post('/student/login', (req, res) => {
+  const studentNo = String(req.body?.studentNo ?? '').trim()
+  const realName = String(req.body?.realName ?? '').trim()
+  if (!studentNo || !realName) {
+    return res.status(400).json({ error: '学号和姓名不能为空' })
+  }
+
+  // 学号优先；没填学号的名单允许只按姓名匹配
+  let student = db.prepare('SELECT * FROM students WHERE student_no = ?').get(studentNo)
+  if (!student) {
+    student = db.prepare('SELECT * FROM students WHERE name = ?').get(realName)
+  }
+  if (!student) {
+    return res.status(401).json({ error: '学号或姓名不对，问一下老师' })
+  }
+  if (student.name !== realName) {
+    return res.status(401).json({ error: '学号与姓名不匹配' })
+  }
+
+  const username = `stu_${student.student_no || student.id.slice(0, 8)}`
+  let user = db.prepare('SELECT * FROM users WHERE username = ?').get(username)
+  if (!user) {
+    const userId = uuidv4()
+    db.prepare(
+      'INSERT INTO users (id, username, password_hash, is_guest, role, real_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run(userId, username, '', 0, 'student', student.name, Date.now())
+    user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId)
+  } else if (user.real_name !== student.name) {
+    db.prepare('UPDATE users SET real_name = ? WHERE id = ?').run(student.name, user.id)
+    user.real_name = student.name
+  }
+
+  res.json({ success: true, token: generateToken(user.id), user: toPublicUser(user) })
+})
+
+// 旧登录入口（兼容 v1 页面调用）
 router.post('/login', (req, res) => {
   const { username, password } = req.body
-
   if (!username || !password) {
     return res.status(400).json({ error: '用户名和密码不能为空' })
   }
 
-  const user = db.prepare('SELECT id, username, password_hash, is_guest FROM users WHERE username = ?').get(username)
-
-  if (!user) {
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username)
+  if (!user || !verifyPassword(password, user.password_hash)) {
     return res.status(401).json({ error: '用户名或密码错误' })
   }
 
-  if (!verifyPassword(password, user.password_hash)) {
-    return res.status(401).json({ error: '用户名或密码错误' })
-  }
-
-  const token = generateToken(user.id)
-  res.json({
-    success: true,
-    token,
-    user: { id: user.id, username: user.username, isGuest: !!user.is_guest }
-  })
+  res.json({ success: true, token: generateToken(user.id), user: toPublicUser(user) })
 })
 
 // 获取当前用户信息
 router.get('/me', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT id, username, is_guest FROM users WHERE id = ?').get(req.userId)
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.userId)
   if (!user) {
     return res.status(404).json({ error: '用户不存在' })
   }
-  res.json({
-    user: {
-      id: user.id,
-      username: user.username,
-      isGuest: !!user.is_guest
-    }
-  })
+  res.json({ user: toPublicUser(user) })
 })
 
 export default router
