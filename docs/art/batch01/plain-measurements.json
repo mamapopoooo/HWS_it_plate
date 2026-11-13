@@ -1,0 +1,26 @@
+[
+  {
+    "file": "base_f-plain-v1.png",
+    "size": [
+      1024,
+      1536
+    ],
+    "bytes": 1569053,
+    "alpha_range": [
+      0,
+      254
+    ]
+  },
+  {
+    "file": "base_m-plain-v1.png",
+    "size": [
+      1024,
+      1536
+    ],
+    "bytes": 1620170,
+    "alpha_range": [
+      0,
+      254
+    ]
+  }
+]
