@@ -13,7 +13,7 @@ import { teacherMiddleware } from '../middleware/auth.js'
 import { importRoster, parseGrade, planRoster, resolveGrade } from '../game/import-roster.js'
 import { GARBLED_HINT, garbled, garbledRows } from '../utils/garbled.js'
 // 级联表清单与引用盘点同源，见 server/utils/rosterRefs.js
-import { USER_DATA_TABLES } from '../utils/rosterRefs.js'
+import { USER_DATA_TABLES, studentRefs, purgeBlockReason } from '../utils/rosterRefs.js'
 
 const router = Router()
 router.use(teacherMiddleware)
@@ -275,8 +275,14 @@ router.delete('/students/:id', (req, res) => {
   if (req.body?.confirm !== true) {
     return res.status(400).json({ error: '删除会一并清除该生的宠物、抽卡和积分记录，需带 confirm=true' })
   }
-  const removed = purgeStudent(req.params.id)
-  if (!removed) return res.status(404).json({ error: '学生不存在' })
+  const student = db.prepare('SELECT id, student_no FROM students WHERE id = ?').get(req.params.id)
+  if (!student) return res.status(404).json({ error: '学生不存在' })
+  // purgeStudent 只认「username 恰等于学号」那一条身份。旧 stu_ 前缀账号或
+  // 学号被非学生角色占用时照删，会把带资产的账号留下还报「已清理 N 行」，所以先预检。
+  const refs = studentRefs(student.student_no)
+  const reason = purgeBlockReason(refs)
+  if (reason) return res.status(409).json({ error: reason, refs })
+  const removed = purgeStudent(student.id)
   res.json({ success: true, ...removed })
 })
 
@@ -323,13 +329,36 @@ router.post('/bulk', (req, res) => {
     if (req.body.confirm !== true) {
       return res.status(400).json({ error: '批量删除会清空这些学生的全部游戏数据，需带 confirm=true' })
     }
+    const find = db.prepare('SELECT id, student_no FROM students WHERE id = ?')
+    const targets = []
+    const blocked = []
+    const notFound = []
+    // 先去重再预检：同一 id 传两次会在第二遍查不到学生，被当成「不存在」而不是「已删」
+    for (const id of new Set(list)) {
+      const student = find.get(id)
+      if (!student) { notFound.push(id); continue }
+      const refs = studentRefs(student.student_no)
+      const reason = purgeBlockReason(refs)
+      if (reason) blocked.push({ id, studentNo: student.student_no, reason, identityCount: refs.identities.length, assetRows: refs.assetRows })
+      else targets.push(student)
+    }
+    // 全批预检通过才动手：旧写法一路 purge，第 3 个人被挡住时前 2 个人已经删完，
+    // 教师看到的是一份被咬掉中间的名单，而且响应只说删了几个。
+    if (blocked.length) {
+      return res.status(409).json({
+        error: `这批里有 ${blocked.length} 人不能安全删除，整批一行都没删。${blocked[0].reason}`,
+        blocked, notFound
+      })
+    }
     let deleted = 0
     let dataRows = 0
-    for (const id of list) {
-      const removed = purgeStudent(id)
-      if (removed) { deleted += 1; dataRows += removed.dataRows }
-    }
-    return res.json({ success: true, action, deleted, dataRows })
+    db.transaction(() => {
+      for (const student of targets) {
+        const removed = purgeStudent(student.id)
+        if (removed) { deleted += 1; dataRows += removed.dataRows }
+      }
+    })()
+    return res.json({ success: true, action, deleted, dataRows, notFound })
   }
 
   res.status(400).json({ error: `不支持的批量操作：${action}` })

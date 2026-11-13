@@ -109,6 +109,27 @@ export function studentDeletable(refs) {
   return refs.identities.length === 0 && refs.assetRows === 0
 }
 
+/** 名单管理（v3 purgeStudent）能不能安全把这个学号清干净。
+ *
+ * purgeStudent 只认「username 恰等于学号且 role='student'」那一条身份，
+ * 其余形态它一行都不碰：
+ *   · 旧版自动建号留下的 stu_学号 账号 —— 它的宠物、抽卡、功名全在它名下；
+ *   · 学号被非 student 角色（admin/teacher/游客）占用的账号。
+ * 这两种情况照删就会清掉 students 行、把带资产的账号留在库里，
+ * 而响应还写着「已清理 N 行数据」—— 那是假干净。
+ * 所以删除前必须先问这里；不能自动删旧账号，也不能把资产搬到另一条身份上。
+ * @returns {string} 拒绝理由，空串表示可以安全清理 */
+export function purgeBlockReason(refs) {
+  if (refs.missingTables.includes('users')) return '登录身份表无法读取，名单管理不删'
+  const legacy = refs.identities.filter((r) => r.username !== refs.studentNo)
+  const nonStudent = refs.identities.filter((r) => r.role !== 'student')
+  const parts = []
+  if (legacy.length) parts.push(`${legacy.length} 个旧 stu_ 前缀账号仍挂着它自己的宠物与功名`)
+  if (nonStudent.length) parts.push(`该学号被 ${nonStudent.length} 个非学生角色账号占用`)
+  if (!parts.length) return ''
+  return `${parts.join('，')}。名单管理只清理与学号同名的学生身份，不会自动删除这些账号，也不会把资产搬过去；请先人工核对处理后再删`
+}
+
 /**
  * 某个班级牵连的学生与档案。删班级前必须先看这里，
  * 旧入口以前是「把班里的 students 一起删掉」，那正好制造 users 身份孤儿。
