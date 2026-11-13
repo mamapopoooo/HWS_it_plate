@@ -1,8 +1,16 @@
 import { afterEach, expect, it, vi } from 'vitest'
-const mocks = vi.hoisted(() => ({ post: vi.fn(), get: vi.fn() }))
-vi.mock('@/composables/useAuth', () => ({ useAuth: () => ({ api: { post: mocks.post, get: mocks.get } }) }))
-import { drawWithReceipt, fetchClassStudents } from './adapter'
+const mocks = vi.hoisted(() => ({ post: vi.fn(), get: vi.fn(), put: vi.fn(), delete: vi.fn() }))
+vi.mock('@/composables/useAuth', () => ({ useAuth: () => ({ api: mocks }) }))
+import { drawWithReceipt, fetchClassStudents, updateStudent, deleteStudent } from './adapter'
 afterEach(() => vi.clearAllMocks())
+
+it('教师名单修改/删除的409不会被占位回落吞掉', async () => {
+  const rejection = { response: { data: { error: '旧接口不能改学号' }, status: 409 } }
+  mocks.put.mockRejectedValue(rejection)
+  mocks.delete.mockRejectedValue(rejection)
+  await expect(updateStudent('demo', { studentNo: '990002' })).rejects.toBe(rejection)
+  await expect(deleteStudent('demo')).rejects.toBe(rejection)
+})
 
 it('求签只返回服务端已提交的余额、次数与结果', async () => {
   mocks.post.mockResolvedValue({ data: { newPoints: 97, pityCount: 1, cost: 3,

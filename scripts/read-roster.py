@@ -1,4 +1,4 @@
-"""读取 26 下班级名单 xlsx，导出为 UTF-8 JSON，供王宠课堂导入。"""
+"""读取 26 下班级名单 xlsx，导出为 UTF-8 JSON，供墨境导入。"""
 import json
 import glob
 import os

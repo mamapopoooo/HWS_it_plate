@@ -147,8 +147,16 @@ const editingId = ref<string | null>(null)
 const editName = ref('')
 const editNo = ref('')
 const confirmDeleteId = ref<string | null>(null)
+const studentSaving = ref(false)
+const studentError = ref('')
+
+function showStudentError(err: unknown) {
+  const response = err as { response?: { data?: { error?: string } }; message?: string }
+  studentError.value = response?.response?.data?.error || response?.message || '请求未确认，请刷新核对后再操作'
+}
 
 function startEdit(s: TeacherStudent) {
+  studentError.value = ''
   editingId.value = s.id
   editName.value = s.name
   editNo.value = s.studentNo
@@ -161,25 +169,42 @@ function cancelEdit() {
 }
 
 async function saveEdit(s: TeacherStudent) {
+  if (studentSaving.value) return
   const name = editName.value.trim()
   if (!name) return
   const studentNo = editNo.value.trim()
-  // 本地先改，再尝试同步（离线也能用）
-  s.name = name
-  s.studentNo = studentNo
-  await updateStudent(s.id, { name, studentNo })
-  cancelEdit()
+  studentSaving.value = true
+  studentError.value = ''
+  try {
+    if (!await updateStudent(s.id, { name, studentNo })) throw new Error('修改未确认')
+    s.name = name
+    s.studentNo = studentNo
+    cancelEdit()
+  } catch (err) {
+    showStudentError(err)
+  } finally {
+    studentSaving.value = false
+  }
 }
 
 async function removeStudent(s: TeacherStudent) {
+  if (studentSaving.value) return
   // 第一下只做确认，第二下才删，避免误触
   if (confirmDeleteId.value !== s.id) {
     confirmDeleteId.value = s.id
     return
   }
-  await deleteStudent(s.id)
-  students.value = students.value.filter((x) => x.id !== s.id)
-  cancelEdit()
+  studentSaving.value = true
+  studentError.value = ''
+  try {
+    if (!await deleteStudent(s.id)) throw new Error('删除未确认')
+    students.value = students.value.filter((x) => x.id !== s.id)
+    cancelEdit()
+  } catch (err) {
+    showStudentError(err)
+  } finally {
+    studentSaving.value = false
+  }
 }
 
 /** 加减分：本地即时反馈 + 进待同步队列 */
@@ -209,6 +234,7 @@ function back() {
 
 <template>
   <div class="td gw-paper">
+    <p v-if="studentError" role="alert">{{ studentError }}</p>
     <header class="td__head">
       <button class="td__back" @click="back">← 学生端</button>
       <div class="td__title">

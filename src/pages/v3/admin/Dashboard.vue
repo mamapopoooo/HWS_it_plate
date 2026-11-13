@@ -10,7 +10,7 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <h1 class="page-title">管理概览</h1>
-      <span class="page-sub">王宠课堂 · 教师管理台</span>
+      <span class="page-sub">墨境 · 教师管理台</span>
     </div>
 
     <!-- 加载状态 -->

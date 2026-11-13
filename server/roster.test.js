@@ -69,6 +69,7 @@ async function call(path, { method, body } = {}) {
 
 const student = (no) => db.prepare('SELECT * FROM students WHERE student_no = ?').get(no)
 const identity = (no) => db.prepare("SELECT * FROM users WHERE username = ? AND role = 'student'").get(no)
+const countUsers = () => db.prepare('SELECT COUNT(*) AS n FROM users').get().n
 
 describe('QD-01 名单派生字段', () => {
   it('积分和登录态读的是 users 真值，不是恒 0 恒未登录', async () => {
@@ -378,9 +379,115 @@ describe('QD-03 转班与年级同步', () => {
   })
 })
 
+// 单条新增/编辑和批量导入必须同一套身份口径，否则教师手一条就能造出
+// 「同一学生两条身份、资产各在一边」——批量导入已经拒绝的那种脏法。
+describe('QD-09 单条入口的身份与班级语义', () => {
+  const legacyUser = (username) => {
+    db.prepare("INSERT INTO users (id, username, password_hash, role, real_name, game_points) VALUES (?, ?, '', 'student', '旧身份', 500)")
+      .run(`u-${username}`, username)
+  }
+
+  it('新增撞上旧 stu_ 前缀账号时拒绝，学生和身份一行都不建', async () => {
+    legacyUser('stu_990000005')
+    const { status, data } = await call('/students', {
+      body: { studentNo: '990000005', name: '示例戊', className: '七年级B班' }
+    })
+    expect(status).toBe(409)
+    expect(data.error).toContain('stu_990000005')
+    expect(student('990000005')).toBeUndefined()
+    expect(identity('990000005')).toBeUndefined()
+    expect(countUsers()).toBe(4)
+  })
+
+  it('改学号撞上目标学号的旧前缀账号时拒绝，学号留在原值', async () => {
+    legacyUser('stu_990000003')
+    const { status, data } = await call('/students/s-2', {
+      method: 'PUT', body: { studentNo: '990000003' }
+    })
+    expect(status).toBe(409)
+    expect(data.error).toContain('stu_990000003')
+    expect(student('990000002').student_no).toBe('990000002')
+    expect(identity('990000002')).toBeTruthy()
+    expect(student('990000003')).toBeUndefined()
+  })
+
+  it('不动学号的编辑不被历史旧账号卡住', async () => {
+    legacyUser('stu_990000001')
+    const { status } = await call('/students/s-1', { method: 'PUT', body: { name: '示例甲（改）' } })
+    expect(status).toBe(200)
+    expect(student('990000001').name).toBe('示例甲（改）')
+  })
+
+  it('拿旧前缀形态当新学号提交时，认出它属于名单里另一人', async () => {
+    const { status, data } = await call('/students', {
+      body: { studentNo: 'stu_990000001', name: '示例癸', className: '七年级B班' }
+    })
+    expect(status).toBe(409)
+    expect(data.error).toContain('撞车')
+    expect(student('stu_990000001')).toBeUndefined()
+  })
+
+  it('同时给 classId 和另一个班级名时拒绝，不静默挑一个', async () => {
+    const { status, data } = await call('/students', {
+      body: { studentNo: '990000006', name: '示例己', classId: 'class-b', className: '八年级C班' }
+    })
+    expect(status).toBe(400)
+    expect(data.error).toContain('不能同时指定两个班级')
+    expect(student('990000006')).toBeUndefined()
+    // 冲突请求不能顺手把「八年级C班」建成新班
+    expect(db.prepare("SELECT COUNT(*) AS n FROM classes WHERE name = '八年级C班'").get().n).toBe(0)
+  })
+
+  it('classId 和同名 className 一起给是合法的（前端两个字段同源时不误伤）', async () => {
+    const { status } = await call('/students', {
+      body: { studentNo: '990000007', name: '示例庚', classId: 'class-b', className: '七年级B班' }
+    })
+    expect(status).toBe(200)
+    expect(student('990000007')).toMatchObject({ class_id: 'class-b', grade: 7 })
+  })
+
+  it('批量转班同样拒绝两个班级来源', async () => {
+    const { status, data } = await call('/bulk', {
+      body: { action: 'move', ids: ['s-1'], classId: 'class-b', className: '八年级C班' }
+    })
+    expect(status).toBe(400)
+    expect(data.error).toContain('不能同时指定两个班级')
+    expect(student('990000001').class_id).toBe('class-a')
+  })
+
+  it('只给 classId 的新增按班级名推年级，不再写成无年级', async () => {
+    // 前端下拉选班时 body.className 是空的，旧写法拿空串推年级 → 全部落 NULL
+    const { status } = await call('/students', {
+      body: { studentNo: '990000008', name: '示例辛', classId: 'class-b' }
+    })
+    expect(status).toBe(200)
+    expect(student('990000008').grade).toBe(7)
+    expect(identity('990000008').grade).toBe(7)
+  })
+
+  it('转班后班级名压过课程名里的旧年级', async () => {
+    const { status } = await call('/students/s-1', {
+      method: 'PUT', body: { classId: 'class-b' }
+    })
+    expect(status).toBe(200)
+    // course 仍是「信息技术 G6」，班级已是七年级B班
+    expect(student('990000001')).toMatchObject({ class_id: 'class-b', course: '信息技术 G6', grade: 7 })
+    expect(identity('990000001').grade).toBe(7)
+  })
+})
+
 // Codex 决定本轮不全局开启 foreign_keys，所以这里锁住「关系断了也不丢人」的底线，
 // 并把 classes.js 删班不清 students 这个孤儿来源写进反馈区等收口。
 describe('孤儿关联兜底', () => {
+  it('尚无登录账号的档案改学号也不能占用其他身份', async () => {
+    db.prepare('DELETE FROM users WHERE id = ?').run('u-1')
+    const { status } = await call('/students/s-1', {
+      method: 'PUT', body: { studentNo: '999999999', name: '不能覆盖教师' }
+    })
+    expect(status).toBe(409)
+    expect(student('990000001').name).toBe('示例甲')
+    expect(db.prepare('SELECT role FROM users WHERE username = ?').get('999999999').role).toBe('teacher')
+  })
   it('导入换班时目标班级年级优先于旧课程', async () => {
     const { data } = await call('/import', { body: { rows: [{ studentNo: '990000001', class: '七年级B班' }] } })
     expect(data.rejected).toEqual([])

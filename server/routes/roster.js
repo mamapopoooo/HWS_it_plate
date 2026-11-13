@@ -12,27 +12,23 @@ import { db } from '../db.js'
 import { teacherMiddleware } from '../middleware/auth.js'
 import { importRoster, parseGrade, planRoster, resolveGrade } from '../game/import-roster.js'
 import { GARBLED_HINT, garbled, garbledRows } from '../utils/garbled.js'
+// 级联表清单与引用盘点同源，见 server/utils/rosterRefs.js
+import { USER_DATA_TABLES } from '../utils/rosterRefs.js'
 
 const router = Router()
 router.use(teacherMiddleware)
 
-// 删学生时要连带清掉的游戏数据表（按 user_id）
-const USER_DATA_TABLES = [
-  'trainers', 'characters', 'player_pets', 'player_skins', 'player_character_skins',
-  'player_fragments', 'player_items', 'player_quests', 'player_achievements',
-  'player_event_progress', 'gacha_records', 'gacha_pity', 'game_points_records',
-  'exchange_records', 'notifications', 'pvp_rankings', 'class_battle_records', 'custom_pets'
-]
-
 // 乱码守卫见 server/utils/garbled.js：库里曾被 GBK 请求写坏过中文名和班级名。
 
 function classIdOf(body) {
+  const name = String(body.className || '').trim()
   if (body.classId) {
-    const cls = db.prepare('SELECT id FROM classes WHERE id = ?').get(body.classId)
+    const cls = db.prepare('SELECT id, name FROM classes WHERE id = ?').get(body.classId)
     if (!cls) return { error: '班级不存在' }
+    // 表单可能同时带着「新选中的班级」和「残留的旧班级名」，静默取一个会把学生改到意外的班
+    if (name && name !== cls.name) return { error: '不能同时指定两个班级，请只保留班级或只保留班级名' }
     return { classId: cls.id }
   }
-  const name = String(body.className || '').trim()
   if (!name) return { classId: null }
   if (garbled(name)) return { error: GARBLED_HINT }
   const existing = db.prepare('SELECT id FROM classes WHERE name = ?').get(name)
@@ -41,6 +37,22 @@ function classIdOf(body) {
   db.prepare('INSERT INTO classes (id, user_id, name, created_at, updated_at) VALUES (?, NULL, ?, ?, ?)')
     .run(id, name, Date.now(), Date.now())
   return { classId: id }
+}
+
+/**
+ * 旧版自动建号写过 `stu_学号` 这种用户名，资产都挂在它身上。
+ * 单条新增/改学号若撞上这类账号，就会造出「同一学生两条身份、资产各在一边」，
+ * 批量导入已按同口径拒绝（见 import-roster.js），单条入口不能留缝。
+ * @returns {string} 冲突说明，空串表示没冲突
+ */
+function legacyIdentityConflict(studentNo) {
+  const prefixed = db.prepare('SELECT username, role FROM users WHERE username = ?').get(`stu_${studentNo}`)
+  if (prefixed) return `旧账号 ${prefixed.username} 已存在，请先在名单里核对或处理它`
+  if (studentNo.startsWith('stu_')) {
+    const owner = db.prepare('SELECT 1 FROM students WHERE student_no = ?').get(studentNo.slice(4))
+    if (owner) return `学号 ${studentNo} 与名单里另一名学生的旧前缀账号撞车`
+  }
+  return ''
 }
 
 // ========== 班级 ==========
@@ -134,6 +146,8 @@ router.post('/students', (req, res) => {
   if (db.prepare('SELECT 1 FROM users WHERE username = ?').get(studentNo)) {
     return res.status(409).json({ error: `学号 ${studentNo} 已被其他账号占用` })
   }
+  const legacy = legacyIdentityConflict(studentNo)
+  if (legacy) return res.status(409).json({ error: legacy })
 
   const cls = classIdOf(req.body)
   if (cls.error) return res.status(400).json({ error: cls.error })
@@ -143,7 +157,9 @@ router.post('/students', (req, res) => {
   const nameEn = String(req.body.nameEn || '').trim()
   const gender = String(req.body.gender || '').trim()
   const course = String(req.body.course || '').trim()
-  const className = String(req.body.className || '').trim()
+  // 班级名一律从库里解析出来的那个班读：前端只选 classId 时 body.className 是空的，
+  // 用它推年级会让「七年级1班」这种明显带年级的班也写成无年级。
+  const className = db.prepare('SELECT name FROM classes WHERE id = ?').get(cls.classId)?.name || ''
   // 显式 grade=0 / 非数字一律视为「没给」，交给课程名和班级名推断；推不出来写 NULL，不写 0
   const grade = resolveGrade(req.body.grade, course, className, null)
 
@@ -198,8 +214,13 @@ router.put('/students/:id', (req, res) => {
 
   const user = db.prepare("SELECT id FROM users WHERE username = ? AND role = 'student'").get(student.student_no)
   // 改学号前先确认新学号没被别人占着，否则 username 唯一索引会炸
-  if (user && nextNo !== student.student_no && db.prepare('SELECT 1 FROM users WHERE username = ?').get(nextNo)) {
+  if (nextNo !== student.student_no && db.prepare('SELECT 1 FROM users WHERE username = ?').get(nextNo)) {
     return res.status(409).json({ error: `学号 ${nextNo} 已有登录身份，请先处理` })
+  }
+  // 只在真的改学号时查前缀冲突：不动学号的编辑（改名、转班）不该被历史旧账号卡住
+  if (nextNo !== student.student_no) {
+    const legacy = legacyIdentityConflict(nextNo)
+    if (legacy) return res.status(409).json({ error: legacy })
   }
 
   db.transaction(() => {

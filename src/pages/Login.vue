@@ -53,9 +53,9 @@ async function submit() {
 
     <main class="login__card gw-scroll">
       <header class="login__head">
-        <div class="login__seal">王宠</div>
+        <div class="login__seal">墨境</div>
         <div>
-          <h1>王宠课堂</h1>
+          <h1>墨境</h1>
           <p>山海异兽 · 五阶品阶 · 八卦斗法</p>
         </div>
       </header>

@@ -2,7 +2,7 @@
  * 数据对接层（adapter）
  *
  * 页面只调这里的函数，不直接摸 axios、也不自己写 DEMO_*。
- * 每个函数都是「先试真实接口，失败则回落占位数据」——
+ * 只读接口可回落占位；正式消费、名单修改/删除失败必须上抛，禁止本地伪造成功。
  * 所以 Qoder 的 /api/v2 就绪后，前端不需要改任何页面，刷新即生效。
  *
  * 端点前缀：/api + /v2/*（见 00-总纲 §12），与 src/api/v3.ts 的 /api/v3 同源。
@@ -470,18 +470,16 @@ export async function createClass(name: string): Promise<ClassRow | null> {
 
 /** 修改学生（改名 / 改学号）——服务端是 PUT，早先写成 POST 一直没生效 */
 export async function updateStudent(id: string, patch: { name?: string; studentNo?: string }): Promise<boolean> {
-  return trySend('put', `/students/${id}`, patch, (d) => Boolean(asRecord(d)?.success), false)
+  const res = await api.put(`/students/${id}`, patch, { timeout: TIMEOUT })
+  if (!asRecord(res.data)?.success) throw new Error('修改未确认，请刷新核对后再操作')
+  return ok(true)
 }
 
 /** 删除学生 */
 export async function deleteStudent(id: string): Promise<boolean> {
-  try {
-    const res = await api.delete(`/students/${id}`, { timeout: TIMEOUT })
-    if (asRecord(res.data)?.success) return ok(true)
-  } catch (err) {
-    console.warn(`[adapter] DELETE /students/${id} 失败：`, err)
-  }
-  return mock(false)
+  const res = await api.delete(`/students/${id}`, { timeout: TIMEOUT })
+  if (!asRecord(res.data)?.success) throw new Error('删除未确认，请刷新核对后再操作')
+  return ok(true)
 }
 
 function pickEvaluations(data: unknown): EvaluationRow[] | null {
