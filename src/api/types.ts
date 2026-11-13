@@ -93,6 +93,14 @@ export interface GachaDrawn {
   fragments: number
 }
 
+/** 服务端已提交的求签回执；页面不得再自行扣款或随机生成结果。 */
+export interface GachaReceipt {
+  results: GachaDrawn[]
+  points: number
+  pulls: number
+  cost: number
+}
+
 /** 造物提交单 */
 export interface CustomPetSubmission {
   id: string

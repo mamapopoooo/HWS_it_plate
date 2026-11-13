@@ -7,7 +7,13 @@ import { generateToken } from '../utils/token.js'
 import { hashPassword, verifyPassword } from '../utils/password.js'
 import { createStudentLogin, toPublicUser } from '../utils/studentLogin.js'
 
+import { routePrice, readEconomy, debit } from '../utils/economy.js'
+import { createGachaRoute } from '../utils/gachaRoute.js'
+
+import { createAwakenRoute } from '../utils/awakenRoute.js'
+
 const router = Router()
+const officialGacha = createGachaRoute(db)
 
 // 本地演出不是权威战斗：明确拒绝结果记账，不能把客户端自报胜负计入战绩或奖励。
 router.post('/battle/pve/result', authMiddleware, (_req, res) => {
@@ -184,29 +190,7 @@ router.post('/pets/obtain', authMiddleware, (req, res) => {
 })
 
 // 宠物觉醒
-router.post('/pets/:petId/awaken', authMiddleware, (req, res) => {
-  const pet = db.prepare('SELECT * FROM player_pets WHERE id = ? AND user_id = ?').get(req.params.petId, req.userId)
-  if (!pet) {
-    return res.status(404).json({ error: '宠物不存在' })
-  }
-
-  if (pet.awakening_level >= 4) {
-    return res.status(400).json({ error: '已达最高觉醒等级' })
-  }
-
-  const cost = (pet.awakening_level + 1) * 500
-  const user = db.prepare('SELECT game_points FROM users WHERE id = ?').get(req.userId)
-
-  if (user.game_points < cost) {
-    return res.status(400).json({ error: '积分不足', required: cost, current: user.game_points })
-  }
-
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(cost, req.userId)
-  db.prepare('UPDATE player_pets SET awakening_level = awakening_level + 1 WHERE id = ?').run(pet.id)
-
-  const newLevel = pet.awakening_level + 1
-  res.json({ success: true, newLevel, cost })
-})
+router.post('/pets/:petId/awaken', authMiddleware, createAwakenRoute(db))
 
 // 装备皮肤
 router.post('/pets/:petId/equip-skin', authMiddleware, (req, res) => {
@@ -390,35 +374,40 @@ router.get('/shop/items', (req, res) => {
 // 购买道具
 router.post('/shop/buy', authMiddleware, (req, res) => {
   const { itemId, quantity = 1 } = req.body
+  if (!Number.isSafeInteger(quantity) || quantity < 1) return res.status(400).json({ error: '购买数量必须为正整数' })
   const item = db.prepare('SELECT * FROM items_template WHERE id = ? AND is_active = 1').get(itemId)
   if (!item) {
     return res.status(404).json({ error: '道具不存在' })
   }
 
   const user = db.prepare('SELECT game_points, grade FROM users WHERE id = ?').get(req.userId)
-  const price = item.price * (user.grade === 7 ? 0.8 : 1)
-  const totalCost = Math.floor(price * quantity)
+  if (!user) return res.status(401).json({ error: '登录身份不存在' })
+  const price = routePrice(db, item.price, user.grade)
+  const totalCost = price * quantity
+  if (!Number.isSafeInteger(totalCost)) return res.status(400).json({ error: '购买数量超出范围' })
 
   if (user.game_points < totalCost) {
     return res.status(400).json({ error: '积分不足', required: totalCost, current: user.game_points })
   }
 
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(totalCost, req.userId)
+  db.transaction(() => {
+    debit(db, req.userId, totalCost)
 
-  // 检查是否已有该道具
-  const existing = db.prepare('SELECT * FROM player_items WHERE user_id = ? AND item_id = ?').get(req.userId, itemId)
-  if (existing) {
-    db.prepare('UPDATE player_items SET quantity = quantity + ? WHERE id = ?').run(quantity, existing.id)
-  } else {
-    db.prepare('INSERT INTO player_items (id, user_id, item_id, quantity, obtained_at) VALUES (?, ?, ?, ?, ?)')
-      .run(uuidv4(), req.userId, itemId, quantity, Date.now())
-  }
+    // 检查是否已有该道具
+    const existing = db.prepare('SELECT * FROM player_items WHERE user_id = ? AND item_id = ?').get(req.userId, itemId)
+    if (existing) {
+      db.prepare('UPDATE player_items SET quantity = quantity + ? WHERE id = ?').run(quantity, existing.id)
+    } else {
+      db.prepare('INSERT INTO player_items (id, user_id, item_id, quantity, obtained_at) VALUES (?, ?, ?, ?, ?)')
+        .run(uuidv4(), req.userId, itemId, quantity, Date.now())
+    }
 
-  // 记录兑换
-  db.prepare('INSERT INTO exchange_records (id, user_id, item_id, cost_points, result_json, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(uuidv4(), req.userId, itemId, totalCost, JSON.stringify({ quantity }), Date.now())
+    // 记录兑换
+    db.prepare('INSERT INTO exchange_records (id, user_id, item_id, cost_points, result_json, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(uuidv4(), req.userId, itemId, totalCost, JSON.stringify({ quantity }), Date.now())
 
-  res.json({ success: true, newPoints: user.game_points - totalCost })
+  })()
+  res.json({ success: true, newPoints: user.game_points - totalCost, cost: totalCost })
 })
 
 // 获取皮肤列表
@@ -436,10 +425,11 @@ router.post('/shop/skins/buy', authMiddleware, (req, res) => {
   }
 
   const user = db.prepare('SELECT game_points, grade FROM users WHERE id = ?').get(req.userId)
-  const price = skin.price * (user.grade === 7 ? 0.8 : 1)
+  if (!user) return res.status(401).json({ error: '登录身份不存在' })
+  const price = routePrice(db, skin.price, user.grade)
 
   if (user.game_points < price) {
-    return res.status(400).json({ error: '积分不足', required: Math.floor(price), current: user.game_points })
+    return res.status(400).json({ error: '积分不足', required: price, current: user.game_points })
   }
 
   // 检查是否已拥有
@@ -448,103 +438,110 @@ router.post('/shop/skins/buy', authMiddleware, (req, res) => {
     return res.status(400).json({ error: '已拥有该皮肤' })
   }
 
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(Math.floor(price), req.userId)
-  db.prepare('INSERT INTO player_skins (id, user_id, skin_id, obtained_at) VALUES (?, ?, ?, ?)')
-    .run(uuidv4(), req.userId, skinId, Date.now())
+  db.transaction(() => {
+    debit(db, req.userId, price)
+    db.prepare('INSERT INTO player_skins (id, user_id, skin_id, obtained_at) VALUES (?, ?, ?, ?)')
+      .run(uuidv4(), req.userId, skinId, Date.now())
 
-  res.json({ success: true, newPoints: user.game_points - Math.floor(price) })
+  })()
+  res.json({ success: true, newPoints: user.game_points - price, cost: price })
 })
 
 // ========== 抽卡接口 ==========
 
 // 抽卡
 router.post('/gacha/draw', authMiddleware, (req, res) => {
+  if (req.body.kind !== undefined) return officialGacha(req, res)
   const { eggType, count = 1 } = req.body
   if (!['normal', 'rare', 'legendary'].includes(eggType)) {
     return res.status(400).json({ error: '无效的蛋类型' })
   }
-  if (count < 1 || count > 10) {
+  if (!Number.isInteger(count) || count < 1 || count > 10) {
     return res.status(400).json({ error: '抽卡数量1-10' })
   }
 
-  const prices = { normal: 200, rare: 500, legendary: 1000 }
+  const prices = readEconomy(db).legacyGacha
   const user = db.prepare('SELECT game_points, grade FROM users WHERE id = ?').get(req.userId)
-  const price = prices[eggType] * (user.grade === 7 ? 0.8 : 1)
-  const totalCost = Math.floor(price * count)
+  if (!user) return res.status(401).json({ error: '登录身份不存在' })
+  const price = routePrice(db, prices[eggType], user.grade)
+  const totalCost = price * count
 
   if (user.game_points < totalCost) {
     return res.status(400).json({ error: '积分不足', required: totalCost, current: user.game_points })
   }
 
-  // 获取保底计数
-  let pity = db.prepare('SELECT count FROM gacha_pity WHERE user_id = ? AND egg_type = ?').get(req.userId, eggType)
-  let pityCount = pity ? pity.count : 0
+  const result = db.transaction(() => {
+    // 获取保底计数
+    let pity = db.prepare('SELECT count FROM gacha_pity WHERE user_id = ? AND egg_type = ?').get(req.userId, eggType)
+    let pityCount = pity ? pity.count : 0
 
-  const results = []
-  for (let i = 0; i < count; i++) {
-    pityCount++
+    const results = []
+    for (let i = 0; i < count; i++) {
+      pityCount++
 
-    // 保底检查
-    let minRarity = 1
-    if (pityCount >= 100) minRarity = 6
-    else if (pityCount >= 50) minRarity = 5
-    else if (pityCount >= 10) minRarity = 4
+      // 保底检查
+      let minRarity = 1
+      if (pityCount >= 100) minRarity = 6
+      else if (pityCount >= 50) minRarity = 5
+      else if (pityCount >= 10) minRarity = 4
 
-    // 概率抽卡
-    const roll = Math.random()
-    let rarity = 1
+      // 概率抽卡
+      const roll = Math.random()
+      let rarity = 1
 
-    if (eggType === 'normal') {
-      if (roll < 0.1) rarity = 3
-      else if (roll < 0.4) rarity = 2
-      else rarity = 1
-    } else if (eggType === 'rare') {
-      if (roll < 0.2) rarity = 5
-      else if (roll < 0.6) rarity = 4
-      else rarity = 3
-    } else {
-      if (roll < 0.7) rarity = 6
-      else rarity = 5
-    }
-
-    rarity = Math.max(rarity, minRarity)
-
-    // 根据稀有度选择宠物
-    const pets = db.prepare('SELECT * FROM pets_template WHERE rarity = ? AND is_active = 1 ORDER BY RANDOM() LIMIT 1').get(rarity)
-    const petTemplate = pets || db.prepare('SELECT * FROM pets_template WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1').get()
-
-    if (petTemplate) {
-      // 检查是否已拥有
-      const existing = db.prepare('SELECT id FROM player_pets WHERE user_id = ? AND template_id = ?').get(req.userId, petTemplate.id)
-      if (!existing) {
-        const petId = uuidv4()
-        const defaultSkills = JSON.parse(petTemplate.skills_json || '[]').slice(0, 1).map(s => s.id)
-        db.prepare(`
-          INSERT INTO player_pets (id, user_id, template_id, level, exp, equipped_skills, obtained_at)
-          VALUES (?, ?, ?, 1, 0, ?, ?)
-        `).run(petId, req.userId, petTemplate.id, JSON.stringify(defaultSkills), Date.now())
+      if (eggType === 'normal') {
+        if (roll < 0.1) rarity = 3
+        else if (roll < 0.4) rarity = 2
+        else rarity = 1
+      } else if (eggType === 'rare') {
+        if (roll < 0.2) rarity = 5
+        else if (roll < 0.6) rarity = 4
+        else rarity = 3
+      } else {
+        if (roll < 0.7) rarity = 6
+        else rarity = 5
       }
+
+      rarity = Math.max(rarity, minRarity)
+
+      // 根据稀有度选择宠物
+      const pets = db.prepare('SELECT * FROM pets_template WHERE rarity = ? AND is_active = 1 ORDER BY RANDOM() LIMIT 1').get(rarity)
+      const petTemplate = pets || db.prepare('SELECT * FROM pets_template WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1').get()
+
+      if (petTemplate) {
+        // 检查是否已拥有
+        const existing = db.prepare('SELECT id FROM player_pets WHERE user_id = ? AND template_id = ?').get(req.userId, petTemplate.id)
+        if (!existing) {
+          const petId = uuidv4()
+          const defaultSkills = JSON.parse(petTemplate.skills_json || '[]').slice(0, 1).map(s => s.id)
+          db.prepare(`
+            INSERT INTO player_pets (id, user_id, template_id, level, exp, equipped_skills, obtained_at)
+            VALUES (?, ?, ?, 1, 0, ?, ?)
+          `).run(petId, req.userId, petTemplate.id, JSON.stringify(defaultSkills), Date.now())
+        }
+      }
+
+      results.push({
+        petTemplateId: petTemplate?.id,
+        rarity,
+        isNew: !db.prepare('SELECT id FROM player_pets WHERE user_id = ? AND template_id = ?').get(req.userId, petTemplate?.id)
+      })
+
+      // 记录抽卡
+      db.prepare('INSERT INTO gacha_records (id, user_id, egg_type, pet_template_id, rarity, pity_count, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .run(uuidv4(), req.userId, eggType, petTemplate?.id, rarity, pityCount, Date.now())
     }
 
-    results.push({
-      petTemplateId: petTemplate?.id,
-      rarity,
-      isNew: !db.prepare('SELECT id FROM player_pets WHERE user_id = ? AND template_id = ?').get(req.userId, petTemplate?.id)
-    })
+    // 更新保底计数
+    db.prepare('INSERT OR REPLACE INTO gacha_pity (user_id, egg_type, count) VALUES (?, ?, ?)')
+      .run(req.userId, eggType, pityCount)
 
-    // 记录抽卡
-    db.prepare('INSERT INTO gacha_records (id, user_id, egg_type, pet_template_id, rarity, pity_count, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run(uuidv4(), req.userId, eggType, petTemplate?.id, rarity, pityCount, Date.now())
-  }
+    // 扣除积分
+    debit(db, req.userId, totalCost)
 
-  // 更新保底计数
-  db.prepare('INSERT OR REPLACE INTO gacha_pity (user_id, egg_type, count) VALUES (?, ?, ?)')
-    .run(req.userId, eggType, pityCount)
-
-  // 扣除积分
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(totalCost, req.userId)
-
-  res.json({ results, newPoints: user.game_points - totalCost, pityCount })
+    return { results, newPoints: user.game_points - totalCost, pityCount, cost: totalCost }
+  })()
+  res.json(result)
 })
 
 // 抽卡记录

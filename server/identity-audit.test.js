@@ -82,7 +82,7 @@ describe('身份只读脱敏盘点', () => {
       if (dirname(directory) !== resolve(tmpdir())) throw new Error('临时目录越界')
       rmSync(directory, { recursive: true, force: true })
     }
-  })
+  }, 15000)
   it('只有新名单未建账号不当作资产冲突，干净快照退出0', () => {
     const db = new Database(':memory:')
     try {

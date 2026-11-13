@@ -7,6 +7,11 @@ import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'
 import { authMiddleware } from '../middleware/auth.js'
 
+import { routePrice, debit } from '../utils/economy.js'
+import { createGachaRoute } from '../utils/gachaRoute.js'
+
+import { createAwakenRoute } from '../utils/awakenRoute.js'
+
 const router = Router()
 
 // ========== 配置接口（前端启动时一次性拉取缓存） ==========
@@ -92,165 +97,12 @@ router.get('/pets/my', authMiddleware, (req, res) => {
 })
 
 // POST /pets/:petId/awaken — 返回 form/formChanged
-router.post('/pets/:petId/awaken', authMiddleware, (req, res) => {
-  const pet = db.prepare('SELECT * FROM player_pets WHERE id = ? AND user_id = ?').get(req.params.petId, req.userId)
-  if (!pet) return res.status(404).json({ error: '宠物不存在' })
-
-  const template = db.prepare('SELECT * FROM pets_template WHERE id = ?').get(pet.template_id)
-  const tierConfig = db.prepare('SELECT * FROM tier_config WHERE tier = ?').get(template.tier)
-  const awakenCap = tierConfig?.awaken_cap || 1
-
-  if (pet.awakening_level >= awakenCap) {
-    return res.status(400).json({ error: '已达该品阶最高觉醒' })
-  }
-
-  // 觉醒费用：从 economy_config 读取
-  const awakenCosts = getEconomyValue('awaken', {})
-  const cost = awakenCosts[`tier${template.tier}`] || (pet.awakening_level + 1) * 500
-
-  const user = db.prepare('SELECT game_points FROM users WHERE id = ?').get(req.userId)
-  const gradeCoef = getGradeCoefficient(req.userId)
-  const finalCost = Math.floor(cost * gradeCoef)
-
-  if (user.game_points < finalCost) {
-    return res.status(400).json({ error: '积分不足', required: finalCost, current: user.game_points })
-  }
-
-  const oldForm = pet.awakening_level + 1
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(finalCost, req.userId)
-  db.prepare('UPDATE player_pets SET awakening_level = awakening_level + 1 WHERE id = ?').run(pet.id)
-
-  const newLevel = pet.awakening_level + 1
-  const newForm = newLevel + 1
-  const formChanged = newForm !== oldForm
-
-  res.json({ success: true, newLevel, form: newForm, formChanged, cost: finalCost })
-})
+router.post('/pets/:petId/awaken', authMiddleware, createAwakenRoute(db))
 
 // ========== 抽卡接口（改造：tier 保底） ==========
 
 // POST /gacha/draw — 返回 tier/trigram
-router.post('/gacha/draw', authMiddleware, (req, res) => {
-  const { count = 1 } = req.body
-  if (count < 1 || count > 10) return res.status(400).json({ error: '抽卡数量1-10' })
-
-  const economy = getEconomyValue('gacha', {})
-  const singlePrice = economy.single || 5
-  const tenPrice = economy.ten || 45
-  const price = count >= 10 ? tenPrice : singlePrice * count
-
-  const user = db.prepare('SELECT game_points, grade FROM users WHERE id = ?').get(req.userId)
-  const gradeCoef = getGradeCoefficient(req.userId)
-  const finalPrice = Math.floor(price * gradeCoef)
-
-  if (user.game_points < finalPrice) {
-    return res.status(400).json({ error: '积分不足', required: finalPrice, current: user.game_points })
-  }
-
-  // 获取保底计数
-  let pity = db.prepare('SELECT * FROM gacha_pity WHERE user_id = ?').get(req.userId)
-  if (!pity) {
-    db.prepare('INSERT INTO gacha_pity (user_id, egg_type, count, tier2_pity, tier3_pity, tier4_pity) VALUES (?, ?, 0, 0, 0, 0)').run(req.userId, 'v3')
-    pity = { count: 0, tier2_pity: 0, tier3_pity: 0, tier4_pity: 0 }
-  }
-
-  const pityTier2 = economy.pityTier2 || 20
-  const pityTier3 = economy.pityTier3 || 60
-
-  // 获取品阶概率
-  const tiers = db.prepare('SELECT * FROM tier_config WHERE is_gacha = 1 ORDER BY tier').all()
-  const totalRate = tiers.reduce((sum, t) => sum + t.gacha_rate, 0)
-
-  const results = []
-  let currentPity = pity.count || 0
-  let currentTier2Pity = pity.tier2_pity || 0
-  let currentTier3Pity = pity.tier3_pity || 0
-  let currentTier4Pity = pity.tier4_pity || 0
-
-  for (let i = 0; i < count; i++) {
-    currentPity++
-    currentTier2Pity++
-    currentTier3Pity++
-    currentTier4Pity++
-
-    // 保底检查
-    let minTier = 1
-    if (currentTier4Pity >= 60) minTier = 4      // 太极无保底，但60抽给一次机会
-    if (currentTier3Pity >= pityTier3) minTier = Math.max(minTier, 3)
-    if (currentTier2Pity >= pityTier2) minTier = Math.max(minTier, 2)
-
-    // 按概率抽品阶
-    let selectedTier = null
-    const roll = Math.random()
-    let cumulative = 0
-    for (const t of tiers) {
-      cumulative += t.gacha_rate / totalRate
-      if (roll < cumulative) { selectedTier = t; break }
-    }
-
-    // 应用保底
-    if (!selectedTier || selectedTier.tier < minTier) {
-      selectedTier = tiers.find(t => t.tier >= minTier) || tiers[0]
-    }
-
-    // 在该品阶中随机选一只宠物
-    const pets = db.prepare('SELECT * FROM pets_template WHERE tier = ? AND is_active = 1 ORDER BY RANDOM() LIMIT 1').get(selectedTier.tier)
-    if (!pets) continue
-
-    // 检查是否已拥有
-    const existing = db.prepare('SELECT id FROM player_pets WHERE user_id = ? AND template_id = ?').get(req.userId, pets.id)
-    let isNew = false
-    if (!existing) {
-      const petId = uuidv4()
-      const defaultSkills = safeJsonParse(pets.skills_json, []).slice(0, 1).map(s => s.id)
-      db.prepare(`
-        INSERT INTO player_pets (id, user_id, template_id, level, exp, equipped_skills, form, power, obtained_at)
-        VALUES (?, ?, ?, 1, 0, ?, 1, 0, ?)
-      `).run(petId, req.userId, pets.id, JSON.stringify(defaultSkills), Date.now())
-      isNew = true
-    } else {
-      // 重复 → 灵纹碎片
-      const fragmentRewards = getEconomyValue('fragment', {})
-      const fragKey = `dupTier${selectedTier.tier}`
-      const fragAmount = fragmentRewards[fragKey] || 20
-      const existingFrag = db.prepare('SELECT count FROM player_fragments WHERE user_id = ? AND tier = ?').get(req.userId, selectedTier.tier)
-      if (existingFrag) {
-        db.prepare('UPDATE player_fragments SET count = count + ? WHERE user_id = ? AND tier = ?').run(fragAmount, req.userId, selectedTier.tier)
-      } else {
-        db.prepare('INSERT INTO player_fragments (user_id, tier, count) VALUES (?, ?, ?)').run(req.userId, selectedTier.tier, fragAmount)
-      }
-    }
-
-    // 保底计数重置
-    if (selectedTier.tier >= 2) currentTier2Pity = 0
-    if (selectedTier.tier >= 3) currentTier3Pity = 0
-    if (selectedTier.tier >= 4) currentTier4Pity = 0
-
-    // 记录抽卡
-    db.prepare(`
-      INSERT INTO gacha_records (id, user_id, egg_type, pet_template_id, rarity, pity_count, tier, trigram, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(uuidv4(), req.userId, 'v3', pets.id, selectedTier.tier, currentPity, selectedTier.tier, pets.trigram, Date.now())
-
-    results.push({
-      petTemplateId: pets.id,
-      petName: pets.name,
-      tier: selectedTier.tier,
-      tierName: selectedTier.name,
-      trigram: pets.trigram,
-      isNew
-    })
-  }
-
-  // 更新保底计数
-  db.prepare('UPDATE gacha_pity SET count = ?, tier2_pity = ?, tier3_pity = ?, tier4_pity = ? WHERE user_id = ?')
-    .run(currentPity, currentTier2Pity, currentTier3Pity, currentTier4Pity, req.userId)
-
-  // 扣除积分
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(finalPrice, req.userId)
-
-  res.json({ results, newPoints: user.game_points - finalPrice, pityCount: currentPity })
-})
+router.post('/gacha/draw', authMiddleware, createGachaRoute(db))
 
 // GET /gacha/rates — 返回品阶概率
 router.get('/gacha/rates', (req, res) => {
@@ -405,19 +257,21 @@ router.post('/character/buy-skin', authMiddleware, (req, res) => {
   const owned = db.prepare('SELECT * FROM player_character_skins WHERE user_id = ? AND skin_id = ?').get(req.userId, skinId)
   if (owned) return res.status(400).json({ error: '已拥有该皮肤' })
 
-  const user = db.prepare('SELECT game_points FROM users WHERE id = ?').get(req.userId)
-  const gradeCoef = getGradeCoefficient(req.userId)
-  const price = Math.floor(skin.price * gradeCoef)
+  const user = db.prepare('SELECT game_points, grade FROM users WHERE id = ?').get(req.userId)
+  if (!user) return res.status(401).json({ error: '登录身份不存在' })
+  const price = routePrice(db, skin.price, user.grade)
 
   if (user.game_points < price) {
     return res.status(400).json({ error: '积分不足', required: price, current: user.game_points })
   }
 
-  db.prepare('UPDATE users SET game_points = game_points - ? WHERE id = ?').run(price, req.userId)
-  db.prepare('INSERT INTO player_character_skins (id, user_id, skin_id, obtained_at) VALUES (?, ?, ?, ?)')
-    .run(uuidv4(), req.userId, skinId, Date.now())
+  db.transaction(() => {
+    debit(db, req.userId, price)
+    db.prepare('INSERT INTO player_character_skins (id, user_id, skin_id, obtained_at) VALUES (?, ?, ?, ?)')
+      .run(uuidv4(), req.userId, skinId, Date.now())
 
-  res.json({ success: true, newPoints: user.game_points - price })
+  })()
+  res.json({ success: true, newPoints: user.game_points - price, cost: price })
 })
 
 // ========== 造物接口 ==========
@@ -626,12 +480,6 @@ router.get('/rankings/:id', (req, res) => {
 
 function safeJsonParse(str, fallback) {
   try { return JSON.parse(str) } catch { return fallback }
-}
-
-function getGradeCoefficient(userId) {
-  const user = db.prepare('SELECT grade FROM users WHERE id = ?').get(userId)
-  const gradeCoef = getEconomyValue('gradeCoef', {})
-  return gradeCoef[String(user?.grade || 6)] || 1.0
 }
 
 function getEconomyValue(key, fallback) {

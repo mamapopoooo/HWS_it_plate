@@ -12,8 +12,8 @@ vi.mock('@/api/adapter', () => ({
 import Students from './Students.vue'
 
 afterEach(() => { vi.clearAllMocks() })
-async function upload(rowPlans?: unknown[]) {
-  mocks.matrix = [['学号', '姓名'], ['0001', '示例学生']]
+async function upload(rowPlans?: unknown[], matrix?: string[][]) {
+  mocks.matrix = matrix || [['学号', '姓名'], ['0001', '示例学生']]
   mocks.preview.mockResolvedValue({ dryRun: true, total: 1, wouldCreate: 0, wouldUpdate: 1,
     invalid: 0, garbled: 0, existingNos: ['0001'], ...(rowPlans === undefined ? {} : { rowPlans }) })
   const wrapper = mount(Students)
@@ -48,6 +48,22 @@ describe('名单导入兼容性阻断与缺席列', () => {
       await button.trigger('click')
       await flushPromises()
       expect(mocks.commit).toHaveBeenCalledWith([{ studentNo: '0001', name: '示例学生' }])
+    } finally { wrapper.unmount() }
+  })
+  it('拒绝原因可见且完整提交空白姓名行，零更新与无变化正常显示', async () => {
+    const wrapper = await upload([
+      { studentNo: '0001', action: 'update', writeFields: [], skipFields: ['name'], warnings: [], errors: [] },
+      { studentNo: '0002', action: 'reject', writeFields: [], skipFields: [], warnings: [], errors: ['示例拒绝原因'] },
+    ], [['学号', '姓名'], ['0001', '示例学生'], ['0002', '']])
+    try {
+      expect(wrapper.text()).toContain('示例拒绝原因')
+      expect(wrapper.text()).toContain('拒绝')
+      mocks.commit.mockResolvedValue({ created: 0, updated: 0, unchanged: 1,
+        rejected: [{ studentNo: '0002', reason: '示例拒绝原因' }] })
+      await wrapper.findAll('button').find(b => b.text().startsWith('确认导入'))!.trigger('click')
+      await flushPromises()
+      expect(mocks.commit).toHaveBeenCalledWith([{ studentNo: '0001', name: '示例学生' }, { studentNo: '0002', name: '' }])
+      expect(wrapper.text()).toContain('新增 0 人，更新 0 人，无变化 1 人，1 行被拒绝')
     } finally { wrapper.unmount() }
   })
 })
