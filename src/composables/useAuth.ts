@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { API_ROOT, getToken } from '@/api'
 
 interface User {
   id: string
@@ -12,14 +13,17 @@ const user = ref<User | null>(null)
 const token = ref<string>(localStorage.getItem('token') || '')
 
 // 创建带认证的 axios 实例（单例）
+// 与登录和名单客户端共用部署基路径。
 const api = axios.create({
-  baseURL: '/pet-garden/api'
+  baseURL: API_ROOT
 })
 
 // 请求拦截器：自动添加 Authorization header
 api.interceptors.request.use((config) => {
-  if (token.value) {
-    config.headers.Authorization = `Bearer ${token.value}`
+  // Pinia 登录会更新 storage，不能继续发送此旧单例缓存的游客 token。
+  const currentToken = getToken()
+  if (currentToken) {
+    config.headers.Authorization = `Bearer ${currentToken}`
   }
   return config
 })

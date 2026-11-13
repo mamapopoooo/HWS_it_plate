@@ -6,9 +6,12 @@
 defineProps<{
   displayName: string
   grade: number
+  className: string
   realm: string
   level: number
   points: number
+  todayPoints: number
+  duelsToday: number
   shards: number
   gender: 'male' | 'female'
 }>()
@@ -35,8 +38,8 @@ const onAvatar = () => emit('avatar')
     </div>
 
     <div class="hud__who">
-      <div class="hud__name">{{ displayName }} · G{{ grade }} 班</div>
-      <div class="hud__sub">修行境界 <em>{{ realm }}</em> · 今日功名 +38</div>
+      <div class="hud__name">{{ displayName }} · {{ className || `G${grade} 班` }}</div>
+      <div class="hud__sub">修行境界 <em>{{ realm }}</em> · 今日功名 +{{ todayPoints }}</div>
     </div>
 
     <div class="hud__spacer" />
@@ -46,7 +49,7 @@ const onAvatar = () => emit('avatar')
         <span>⛁</span><b class="num">{{ points }}</b>灵石
       </div>
       <div class="hud__stat"><span>◈</span>灵纹 <span class="num">{{ shards }}</span></div>
-      <div class="hud__stat"><span>✧</span>斗法 <span class="num">3</span>/3</div>
+      <div class="hud__stat"><span>✧</span>今日斗法 <span class="num">{{ duelsToday }}</span></div>
     </div>
 
     <button class="hud__gear" title="设置" @click="onSettings">⚙</button>
