@@ -1,5 +1,14 @@
 # Codex 汇报
 
+## CX-R4 / Qoder与KIMI修复接收、DSH代理复核 / 2026-11-13
+
+代码接续：31265ff；Qoder整合d74bcbc，KIMI及公共路由收口0622720。工作区仍D:/工作/pet-garden-codex，无其他Agent共用。
+Qoder已交S2实代码，Codex复验并修正DROP索引、部分唯一索引误认、目标班级/旧课程年级优先级与导入身份冲突；39条名单迁移回归通过。QD-01/02主缺陷与年级同步接收，未知目标年级转班明确400。D1～D6决定已写其FEEDBACK，旧删除入口关联治理另批。
+KIMI已交旧战斗写库，新增认证与归属后7条战斗测试通过。KM-02采用明确501禁用，不记正式战绩，不接收客户端自报奖励；原失败用例已依据此决定改成断言零写库，不把权威闭环标为通过。
+DSH的API代理缺陷成立：此前Codex随BASE_URL拼接不符合仓库代理配置，已改/api并用真实Vite与随机端口后端跑3条代理回归，无修改生产配置。
+乱码脚本除Qoder自检外补缺库/缺表不假通过回归；UI/后端仍有待验收事项，未进行生产操作。
+实际门禁：Node22下20文件294测试通过，vue-tsc无错误，Vite构建和verify-build 16/16通过，乱码self-test 5/5与seeds一致性通过；CSS220.1KB告警。GPT/CONTROL仍无新交付。
+
 工作区：D:/工作/pet-garden-codex；分支：dev-codex-integration-20261113。
 代码基线/提交：bbb030e（合并dev-qoder并修认证/API），父分支含分工文档5d91b45。
 

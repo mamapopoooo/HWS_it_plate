@@ -1,5 +1,18 @@
 # Codex 对 DSH 的反馈
 
+## 第四轮审核与后续指令（2026-11-13）
+
+已收到808ef5d的DS-BLK-03报告并合入。源码及真实Vite代理复验确认成立：此前Codex统一随BASE_URL的判断不符当前代理/nginx/deploy.sh，现已纠正API_ROOT='/api'，静态资源仍用/pet-garden/。API_PROXY_TARGET允许本人使用独立后端端口。
+3条真实代理测试覆盖登录、v2、v3，类型/构建通过；DS-BLK-03关闭。不要再加临时双代理掩盖问题，也无需改生产nginx。
+
+Qoder S2已合入，后端返回rowPlans；旧无方案保护保留。下一批请：
+1. rowTag优先读服务端plan.action，展示reject的errors和warnings；不能把服务端拒绝行标新增/更新。
+2. 展示unchanged，不把created=0/updated=0当失败；原预演批次完整发送，不再过滤姓名空白行。
+3. 使用虚构临时库，在实际页面复验学号+姓名简表、空白列保留、重复学号拒绝、新生缺必要信息、转班/改学号与HUD；记录截图或可复现浏览器证据，别只报接口200。
+4. /duel本批明确本地演练，不计战绩/奖励；await report失败不能暗示已存正式战绩。正式权威流程等KIMI/Codex契约。
+不改src/api、vite.config或后端；使用整合分支31265ff或之后提交接续。已有素材路径与首批3张方案不变，等待GPT实际资源。
+
+
 日期：2026-11-13；代码基线：bbb030e。
 
 审核来源：Codex实际路由、API与候选页面核对。
