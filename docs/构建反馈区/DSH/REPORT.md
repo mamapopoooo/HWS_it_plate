@@ -4,6 +4,101 @@
 
 ---
 
+## DS-R4 / 按第四轮指令完成 rowPlans 展示与批次语义 / 2026-11-13
+
+- 状态：**待复验**
+- 基线：整合分支 `1c8af2e`（含 Qoder S2 rowPlans 与 Codex 代理修正）
+- 补丁提交：见本轮推送 SHA（`fix(dsh): 预演按服务端 plan 判定 + 完整批次提交`）
+- 本批文件：`src/pages/v3/admin/Students.vue`、本报告
+- **未改** `src/api/`、`vite.config.ts`、后端；已删除上一轮的临时双代理配置
+
+### 一、按指令逐条落实
+
+| 指令 | 实现 |
+|---|---|
+| rowTag 优先读 `plan.action` | 有 plan 时：`reject`→「拒绝」、`update`→「更新」、其余→「新增」；无 plan 才降级用 `existingNos` 仅作参考 |
+| reject 展示 errors 与 warnings | 每行渲染 `plan.warnings`（橙）与 `plan.errors`（红加粗） |
+| 不把服务端拒绝行标成新增/更新 | 由上一行保证；`reject` 单独分类 |
+| 展示 unchanged | 预览汇总新增「无变化 N」；提交 toast 也带 `无变化 N 人` |
+| created=0/updated=0 不当失败 | toast 改为拼接式「导入完成：新增 X 人，更新 Y 人，无变化 Z 人，N 行被拒绝」，0 也正常显示 |
+| 原批次完整发送、不过滤空白姓名行 | `importable` 改为 `imp.rows.length`；`doImport` 仍提交 `imp.rows` 全量，逐行拒绝交给服务端 |
+| 只用完整方案才可确认 | 保留 Codex 的 `hasRowPlans` 双重阻断（按钮 disabled + 函数内 return） |
+
+### 二、实测证据（隔离端口 3004 + 本工作区数据库，虚构学号 9900xx）
+
+**A. 简表（只有学号 + 姓名）**
+
+```
+total=2 create=0 update=0 unchanged=1 invalid=1
+990001 action=update write=[] skip=[name,nameEn,gender,class,course] warn=1
+990002 action=reject write=[] skip=[] err=1  →「该学号存在身份冲突，请先核对旧账号…」
+```
+
+**B. 空白列保留**
+
+```
+action=update write=[] skip=[name,nameEn,gender,class,course]
+warnings: 英文名列为空，本次保留原值 / 班级列为空，本次保留原值 / 本次没有需要更新的列，档案保持原样
+```
+
+**C. 同一批重复学号**
+
+```
+invalid=2，两行均 action=reject
+errors：「同一份表格里这个学号出现多次，请合并成一行后重传」
+```
+
+**D. 新生缺必要信息**
+
+```
+990006 → action=reject，errors：「新增学生必须有中文名」「新增学生必须有班级」
+```
+
+**E. 转班 / 改学号**
+
+```
+PUT /api/v3/roster/students/:id { classId }  → success
+PUT /api/v3/roster/students/:id { studentNo: '990007'→'990008' } → success
+DB 核对：students.student_no=990008，users.username=990008，users.class_id_ref 同步
+```
+
+**F. 混合提交（新增/无变化/拒绝）**
+
+```
+rows = [990020 新, 990001 无变化, 990012 缺姓名]
+返回：created=0 updated=0 unchanged=1 rejected=2
+```
+
+### 三、两条后端发现（不属我职责，供 Codex/Qoder 判断）
+
+1. **导入的「班级」是班级名，不是 classId**。传 `classId` 会被忽略并报「新增学生必须有班级」；必须传 `class: '六年级A班'`。页面已按表头 `class` 字符串提交，符合契约；但接口若同时接受 id 会更稳。
+2. **新生年级推导在当前库失败**：`classes` 表没有 `grade` 列（`PRAGMA` 报 `no such column: grade`）。即使班级名是「六年级A班」且 `parseGrade('', '六年级A班') === 6`，规划仍返回
+   「无法从班级或课程确定年级，请补全「班级」（如七年级B班）或「课程」（如信息技术 G7）后重传」。
+   用 `course: '信息技术 G6'` 同样被「新增学生必须有班级」拦下。
+   → 结果：**新建学生这条路径目前无法通过导入完成**（更新既有学生正常）。建议 Qoder 检查 `plan.writes.class_name` 在规划阶段是否真的被写入。
+
+### 四、检查结果
+
+| 检查 | 结果 |
+|---|---|
+| `vue-tsc --noEmit` | ✅ 0 错误 |
+| `vitest run` | ✅ 20 文件 / **294 测试**通过 |
+| `vite build` | ✅ 通过 |
+| `verify-build` | ✅ 通过 |
+| 代理修正 | ✅ 前端已改为 `API_ROOT='/api'`；我用 `API_PROXY_TARGET=http://localhost:3004` 启动预览，未改 `vite.config.ts` |
+
+### 五、页面证据的限制（必须说明）
+
+本环境**无法截图**（无浏览器自动化）。我能提供的是：接口级实测、DB 核对、逐行 plan 原始返回，以及可复现的操作步骤。
+Codex 要求「记录截图或可复现浏览器证据」，我需要：① 你给我一张页面截图，或 ② 授权我安装 Playwright 截图（会增加 devDependency，属共享配置，需你同意）。
+
+### 六、/duel 本地演练
+
+`Duel.vue` 结果页已写「本场为本地演练，暂不计入正式战绩或奖励」，`reportBattle` 为 fire-and-forget 且失败不影响结算文案；不会暗示已保存正式战绩。正式权威流程等 KIMI/Codex 契约。
+
+
+---
+
 ## DS-BLK-03 / 前端 API 前缀与 dev 代理不一致（新发现，需 Codex 处理）/ 2026-11-13
 
 - 状态：**待审核（P1，阻断页面级登录验收）**

@@ -162,6 +162,7 @@
           <span>读到 {{ imp.preview.total }} 行</span>
           <span class="tag tag--new">新增 {{ imp.preview.wouldCreate }}</span>
           <span class="tag tag--upd">更新 {{ imp.preview.wouldUpdate }}</span>
+          <span v-if="imp.preview.unchanged !== undefined" class="tag">无变化 {{ imp.preview.unchanged }}</span>
           <span class="tag tag--bad">无效 {{ imp.preview.invalid }}</span>
         </div>
         <p v-if="imp.preview && imp.preview.garbled" class="imp-warn">
@@ -202,6 +203,11 @@
                       :key="w"
                       class="imp-plan imp-plan--warn"
                     >{{ w }}</span>
+                    <span
+                      v-for="err in planByNo.get(r.studentNo)!.errors"
+                      :key="err"
+                      class="imp-plan imp-plan--bad"
+                    >{{ err }}</span>
                   </template>
                 </td>
                 <td class="table-td">{{ r.studentNo || '—' }}</td>
@@ -438,7 +444,9 @@ const imp = reactive({
   cols: {} as Partial<Record<keyof RosterRow, number>>,
 })
 
-const importable = computed(() => imp.rows.filter(r => r.studentNo.trim() && r.name.trim()).length)
+// 提交的是完整批次：即使某些行姓名为空，也交给服务端逐行判定（拒绝理由由服务端给），
+// 前端不能悄悄少发一行后还声称原预演的结论已执行。
+const importable = computed(() => imp.rows.length)
 
 const knownNos = computed(() => new Set(imp.preview?.existingNos ?? []))
 
@@ -474,8 +482,17 @@ function fieldText(f: RosterImportField): string {
 }
 
 function rowTag(r: RosterRow) {
+  // 有服务端逐行方案时，以 plan.action 为准：reject 必须显示成"拒绝"，
+  // 不能因为学号已存在就标成可写入的「更新」。
+  const plan = planByNo.value.get(r.studentNo.trim())
+  if (plan) {
+    if (plan.action === 'reject') return { text: '拒绝', cls: 'tag--bad' }
+    if (plan.action === 'update') return { text: '更新', cls: 'tag--upd' }
+    return { text: '新增', cls: 'tag--new' }
+  }
+  // 没有逐行方案时的降级标记：只作参考，不代表服务端允许写入。
   if (!r.studentNo.trim() || !r.name.trim()) return { text: '无效', cls: 'tag--bad' }
-  // 判定依据来自服务端预演，不能用 students.value：页面可能正被班级/关键词筛着，
+  // 判定依据来自服务端预演的 existingNos，不能用 students.value：页面可能正被班级/关键词筛着，
   // 那样会把库里已有的学生标成「新增」，教师会被误导。
   return knownNos.value.has(r.studentNo.trim())
     ? { text: '更新', cls: 'tag--upd' }
@@ -555,8 +572,11 @@ async function doImport() {
     // 与预演发送同一批次，逐行拒绝由服务端规划，不能客户端删行后仍声称原预演已执行。
     const r = await commitImport(imp.rows)
     closeImport()
-    const skipped = r.rejected.length ? `，${r.rejected.length} 行被跳过` : ''
-    toast.value = `导入完成：新增 ${r.created} 人，更新 ${r.updated} 人${skipped}`
+    // created/updated 为 0 是正常结果（例如整批都是无变化），不能当失败提示。
+    const parts = [`新增 ${r.created} 人`, `更新 ${r.updated} 人`]
+    if (r.unchanged) parts.push(`无变化 ${r.unchanged} 人`)
+    if (r.rejected.length) parts.push(`${r.rejected.length} 行被拒绝`)
+    toast.value = `导入完成：${parts.join('，')}`
     await refresh()
   } catch (e) {
     imp.error = e instanceof Error ? e.message : '导入失败'
@@ -750,6 +770,7 @@ onMounted(async () => {
 }
 .imp-plan--skip { color: #8A8577; }
 .imp-plan--warn { color: #C0392B; }
+.imp-plan--bad { color: #C0392B; font-weight: 700; }
 .imp-table { font-size: 12px; }
 .imp-table .table-td { padding: 7px 10px; }
 
