@@ -220,9 +220,12 @@ onUnmounted(() => {
     <GameHud
       :display-name="profile.displayName"
       :grade="profile.grade"
+      :class-name="profile.className"
       :realm="profile.realm"
       :level="profile.trainerLevel"
       :points="profile.points"
+      :today-points="profile.todayPoints"
+      :duels-today="profile.duelsToday"
       :shards="profile.shards"
       :gender="profile.gender"
       @settings="() => {}"

@@ -28,7 +28,14 @@
     "tier4": 120,
     "tier5": 160
   },
-  "awakenBonus": [0, 0.1, 0.25, 0.5, 1.0, 1.5],
+  "awakenBonus": [
+    0,
+    0.1,
+    0.25,
+    0.5,
+    1,
+    1.5
+  ],
   "fragment": {
     "dupTier1": 20,
     "dupTier2": 60,
@@ -39,7 +46,7 @@
     "_comment": "碎片最多抵扣觉醒费用的 50%"
   },
   "gradeCoef": {
-    "6": 1.0,
+    "6": 1,
     "7": 0.6
   },
   "character": {
@@ -59,5 +66,10 @@
   },
   "levelCoef": 0.05,
   "levelCap": 7,
-  "powerBase": 100
+  "powerBase": 100,
+  "legacyGacha": {
+    "normal": 200,
+    "rare": 500,
+    "legendary": 1000
+  }
 }

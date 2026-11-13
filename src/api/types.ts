@@ -9,14 +9,20 @@ export type Gender = 'male' | 'female'
 /** 玩家档案（HUD 用） */
 export interface Profile {
   userId: string
-  /** 昵称 · 姓名（排行榜与 HUD 统一用这个格式） */
+  /** 显示名：有角色昵称时「昵称 · 真名」，没有昵称就只显示真名 */
   displayName: string
   nickname: string
   realName: string
   grade: 6 | 7
+  /** 后端返回的真实班级名，如「七年级A班」；缺失时 HUD 回落成 G7 班 */
+  className: string
   realm: string
   trainerLevel: number
   points: number
+  /** 今日新增功名（当天积分流水之和，不是总积分） */
+  todayPoints: number
+  /** 今日斗法场次 */
+  duelsToday: number
   shards: number
   gender: Gender
 }
@@ -85,6 +91,14 @@ export interface GachaDrawn {
   petId: string
   isNew: boolean
   fragments: number
+}
+
+/** 服务端已提交的求签回执；页面不得再自行扣款或随机生成结果。 */
+export interface GachaReceipt {
+  results: GachaDrawn[]
+  points: number
+  pulls: number
+  cost: number
 }
 
 /** 造物提交单 */

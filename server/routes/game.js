@@ -5,8 +5,14 @@ import { db } from '../db.js'
 import { PETS, getPetTemplate } from '../game/pet-data.js'
 import { BattleState, BattleEngine, BattleAI } from '../game/battle-engine.js'
 import { calcStats, MAX_LEVEL, LEVEL_EXP, getLevelBracket } from '../game/constants.js'
+import { authMiddleware } from '../middleware/auth.js'
 
 const router = Router()
+router.use('/battle', authMiddleware, (req, res, next) => {
+  const user = db.prepare('SELECT id, is_guest FROM users WHERE id = ?').get(req.userId)
+  if (!user || user.is_guest) return res.status(403).json({ error: '需要有效登录身份才能斗法' })
+  next()
+})
 
 // 内存中存储活跃战斗（P0 简化方案，后续可改 Redis）
 const activeBattles = new Map()
@@ -181,7 +187,9 @@ router.post('/pets/:petId/add-exp', (req, res) => {
 
 // POST /api/game/battle/start - 开始战斗（P0: 自动匹配 AI）
 router.post('/battle/start', (req, res) => {
-  const { playerId, petId } = req.body
+  const { petId } = req.body
+  const playerId = req.userId
+  if (req.body.playerId && req.body.playerId !== playerId) return res.status(403).json({ error: '不能冒用其他玩家身份' })
   if (!playerId || !petId) {
     return res.status(400).json({ error: '缺少 playerId 或 petId' })
   }
@@ -250,6 +258,7 @@ router.post('/battle/start', (req, res) => {
 router.post('/battle/:id/action', (req, res) => {
   const battle = activeBattles.get(req.params.id)
   if (!battle) return res.status(404).json({ error: '战斗不存在或已结束' })
+  if (battle.state.playerA.playerId !== req.userId) return res.status(403).json({ error: '这不是你的战斗' })
 
   const { skillId } = req.body
   if (!skillId) return res.status(400).json({ error: '缺少 skillId' })
@@ -310,19 +319,16 @@ router.post('/battle/:id/action', (req, res) => {
   if (state.status === 'finished') {
     const recordId = uuidv4()
     db.prepare(`
-      INSERT INTO battle_records (id, player_a_id, player_b_id, player_a_pet, player_b_pet, player_a_level, player_b_level, winner, battle_log, battle_type, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO battle_records (id, battle_type, player_a_id, player_b_id, winner_id, turn_count, log_json, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       recordId,
+      'pve',
       state.playerA.playerId,
       state.playerB.playerId,
-      state.playerA.petId,
-      state.playerB.petId,
-      state.playerA.level,
-      state.playerB.level,
-      state.winner,
+      state.winner === 'A' ? state.playerA.playerId : state.playerB.playerId,
+      state.turn,
       JSON.stringify(state.log),
-      'pve',
       Date.now()
     )
 
@@ -337,6 +343,7 @@ router.post('/battle/:id/action', (req, res) => {
 router.get('/battle/:id/state', (req, res) => {
   const battle = activeBattles.get(req.params.id)
   if (!battle) return res.status(404).json({ error: '战斗不存在或已结束' })
+  if (battle.state.playerA.playerId !== req.userId) return res.status(403).json({ error: '这不是你的战斗' })
 
   const { state, playerSide } = battle
   const playerFighter = playerSide === 'A' ? state.playerA : state.playerB

@@ -226,6 +226,8 @@ function back() {
         </button>
         <button class="gw-seal" @click="toggleFlow">{{ showFlow ? '收起流水' : '积分流水' }}</button>
         <button class="gw-seal" @click="showImport = true">导入学生</button>
+        <!-- 名单管理复用现有 /admin/students 页，不新建第二份名单页（Codex 2026-11-13 指示） -->
+        <button class="gw-seal" @click="router.push('/admin/students')">名单管理</button>
         <button class="gw-seal" @click="goReview">造物审核</button>
         <button class="gw-seal" @click="router.push('/teacher/content')">内容台账</button>
       </div>

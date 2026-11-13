@@ -5,9 +5,25 @@ import { authMiddleware } from '../middleware/auth.js'
 
 const router = Router()
 
-// 获取班级列表（只返回当前用户的班级）
+// v2/v3 起教师来自 users.role，班级也可能由名单导入自动建（user_id 为 NULL）。
+// 因此：班级创建者或教师角色都算有权限。
+function isTeacher(userId) {
+  const u = db.prepare('SELECT role FROM users WHERE id = ?').get(userId)
+  return !!u && ['admin', 'teacher'].includes(u.role)
+}
+
+function canManage(classInfo, userId) {
+  return classInfo.user_id === userId || isTeacher(userId)
+}
+
+// 获取班级列表（教师看到全部班级，普通用户只看自己建的）
 router.get('/', authMiddleware, (req, res) => {
-  const classes = db.prepare('SELECT * FROM classes WHERE user_id = ? ORDER BY created_at DESC').all(req.userId)
+  const classes = isTeacher(req.userId)
+    ? db.prepare(`
+        SELECT c.*, (SELECT COUNT(*) FROM students s WHERE s.class_id = c.id) AS studentCount
+        FROM classes c ORDER BY c.name
+      `).all()
+    : db.prepare('SELECT * FROM classes WHERE user_id = ? ORDER BY created_at DESC').all(req.userId)
   res.json({ classes })
 })
 
@@ -29,10 +45,13 @@ router.get('/:classId/students', authMiddleware, (req, res) => {
   if (!cls) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (cls.user_id !== req.userId) {
+  if (!canManage(cls, req.userId)) {
     return res.status(403).json({ error: '无权访问此班级' })
   }
-  const students = db.prepare('SELECT * FROM students WHERE class_id = ? ORDER BY name').all(req.params.classId)
+  // 旧字段只增不删：课堂累计仍保留，教师余额与HUD统一读取游戏账本。
+  const students = db.prepare(`SELECT s.*, COALESCE(u.game_points,0) AS game_points
+    FROM students s LEFT JOIN users u ON u.username=s.student_no AND u.role='student'
+    WHERE s.class_id=? ORDER BY s.name`).all(req.params.classId)
   res.json({ students })
 })
 
@@ -44,7 +63,7 @@ router.put('/:id', authMiddleware, (req, res) => {
   if (!classInfo) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (classInfo.user_id !== req.userId) {
+  if (!canManage(classInfo, req.userId)) {
     return res.status(403).json({ error: '无权修改' })
   }
 
@@ -60,7 +79,7 @@ router.delete('/:id', authMiddleware, (req, res) => {
   if (!classInfo) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (classInfo.user_id !== req.userId) {
+  if (!canManage(classInfo, req.userId)) {
     return res.status(403).json({ error: '无权删除' })
   }
 

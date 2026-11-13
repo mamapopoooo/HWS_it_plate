@@ -126,6 +126,22 @@ for path in /api/health /api/v3/config /api/v3/pets/templates /api/v3/gacha/rate
   [ "${code}" = "200" ] || FAILED=1
 done
 
+# API 必须返回 JSON，不能是 nginx SPA 兜底页的 HTML。
+# 2026-11-12 的教训：baseURL 误写成 /pet-garden/api，请求落到 SPA 兜底拿到 HTML，
+# adapter 的 catch 静默回落占位数据 → 全站跑假数据且控制台零报错。
+for path in /api/v3/config /api/v2/pets/templates /api/v2/shop/items; do
+  body=$(curl -s "http://${SERVER_HOST}${path}")
+  case "${body}" in
+    '<!'*|'<html'*|'<HTML'*)
+      echo "   ✗ ${path} 返回 HTML 而非 JSON —— 该前缀未被 nginx 代理，前端会静默回落假数据"
+      FAILED=1
+      ;;
+    *)
+      echo "   ✓ ${path} 返回 JSON"
+      ;;
+  esac
+done
+
 if [ "${FAILED}" != "0" ]; then
   echo "❌ 校验未通过。白屏风险未排除，别收工。"
   echo "   回滚：ssh ubuntu@${SERVER_HOST} 'sudo tar -xzf /tmp/pet-garden-webroot-backup.tgz -C ${WEBROOT}'"

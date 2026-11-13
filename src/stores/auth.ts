@@ -6,8 +6,10 @@ interface User {
   id: string
   username: string
   realName: string
+  nameEn?: string
   role: 'student' | 'admin'
   grade?: number
+  className?: string
   gamePoints?: number
 }
 

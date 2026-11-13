@@ -6,22 +6,15 @@ import { generateToken } from '../utils/token.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { ensureUserColumns } from '../utils/userSchema.js'
 
+import { createStudentLogin, toPublicUser as publicUser } from '../utils/studentLogin.js'
+
 const router = Router()
 
 // 老库补列（role / real_name / grade），登录与路由守卫都依赖 role
 ensureUserColumns()
 
 /** 统一的用户返回结构，字段名与前端 src/api/types.ts 对齐 */
-function toPublicUser(row) {
-  return {
-    id: row.id,
-    username: row.username,
-    realName: row.real_name || row.username,
-    role: row.role || 'admin',
-    grade: row.grade ?? null,
-    isGuest: !!row.is_guest,
-  }
-}
+function toPublicUser(row) { return publicUser(db, row) }
 
 // 注册（教师自助注册，注册出来就是管理员）
 router.post('/register', (req, res) => {
@@ -76,40 +69,7 @@ router.post('/admin/login', (req, res) => {
  * 学生登录（前端 POST /api/auth/student/login）
  * 学号 + 姓名免密：匹配 students 表，首次登录自动为其建一条 users 记录。
  */
-router.post('/student/login', (req, res) => {
-  const studentNo = String(req.body?.studentNo ?? '').trim()
-  const realName = String(req.body?.realName ?? '').trim()
-  if (!studentNo || !realName) {
-    return res.status(400).json({ error: '学号和姓名不能为空' })
-  }
-
-  // 学号优先；没填学号的名单允许只按姓名匹配
-  let student = db.prepare('SELECT * FROM students WHERE student_no = ?').get(studentNo)
-  if (!student) {
-    student = db.prepare('SELECT * FROM students WHERE name = ?').get(realName)
-  }
-  if (!student) {
-    return res.status(401).json({ error: '学号或姓名不对，问一下老师' })
-  }
-  if (student.name !== realName) {
-    return res.status(401).json({ error: '学号与姓名不匹配' })
-  }
-
-  const username = `stu_${student.student_no || student.id.slice(0, 8)}`
-  let user = db.prepare('SELECT * FROM users WHERE username = ?').get(username)
-  if (!user) {
-    const userId = uuidv4()
-    db.prepare(
-      'INSERT INTO users (id, username, password_hash, is_guest, role, real_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    ).run(userId, username, '', 0, 'student', student.name, Date.now())
-    user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId)
-  } else if (user.real_name !== student.name) {
-    db.prepare('UPDATE users SET real_name = ? WHERE id = ?').run(student.name, user.id)
-    user.real_name = student.name
-  }
-
-  res.json({ success: true, token: generateToken(user.id), user: toPublicUser(user) })
-})
+router.post('/student/login', createStudentLogin(db))
 
 // 旧登录入口（兼容 v1 页面调用）
 router.post('/login', (req, res) => {

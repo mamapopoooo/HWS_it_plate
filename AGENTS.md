@@ -53,6 +53,7 @@ server/           Express；算法与迁移归 KIMI / Qoder
 | **CODEX-CONTROL** | 机房管控客户端与积分接入 | 管控仓库客户端；本仓库限 `CODEX_CONTROL_*` 文档 |
 
 **必须阅读：**
+- [构建反馈区](docs/构建反馈区/README.md)：各Agent独写自己的 REPORT，Codex在对应 FEEDBACK 逐项给审核与复验要求；当前接续基线见该索引。
 - [Agent分工与工作区规范-20261113](docs/Agent分工与工作区规范-20261113.md)：文件归属、独立工作区、端口/数据库隔离、当前阻塞与执行顺序。
 - [各Agent当前任务提示词-20261113](docs/各Agent当前任务提示词-20261113.md)：公共前缀与各角色任务。
 
@@ -121,7 +122,7 @@ node scripts\verify-build.mjs                       # "通过：构建产物可�
 | 不要 | 原因 |
 |---|---|
 | 在共享目录 `class-pet-garden` 里切分支提交 | 已发生两次分支互踩、未提交改动被冲掉。**各开 worktree**：`git worktree add ..\pet-garden-xxx dev-xxx` |
-| 恢复 v2 的 `src/pages/v2/`、`/student`、`/admin` | 已于 2026-11-04 全部下线，功能已被 v3 覆盖；如需旧代码看 git 历史 |
+| 恢复 v2 的 `src/pages/v2/` 或旧业务实现 | 当前源码仍有 `/student`、`/admin` 的 v3 嵌套路由，整合期间保留；不要据历史“已删除”描述误删现行页面 |
 | 给属性克制加回 ×0.77 | 对宫 `opposite` 互指，那条分支永远不可达（2026-11-03 单测发现） |
 | 把价格/概率写进组件或接口 | 唯一来源是 `docs/seeds/economy.json` 与 `tiers.json` |
 | 让学生自填技能数值 | 造物只能用效果池 + 120 灵力预算，防「一击必杀」 |

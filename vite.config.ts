@@ -14,13 +14,17 @@ export default defineConfig({
     port: 3001,
     host: true,
     proxy: {
-      '/pet-garden/api': {
-        target: 'http://localhost:3002',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/pet-garden/, '')
+      // 与生产 nginx 的 `location /api/` 保持一致：前端一律请求 /api/*，
+      // 不再 rewrite 去前缀，避免 dev 能跑、生产 404 的前缀分裂。
+      '/api': {
+        target: process.env.API_PROXY_TARGET || 'http://localhost:3002',
+        changeOrigin: true
       }
-    },
-    // 静态资源缓存配置
+    }
+    // dev 不能设 immutable：源码路径（Login.vue 等）没有 hash，缓存一年等于改代码不生效
+  },
+  // 只有 preview / 生产才全是带 hash 的产物，可以放心 immutable
+  preview: {
     headers: {
       'Cache-Control': 'public, max-age=31536000, immutable'
     }

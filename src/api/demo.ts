@@ -26,9 +26,12 @@ export const DEMO_PROFILE: Profile = {
   nickname: '小狐仙',
   realName: '李四',
   grade: 6,
+  className: '六年级B班',
   realm: '筑基三层',
   trainerLevel: 12,
   points: 1250,
+  todayPoints: 38,
+  duelsToday: 3,
   shards: 12,
   gender: 'female',
 }
