@@ -12,3 +12,7 @@
 本仓库仅拥有 CODEX_CONTROL_* 文档；公共API与game-v2.js归Codex。不要把文档提案当可启用接口。
 现状：契约待实现与联调，上传不得启用。
 
+## 第二轮检查（2026-11-13）
+
+origin/dev-codex-control-integration仍为2b6d8c2，本区无实际REPORT或新修复。PR #1仍按契约预留处理。
+身份首批已整合不代表幂等账本已完成；CC-03/CC-06仍阻塞，生产同步继续关闭。
