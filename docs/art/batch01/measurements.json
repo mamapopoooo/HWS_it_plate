@@ -1,0 +1,56 @@
+[
+  {
+    "file": "base_f-v2.png",
+    "dimensions": [
+      1024,
+      1536
+    ],
+    "bytes": 1610421,
+    "alpha_range": [
+      0,
+      254
+    ],
+    "alpha_bbox": [
+      25,
+      13,
+      1008,
+      1494
+    ]
+  },
+  {
+    "file": "base_m-v2.png",
+    "dimensions": [
+      1024,
+      1536
+    ],
+    "bytes": 1697130,
+    "alpha_range": [
+      0,
+      254
+    ],
+    "alpha_bbox": [
+      0,
+      65,
+      1000,
+      1508
+    ]
+  },
+  {
+    "file": "qinglong-v2.png",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "bytes": 1378404,
+    "alpha_range": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      0,
+      9,
+      1232,
+      1254
+    ]
+  }
+]
