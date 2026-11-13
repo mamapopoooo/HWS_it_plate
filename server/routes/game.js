@@ -1,4 +1,4 @@
-// 王宠课堂 - 游戏 API 路由
+// 墨境 - 游戏 API 路由
 import { Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'

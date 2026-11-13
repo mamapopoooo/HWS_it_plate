@@ -26,7 +26,8 @@ interface Shown {
 const grade = ref<6 | 7>(6)
 const wallet = ref(0)
 const fragments = ref(0)
-const pulls = ref(0)
+// shortcut: 缺少只读累计次数接口；首次回执前不显示虚构的零次进度。
+const pulls = ref<number | null>(null)
 const owned = ref<Set<string>>(new Set())
 const busy = ref(false)
 const error = ref('')
@@ -49,7 +50,7 @@ const prices = computed(() => ({
   ten: drawPrice('ten', grade.value),
 }))
 
-const pity = computed(() => pityProgress(pulls.value))
+const pity = computed(() => pityProgress(pulls.value ?? 0))
 const rates = computed(() => rateTable())
 const ownedCount = computed(() => owned.value.size)
 
@@ -69,7 +70,7 @@ function toShown(rows: Array<{ tier: number; petId: string; isNew: boolean; frag
 }
 
 async function play(kind: 'single' | 'ten') {
-  if (busy.value || playing.value) return
+  if (busy.value || playing.value || pendingCheck.value) return
   const cost = kind === 'single' ? prices.value.single : prices.value.ten
   if (wallet.value < cost) {
     error.value = '灵石不足，去找老师加分吧'
@@ -85,12 +86,13 @@ async function play(kind: 'single' | 'ten') {
     wallet.value = receipt.points
     pulls.value = receipt.pulls
     const shown = toShown(receipt.results)
-    if (shown.length === 0) {
+    if (shown.length !== receipt.results.length) {
       pendingCheck.value = true
       error.value = '回执里没有可识别的宠物，请到图鉴核对是否已发放'
       return
     }
     results.value = shown
+    fragments.value += receipt.results.reduce((sum, r) => sum + r.fragments, 0)
     for (const r of shown) owned.value.add(r.pet.id)
     playing.value = bestOf(shown)
   } catch {
@@ -130,7 +132,7 @@ function accentOf(tier: number): string {
     </header>
 
     <!-- 保底进度 -->
-    <section class="gk__pity">
+    <section v-if="pulls !== null" class="gk__pity">
       <div class="gk__pity-item">
         <span>距「八卦」保底</span>
         <b class="num">{{ pity.toTier2 }}</b>
@@ -144,21 +146,23 @@ function accentOf(tier: number): string {
       <div class="gk__pity-note">已抽 <b class="num">{{ pulls }}</b> 次 · 太极无保底（靠两仪活动）</div>
     </section>
 
+    <p v-else>累计抽数与保底进度待确认，下次求签后以服务端回执更新。</p>
+
     <!-- 主操作 -->
     <section class="gk__actions">
       <button
         class="gw-seal gw-seal--primary gk__draw"
-        :disabled="busy || !!playing || wallet < prices.single"
+        :disabled="busy || !!playing || pendingCheck || wallet < prices.single"
         @click="play('single')"
       >
         {{ busy ? '开签中…' : '单签' }}<span class="gw-seal__hint">{{ prices.single }} 灵石</span>
       </button>
       <button
         class="gw-seal gk__draw"
-        :disabled="busy || !!playing || wallet < prices.ten"
+        :disabled="busy || !!playing || pendingCheck || wallet < prices.ten"
         @click="play('ten')"
       >
-        {{ busy ? '开签中…' : '十连' }}<span class="gw-seal__hint">{{ prices.ten }} 灵石 · 省 5</span>
+        {{ busy ? '开签中…' : '十连' }}<span class="gw-seal__hint">{{ prices.ten }} 灵石 · 省 {{ prices.single * 10 - prices.ten }}</span>
       </button>
       <button class="gw-seal gk__draw" disabled>祈福（待开放）</button>
     </section>

@@ -108,7 +108,7 @@ function back() {
     </main>
 
     <footer class="sp__foot">
-      价格为 G6 基准价，G7 按 {{ (0.6 * 10).toFixed(0) }} 折结算 · 装饰类不加属性，只改变外观
+      当前为 G{{ grade }} 展示价，成交尚未开通 · 装饰类不加属性，只改变外观
     </footer>
   </div>
 </template>

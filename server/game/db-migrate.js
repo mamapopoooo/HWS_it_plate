@@ -1,4 +1,4 @@
-// 王宠课堂 - 游戏数据库迁移
+// 墨境 - 游戏数据库迁移
 // 在现有 ClassPetGarden 数据库上新增游戏相关表
 
 import { db } from '../db.js'

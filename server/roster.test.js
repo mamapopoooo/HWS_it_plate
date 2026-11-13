@@ -479,6 +479,15 @@ describe('QD-09 单条入口的身份与班级语义', () => {
 // Codex 决定本轮不全局开启 foreign_keys，所以这里锁住「关系断了也不丢人」的底线，
 // 并把 classes.js 删班不清 students 这个孤儿来源写进反馈区等收口。
 describe('孤儿关联兜底', () => {
+  it('尚无登录账号的档案改学号也不能占用其他身份', async () => {
+    db.prepare('DELETE FROM users WHERE id = ?').run('u-1')
+    const { status } = await call('/students/s-1', {
+      method: 'PUT', body: { studentNo: '999999999', name: '不能覆盖教师' }
+    })
+    expect(status).toBe(409)
+    expect(student('990000001').name).toBe('示例甲')
+    expect(db.prepare('SELECT role FROM users WHERE username = ?').get('999999999').role).toBe('teacher')
+  })
   it('导入换班时目标班级年级优先于旧课程', async () => {
     const { data } = await call('/import', { body: { rows: [{ studentNo: '990000001', class: '七年级B班' }] } })
     expect(data.rejected).toEqual([])

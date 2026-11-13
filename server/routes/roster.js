@@ -214,7 +214,7 @@ router.put('/students/:id', (req, res) => {
 
   const user = db.prepare("SELECT id FROM users WHERE username = ? AND role = 'student'").get(student.student_no)
   // 改学号前先确认新学号没被别人占着，否则 username 唯一索引会炸
-  if (user && nextNo !== student.student_no && db.prepare('SELECT 1 FROM users WHERE username = ?').get(nextNo)) {
+  if (nextNo !== student.student_no && db.prepare('SELECT 1 FROM users WHERE username = ?').get(nextNo)) {
     return res.status(409).json({ error: `学号 ${nextNo} 已有登录身份，请先处理` })
   }
   // 只在真的改学号时查前缀冲突：不动学号的编辑（改名、转班）不该被历史旧账号卡住

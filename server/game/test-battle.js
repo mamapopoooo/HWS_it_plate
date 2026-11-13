@@ -3,7 +3,7 @@ import { BattleState, BattleEngine, BattleAI } from './battle-engine.js'
 import { PETS } from './pet-data.js'
 import { calcStats, MAX_LEVEL } from './constants.js'
 
-console.log('=== 王宠课堂 战斗引擎测试 ===\n')
+console.log('=== 墨境 战斗引擎测试 ===\n')
 
 // 测试 1：属性计算
 console.log('--- 测试 1：属性计算 ---')

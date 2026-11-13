@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# 班级宠物园（王宠课堂 v3）前端部署脚本
+# 墨境 v3 前端部署脚本
 #
 # 用法：
 #   bash deploy.sh              构建 + 部署 + 校验
@@ -39,7 +39,7 @@ done
 # 切到脚本所在目录，避免依赖调用时的 cwd
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-echo "🚀 部署 班级宠物园 → ${SITE_URL}"
+echo "🚀 部署 墨境 → ${SITE_URL}"
 
 # ── 1. 构建 + 产物自检 ───────────────────────────────
 if [ "${DO_BUILD}" = "1" ]; then
