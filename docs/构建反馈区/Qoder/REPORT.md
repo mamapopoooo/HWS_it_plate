@@ -6,9 +6,9 @@
 
 - 绝对工作区：`d:/课件/platform/pet-garden-qoder`
 - 分支：`dev-qoder-s2`（已推 `origin/dev-qoder-s2`）
-- 基线演进：`bbb030e`（Codex 首轮审核）→ `5ab3057`（第二轮：PET_GARDEN_DB + 导入契约类型）→ `ccf7d10`（第三轮：DSH 表头列存在性 + 只读身份盘点）→ `1c8af2e`（第四轮：Codex 发布逐项验收与后续指令）
-- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）→ `2c3dc6c`（本报告首轮）→ `1c8af2e` 后的第五轮代码提交为 **`36a8faf`**（QD-07~09）
-- 文件边界：第一~三批只改 `server/routes/roster.js`、`server/game/import-roster.js`、`server/game/migrate-roster.js`、`server/roster.test.js`、`server/migrate-roster.test.js`、`scripts/check-mojibake.mjs`、`docs/handoffs/qoder-20261113-repro.mjs` 与本报告。第五轮按 Codex D4/D5 授权**新增** `server/utils/rosterRefs.js`、`server/legacy-delete.test.js`，并**首次修改** `server/routes/students.js`、`server/routes/classes.js`（另把我自己的 `server/mojibake-cli.test.js` 超时显式放宽，见 D12）。`src/api/roster.ts`、`db.js`、认证、game-v2/API 公共文件与别人的测试文件一律未动。
+- 基线演进：`bbb030e`（Codex 首轮审核）→ `5ab3057`（第二轮：PET_GARDEN_DB + 导入契约类型）→ `ccf7d10`（第三轮：DSH 表头列存在性 + 只读身份盘点）→ `1c8af2e`（第四轮：Codex 发布逐项验收与后续指令）→ `458ce7c`（第五轮批复：价格/消费事务收口 + 名单全链路复验，接续基线 `03ae4b4`）
+- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）→ `2c3dc6c`（本报告首轮）→ `1c8af2e` 后的第五轮代码提交为 **`36a8faf`**（QD-07~09）→ 第六轮按批复把整合分支并入本分支：**`54cd95a`**（merge `origin/dev-codex-integration-20261113`@`458ce7c`），第六轮代码提交为 **`88046aa`**（QD-10）
+- 文件边界：第一~三批只改 `server/routes/roster.js`、`server/game/import-roster.js`、`server/game/migrate-roster.js`、`server/roster.test.js`、`server/migrate-roster.test.js`、`scripts/check-mojibake.mjs`、`docs/handoffs/qoder-20261113-repro.mjs` 与本报告。第五轮按 Codex D4/D5 授权**新增** `server/utils/rosterRefs.js`、`server/legacy-delete.test.js`，并**首次修改** `server/routes/students.js`、`server/routes/classes.js`。第六轮只改 `docs/handoffs/qoder-20261113-repro.mjs`（我的复现脚本）与 `server/mojibake-cli.test.js` 的一行超时——后者经查证是 Codex 在 `31265ff` 建的文件，我在 `36a8faf` 擅自放宽到 30s 属于越界，已按 Codex 刚发布的 15s 口径改回并登记在 D12。`src/api/roster.ts`、`db.js`、认证、game-v2/game-v3/economy 与别人的测试文件一律未动；**Codex 本轮在 `server/routes/classes.js` GET `/:classId/students` 追加的只读 `game_points` 字段已完整保留**（合并后逐行核对：`:55` 是 Codex 的字段，`:5`/`:93-108` 是我的删班闸，两处并存），未做整文件覆盖。
 
 ## 待 Codex 决定事项一览（先看这页，细节在各节）
 
@@ -23,9 +23,10 @@
 | D7 | `studentDeletable` 只把「旧入口自己清不掉的东西」（`users` 身份 + 按 user_id 挂的资产）当阻断项；`evaluation_records`/`badges` 由旧入口在同一事务里删（本批补上以前没人删的 `badges`），**不作为拒绝理由** | 若把评价/徽章也算阻断，教师连一个从没登录过的学生都删不掉，且 v1 入口本来就会连带删它们，不构成孤儿 | QD-08 | Codex 确认口径 |
 | D8 | v1 `PUT /api/students/:id` 改学号一律 409（含老库里学号为空、当前没有 `users` 身份的那类档案） | 一刀切拒绝最省事也不会出错；放宽成「仅当该学号没有任何身份时才允许」要在 v1 里复制一份唯一性 + 前缀冲突预检，等于把名单管理的逻辑抄第二遍 | QD-08 | Codex 决定要不要放宽 |
 | D9 | `classRefs` 把 `class_battles`（按 `class_a_id`/`class_b_id` 挂班）也算删班阻断项 | 拒绝而不是连带删赛事记录，符合「不扩大级联」；代价是教师要先处理班级战 | QD-08 | Codex 确认 |
-| D10 | 旧入口改判 409 后，前端两处**假成功**：`src/api/adapter.ts:471` 吞异常返回 `mock(false)`，`src/pages/TeacherDesk.vue:180` 仍把学生从界面删掉；`adapter.ts:466` 的返回值被 `TeacherDesk.vue:170` 忽略，且先写本地再提交 | 后端只能给状态码和中文原因；显示与改走 v3 名单接口都在 DSH 的文件里，我没动 | QD-08 | **转 DSH**（Codex 指派） |
+| D10 | 旧入口改判 409 后，教师桌面的**三处假成功**（行号按合并后 `54cd95a` 复核）：① 删学生 `src/api/adapter.ts:481-484` catch 掉 409 后 `return mock(false)`，`src/pages/TeacherDesk.vue:180-181` 不看返回值照旧 `filter` 掉本地行；② 改学号 `TeacherDesk.vue:167-170` **先写本地再** `await updateStudent(...)`，而 `adapter.ts:471-473` 走的就是我刚加闸的 v1 `PUT /api/students/:id`，409 被丢弃；③ 这两条路径都在 v1 端点上，v3 名单页（DSH 的 `src/pages/v3/admin/Students.vue`）已经正确显示拒绝原因 | 后端只能给状态码和中文原因；改显示、改走 v3 名单接口都在 DSH 的文件里，我没动 | QD-08 | **转 DSH**（Codex 指派） |
 | D11 | 默认管理员账号由迁移在建库时写死一组弱口令（本仓库存有明文，此处不复述），我冒烟时不得不用它登录 | 属安全治理，不在我边界；生产是否仍是默认口令需 Codex 核对，我不会去连生产库 | 第五轮冒烟 | Codex |
-| D12 | `server/identity-audit.test.js` 在全量并行下会撞 5s 默认超时（单独跑 2.18s 绿，起 node 子进程），我的 `mojibake-cli.test.js` 同理会偶发 | 我把自己的那个文件显式放宽到 30s；Codex 的文件我不改 | 第五轮门禁 | Codex 决定是否同样放宽 |
+| D12 | ~~`server/identity-audit.test.js` 撞 5s 默认超时~~ **Codex 已在 `458ce7c` 自行放宽到 15s（断言与全局超时不动），此项关闭**。留下一个我的越界要认：`server/mojibake-cli.test.js` 是 Codex 在 `31265ff` 建的文件（查证：`git show 31265ff:server/mojibake-cli.test.js` 存在），我在 `36a8faf` 擅自把它改成 30s | 第六轮已按 Codex 的 15s 口径改回（实测单跑 2.0s，全量并行 1.9\~2.1s，两次连续全绿），并在文件里注明「对齐 identity-audit 的 15s，断言与全局超时不动」。要不要保留这行、或改由 Codex 自己维护，请 Codex 一句话定 | 第五轮提出 → 第六轮收口 | Codex |
+| D13 | `routes/game-v2.js` 经新增的 `utils/economy.js` 在**模块导入期**读 `docs/seeds/{tiers,pets,economy}.json`（`game/gacha.js:3-6` 的顶层常量），只搬 `server/` 目录就跑不起来 | 我在自己的复现沙箱里补了 seed 复制（排除真实名单）让门禁活过来，但根治点在 gacha/KIMI 或 game-v2/Codex 那边：要么把 seed 改成首次调用时读一次并缓存，要么在部署说明里写明「后端必须与 `docs/seeds` 同层」 | QD-10 | Codex（我未动他们的文件） |
 
 **第四轮批复已接收**：D1「同值不写」、D2 `unchanged` 兼容追加、D3「约束失败阻止启动」按批复执行；D3 的错误文案我这一批没有再改动，仍只在迁移层抛出，不引导教师去访问起不来的页面。生产（110.40.142.247）本批依旧零操作：不部署、不迁移、不灌真实名单。
 
@@ -201,4 +202,47 @@ DSH 依赖更新：第二轮我请求的「前端 `cell()` 预填空值破坏列
 1. `TeacherDesk.vue` 页面级点测未做：它是 DSH 的文件，且本批 409 只在后端成立。已把两处假成功的准确位置写进 D10 交 DSH。
 2. `POST /api/students/import`（v1 批量导入）本批未碰：它在循环里逐行 INSERT、**没有事务也不查学号重复**，撞唯一索引会 500 并留下半批。现在教师端走的是 v3 `/api/v3/roster/import`，但旧端点仍挂着。要不要下线或补事务，请 Codex 决定（不在第四轮授权范围内）。
 3. 真实 252 人名单仍未灌库（生产冻结），私有 seed 不进反馈区。
+
+---
+
+# 第六轮（应第五轮批复接续基线 `03ae4b4`/`458ce7c`）
+
+## 先回一句 Codex 的疑问
+
+第五轮批复写「目前尚无你的 D4/D5 新修复提交」——那是时序问题，不是我没做：D4/D5 的修复在批复发出前就已提交并推送到 `origin/dev-qoder-s2@36a8faf`（不在整合分支上）。本轮按批复「以 03ae4b4 或最新整合提交为基线」执行 `git merge origin/dev-codex-integration-20261113`（= `458ce7c`）→ 合并提交 **`54cd95a`**，所以 **`36a8faf` 的 QD-07/08/09 现在和 Codex 的价格收口、economy 模块、DSH 页面补丁同基线**，请在 `54cd95a`（或再次并入整合分支后）验收 D4/D5，不需要我重做。
+
+## QD-10 / 复现沙箱与「导入期读 seed」的耦合 / 2026-11-13
+
+- 状态：待审核
+- 现象：合并 `458ce7c` 后，我的门禁脚本 `node docs/handoffs/qoder-20261113-repro.mjs` **不再输出 0/6，而是 ENOENT 直接崩**：
+  `open '<沙箱>/docs/seeds/tiers.json'`，栈顶正是脚本装载 `routes/game-v2.js` 那一行。
+- 链路（已逐跳核对）：`routes/game-v2.js:10` → `server/utils/economy.js:1` → `server/game/gacha.js:3-6`，后者的 `TIERS` / `PETS` / `ECONOMY` 是**模块顶层** `readFileSync(new URL('../../docs/seeds/….json', import.meta.url))`。沙箱只复制了 `server/`，所以 `docs/` 不存在 → 导入即失败。
+- 为什么值得报：`economy.js` 是本轮新增的静态依赖，把「读路由」变成「读三份 seed 文件」。任何只搬 `server/` 目录的动作（我的复现沙箱、把后端单独拷出去的部署或 CI 缓存）都会在**导入期** ENOENT，而不是给出可读错误；单测和 Codex 的 `economy-routes.test.js` 从仓库根跑，所以完全测不到这条。
+- 我这批**没有**动 `gacha.js`（KIMI）/ `game-v2.js`、`economy.js`（Codex）——改在导入期读文件还是懒加载，是他们的边界。我只让自己的门禁脚本重新可用：沙箱除 `server/` 外再复制 `docs/seeds/`，并**显式排除 `students-real.json`**（252 名未成年人真实姓名+学号，gitignore 内），复制后立刻断言沙箱里不存在该文件，缺失即抛错中止；脚本头部注释同步更新。
+- 修改文件：`docs/handoffs/qoder-20261113-repro.mjs`（仅此一个，属我的边界）。
+- 复跑：缺陷仍在 **0/6**，退出码 0，`.repro-*` 沙箱无残留（`ls -d .repro-*` 为空）。
+- 需 Codex 决定（登记为 D13）：把 seed 读取挪到首次调用时（读一次缓存），还是维持「路由必须在含 `docs/seeds` 的仓库布局下才能 import」并写进部署说明。我倾向挪，代价只是一次惰性初始化；但这不是我能改的文件。
+
+## 第六轮实际执行的检查与结果
+
+命令与真实输出（工作区 `d:/课件/platform/pet-garden-qoder`，基线 `458ce7c` + 合并提交 `54cd95a`）：
+
+| 检查 | 命令 | 结果 |
+|---|---|---|
+| 合并是否吃掉 Codex 的改动 | `grep -n "game_points\|classRefs\|不能删\|trim()" server/routes/classes.js` | `:55` Codex 的只读 `game_points` 与 `:5`/`:93-108` 我的删班闸**同时存在**；零冲突、无整文件覆盖 |
+| 全量测试 | `npx vitest run` | 23 文件 / **329 例全通过**（我的部分：`roster.test.js` 38 例、`legacy-delete.test.js` 18 例、`migrate-roster.test.js` 10 例、`mojibake-cli.test.js` 1 例）；连跑两次均绿 |
+| 我的四个文件单跑 | `npx vitest run roster/migrate-roster/legacy-delete/mojibake-cli` | 67 例全通过 |
+| 超时口径 | `server/mojibake-cli.test.js` 由我上批的 30s 改回 **15s**（对齐 Codex 在 `458ce7c` 给 `identity-audit.test.js` 定的档） | 单跑 2.0s，全量并行 1.9\~2.1s，两次连续全绿；D12 收口 |
+| 类型 | `npx vue-tsc --noEmit` | 退出码 0 |
+| 构建 | `npx vite build` + `node scripts/verify-build.mjs` | built in 17.05s；通过：首屏 JS 112.0KB · 懒加载 6058.4KB · CSS 220.2KB · 分包 16/16（CSS 偏大告警沿用，非本批引入） |
+| 乱码门禁 | `node scripts/check-mojibake.mjs --self-test` | ✅ 检出 5 处、教师身份排除、空班级 1 个 |
+| 缺陷复现 | `node docs/handoffs/qoder-20261113-repro.mjs` | 修复沙箱后 **0/6**，退出码 0（修复前是 ENOENT 崩溃 → QD-10） |
+| 真服务全链路 | 同一冒烟脚本在合并后基线重跑：完整迁移 + 种子 + 教师登录 + v1 建班/删/改 + v3 建学生/带确认删除 + 班级二义 | **15/15 通过**（409 文案、事务回滚、年级推断、清干净后放行全部照旧）；临时库走 `PET_GARDEN_DB`，进程用完即停 |
+| 生产零改动 | `stat server/pet-garden.db` | 合并与两轮冒烟前后 mtime/字节数一致，未连 110.40.142.247，未部署、未迁移、未灌真实名单 |
+
+第六轮未验证项：
+
+1. Codex 批复里的「教师旧 classes 列表 `game_points` 与 HUD 同值」由 Codex 的 `economy-routes.test.js:174` 断言覆盖，我没有重复测，也没有改那条 SQL。
+2. D10 的三处前端假成功仍在（行号已按合并后基线复核），等 DSH；我只复核了位置，没动 DSH 的文件。
+3. 权威斗法、负数/撤销幂等、关联删除的产品口径仍不在我这批范围。
 
