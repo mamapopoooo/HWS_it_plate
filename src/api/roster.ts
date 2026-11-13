@@ -82,6 +82,7 @@ export interface RosterPatch {
 export interface ImportResult {
   created: number
   updated: number
+  unchanged?: number
   rejected: Array<{ studentNo: string; reason: string }>
   /** 兼容扩展：待Qoder实现，旧响应可缺省；不能据此假定服务端已支持列保留。 */
   rowPlans?: RosterImportPlan[]
@@ -104,6 +105,7 @@ export interface DryRunResult {
   total: number
   wouldCreate: number
   wouldUpdate: number
+  unchanged?: number
   invalid: number
   garbled: number
   /** 库里已存在的学号，供预览逐行判定「新增/更新」，不受页面筛选影响 */

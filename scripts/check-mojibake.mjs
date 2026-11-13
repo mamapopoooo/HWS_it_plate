@@ -148,7 +148,17 @@ function main() {
     process.exit(2)
   }
 
-  const db = new Database(abs, { readonly: true })
+  const db = new Database(abs, { readonly: true, fileMustExist: true })
+  // 缺表/缺列不能当作“零乱码”；那表示此库尚未完成检查。
+  for (const field of FIELDS) {
+    const required = ['id', ...field.cols, ...(field.where ? ['role'] : [])]
+    const columns = columnsOf(db, field.table)
+    if (required.some(column => !columns.has(column))) {
+      db.close()
+      console.error('未检查：数据库缺少名单检查所需表或字段，请先核对快照结构')
+      process.exit(2)
+    }
+  }
   const findings = scan(db)
   const empties = emptyClasses(db)
   db.close()
@@ -176,4 +186,7 @@ function main() {
   process.exit(findings.length ? 1 : 0)
 }
 
-main()
+try { main() } catch {
+  console.error('未检查：无法读取有效的SQLite快照或指定输入')
+  process.exitCode = 2
+}

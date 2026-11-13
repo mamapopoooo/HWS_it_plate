@@ -4,6 +4,61 @@
 
 ---
 
+## DS-BLK-03 / 前端 API 前缀与 dev 代理不一致（新发现，需 Codex 处理）/ 2026-11-13
+
+- 状态：**待审核（P1，阻断页面级登录验收）**
+- 基线：`5ab3057` 之后的本地测试运行；工作区/分支同上
+- 归属：`src/api/index.ts` 与 `vite.config.ts` 都属 Codex 收口范围，我**没有改**
+
+### 现象
+
+前端实际请求路径是 **`/pet-garden/api/...`**：
+
+```ts
+// src/api/index.ts
+export const API_ROOT = `${import.meta.env.BASE_URL}api`.replace(/\/+$/, '')   // = /pet-garden/api
+```
+
+而 `vite.config.ts` 的代理规则只有 **`'/api'`**，且 `deploy.sh` 的断言也是 `/api/*`：
+
+```ts
+proxy: { '/api': { target: 'http://localhost:3002', changeOrigin: true } }
+```
+
+### 实测证据（同一后端，只改代理规则）
+
+| 代理规则 | 请求路径 | 结果 |
+|---|---|---|
+| 仅 `/api`（**仓库现状**） | `POST /api/auth/admin/login` | **200 JSON** ✓ |
+| 仅 `/api`（**仓库现状**） | `POST /pet-garden/api/auth/admin/login` | **404** ❌ |
+| 两前缀都代理（我本地临时配置） | `POST /pet-garden/api/auth/admin/login` | 200 JSON ✓ |
+
+即：**按仓库现有配置，登录页发出的请求必然 404**（生产环境则是落到 SPA 兜底页拿到 HTML，正是 deploy.sh 里记录的 2026-11-12 那次事故）。
+
+### 影响
+
+- 页面级无法验登录（我的接口级 L1–L8 是直接打 `/api` 的，所以没暴露这条）
+- 生产 Nginx 只转 `/api`，同一问题会重现
+
+### 建议（二选一，需 Codex 定）
+
+1. **改前端**：`API_ROOT = '/api'`（不拼 BASE_URL），与 dev 代理和 `deploy.sh` 对齐 —— 我倾向这条，最小改动
+2. **改配置**：vite 代理与 Nginx 同时接受 `/pet-garden/api`（保留前缀），但要同步 `deploy.sh` 断言
+
+我本地为继续验收临时用了「两前缀都代理」的配置（`vite.dsh-test.config.ts`，**不入库、测完删除**），**没有提交、没有改 `vite.config.ts`**。
+
+### 同一轮的其它实测（供 Codex 参考，均非我职责）
+
+| 项 | 结果 |
+|---|---|
+| 名单导入预演 `POST /api/v3/roster/import`（dryRun） | 200，返回 `dryRun/total/wouldCreate/wouldUpdate/invalid/garbled/existingNos`；**无 `rowPlans`** |
+| 因此页面表现 | 显示「详细预演尚不支持」，不伪造计划（符合契约） |
+| `trainer/me` 的 `today_points` | 200，种子 5+3 → **8** ✓（数据源是 `game_points_records`） |
+| `trainer/me` 的 `grade` | **返回 0**（`students.grade=0`）⚠️ 契约要求"不写 grade=0"；适配层回落成 6 所以 HUD 不显示 0，但后端数据不对，建议归 Qoder 排查 |
+| `today_battles` | 0（IN-07 未修，已知） |
+
+---
+
 ## DS-R3 / 解除 DS-BLK-01 并按 S2 落实前端补丁 / 2026-11-13（第三轮）
 
 - 状态：**待复验**
