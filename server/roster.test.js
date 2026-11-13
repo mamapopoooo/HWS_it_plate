@@ -247,6 +247,21 @@ describe('QD-02 按列存在性导入', () => {
       updated: preview.data.wouldUpdate,
       unchanged: preview.data.unchanged
     })
+
+    // Codex 在 src/api/roster.ts 里用 isImportPlan 逐条校验，这里锁住同一口径：
+    // 覆盖每一行、保留顺序、reject 行不省略，字段 code 只有契约里那五个。
+    const CODES = ['name', 'nameEn', 'gender', 'class', 'course']
+    for (const source of [preview, commit]) {
+      expect(source.data.rowPlans).toHaveLength(rows.length)
+      expect(source.data.rowPlans.map((p) => p.studentNo)).toEqual(rows.map((r) => r.studentNo))
+      for (const p of source.data.rowPlans) {
+        expect(['create', 'update', 'reject']).toContain(p.action)
+        expect(p.writeFields.every((f) => CODES.includes(f))).toBe(true)
+        expect(p.skipFields.every((f) => CODES.includes(f))).toBe(true)
+        expect(p.warnings.every((m) => typeof m === 'string' && m.length > 0)).toBe(true)
+        expect(p.errors.every((m) => typeof m === 'string' && m.length > 0)).toBe(true)
+      }
+    }
   })
 
   it('同批重复学号两行都拒绝，后行不覆盖前行', async () => {
