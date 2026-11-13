@@ -9,6 +9,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type Gender, SKINS, skinPrice } from '@/config/contentConfig'
 import { ECONOMY } from '@/config/gameConfig'
+import { previewSkinImage } from '@/config/artPreview'
 import { fetchCharacter, fetchWallet, saveSkin } from '@/api/adapter'
 
 const router = useRouter()
@@ -46,6 +47,8 @@ const current = computed(() => SKINS.find((s) => s.id === wearing.value))
  * 美术分批交付期间这是常态（seeds 里的 image 路径可能还没有文件）。
  */
 const portraitFailed = ref(false)
+/** 开发期：候选图优先（详见 src/config/artPreview.ts），正式构建自动回落 */
+const portraitSrc = computed(() => previewSkinImage(current.value?.id ?? '') || current.value?.image || '')
 watch(current, () => { portraitFailed.value = false })
 
 const canWear = (id: string) => owned.value.has(id)
@@ -105,10 +108,10 @@ function back() {
       <section class="chr__stage">
         <div class="chr__avatar" :class="`chr__avatar--${gender}`">
           <img
-            v-if="current?.image && !portraitFailed"
+            v-if="portraitSrc && !portraitFailed"
             class="chr__img"
-            :src="current.image"
-            :alt="current.name"
+            :src="portraitSrc"
+            :alt="current?.name ?? '角色立绘'"
             @error="portraitFailed = true"
           />
           <template v-else>
