@@ -6,6 +6,17 @@ import { calculateLevel } from '../utils/level.js'
 
 const router = Router()
 
+// v2/v3 起教师是 users.role='admin'，不再依赖 v1 的 classes.user_id 归属。
+// 两种都放行：班级创建者，或管理员/教师。
+function isTeacher(userId) {
+  const u = db.prepare('SELECT role FROM users WHERE id = ?').get(userId)
+  return !!u && ['admin', 'teacher'].includes(u.role)
+}
+
+function canManageClass(cls, userId) {
+  return cls.user_id === userId || isTeacher(userId)
+}
+
 // 验证班级归属的中间件
 function verifyClassOwnership(req, res, next) {
   const classId = req.params.classId || req.body.classId
@@ -16,11 +27,20 @@ function verifyClassOwnership(req, res, next) {
   if (!cls) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (cls.user_id !== req.userId) {
+  if (!canManageClass(cls, req.userId)) {
     return res.status(403).json({ error: '无权访问此班级' })
   }
   req.classId = classId
   next()
+}
+
+// 取学生并校验权限（v1 归属 或 教师角色）
+function loadManageableStudent(req) {
+  const student = db.prepare('SELECT * FROM students WHERE id = ?').get(req.params.id)
+  if (!student) return null
+  const cls = db.prepare('SELECT * FROM classes WHERE id = ?').get(student.class_id)
+  if (cls && !canManageClass(cls, req.userId)) return null
+  return student
 }
 
 // 获取班级学生列表
@@ -38,7 +58,7 @@ router.post('/', authMiddleware, (req, res) => {
   if (!cls) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (cls.user_id !== req.userId) {
+  if (!canManageClass(cls, req.userId)) {
     return res.status(403).json({ error: '无权访问此班级' })
   }
 
@@ -54,11 +74,7 @@ router.put('/:id', authMiddleware, (req, res) => {
   const { name, studentNo } = req.body
 
   // 验证学生归属
-  const student = db.prepare(`
-    SELECT s.* FROM students s
-    JOIN classes c ON s.class_id = c.id
-    WHERE s.id = ? AND c.user_id = ?
-  `).get(req.params.id, req.userId)
+  const student = loadManageableStudent(req)
 
   if (!student) {
     return res.status(404).json({ error: '学生不存在或无权访问' })
@@ -71,11 +87,7 @@ router.put('/:id', authMiddleware, (req, res) => {
 // 删除学生
 router.delete('/:id', authMiddleware, (req, res) => {
   // 验证学生归属
-  const student = db.prepare(`
-    SELECT s.* FROM students s
-    JOIN classes c ON s.class_id = c.id
-    WHERE s.id = ? AND c.user_id = ?
-  `).get(req.params.id, req.userId)
+  const student = loadManageableStudent(req)
 
   if (!student) {
     return res.status(404).json({ error: '学生不存在或无权访问' })
@@ -100,7 +112,7 @@ router.post('/import', authMiddleware, (req, res) => {
   if (!cls) {
     return res.status(404).json({ error: '班级不存在' })
   }
-  if (cls.user_id !== req.userId) {
+  if (!canManageClass(cls, req.userId)) {
     return res.status(403).json({ error: '无权访问此班级' })
   }
 
@@ -125,11 +137,7 @@ router.put('/:id/pet', authMiddleware, (req, res) => {
   const now = Date.now()
 
   // 验证学生归属
-  const student = db.prepare(`
-    SELECT s.* FROM students s
-    JOIN classes c ON s.class_id = c.id
-    WHERE s.id = ? AND c.user_id = ?
-  `).get(req.params.id, req.userId)
+  const student = loadManageableStudent(req)
 
   if (!student) {
     return res.status(404).json({ error: '学生不存在或无权访问' })

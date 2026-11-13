@@ -23,3 +23,6 @@ Thumbs.db
 .env
 .env.local
 opencode.json
+
+# 真实学生名单（姓名+学号，未成年人个人信息）只留在本地和服务器上，不进仓库
+docs/seeds/students-real.json

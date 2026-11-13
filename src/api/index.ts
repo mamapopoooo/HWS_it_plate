@@ -4,7 +4,7 @@
 // 开发期只有 '/pet-garden/api' 会被代理到后端（见 vite.config.ts），
 // 生产期由 Nginx 把 /pet-garden/api 转到 3002。写死 '/api/v2' 会打到 Vite 自己，
 // 拿到一段非 JSON 文本，前端就会报 "Unexpected token ..." 之类。
-const API_ROOT = `${import.meta.env.BASE_URL}api`.replace(/\/+$/, '')
+export const API_ROOT = `${import.meta.env.BASE_URL}api`.replace(/\/+$/, '')
 
 /** v2 业务接口（训练师/宠物/战斗/商城…）挂在 /api/v2 下 */
 const V2 = `${API_ROOT}/v2`
@@ -13,9 +13,10 @@ export function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
-async function request<T = any>(
+export async function request<T = any>(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  loginCall = false
 ): Promise<T> {
   const token = getToken()
   const headers: Record<string, string> = {
@@ -35,7 +36,7 @@ async function request<T = any>(
     try {
       data = JSON.parse(text)
     } catch {
-      if (res.status === 401) {
+      if (res.status === 401 && !loginCall) {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         window.location.href = `${import.meta.env.BASE_URL}login`
@@ -49,7 +50,9 @@ async function request<T = any>(
   }
 
   if (!res.ok) {
-    if (res.status === 401) {
+    // 401 有两种含义：登录本身失败（账号名单不对）和 token 过期。
+    // 前者必须把服务端的文案交给登录页显示，不能当过期处理强刷页面。
+    if (res.status === 401 && !loginCall) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = `${import.meta.env.BASE_URL}login`
@@ -64,7 +67,7 @@ async function request<T = any>(
 const auth = {
   get: <T = any>(path: string) => request<T>(`${API_ROOT}${path}`, { method: 'GET' }),
   post: <T = any>(path: string, body?: any) =>
-    request<T>(`${API_ROOT}${path}`, { method: 'POST', body: JSON.stringify(body) }),
+    request<T>(`${API_ROOT}${path}`, { method: 'POST', body: JSON.stringify(body) }, path.endsWith('/login')),
 }
 
 export const api = {

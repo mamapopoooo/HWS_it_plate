@@ -1,37 +1,13 @@
 // 王宠课堂 v3 API 封装
 // 基础路径 /api/v3，支持 config 缓存和图片回落链
 
-import { getToken } from './index'
+import { API_ROOT, request as apiRequest } from './index'
 
-const BASE_URL = '/api/v3'
+const BASE_URL = `${API_ROOT}/v3`
 
-// ========== 请求核心 ==========
-
-async function request<T = any>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken()
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>)
-  }
-  if (token) headers['Authorization'] = `Bearer ${token}`
-
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
-  const data = await res.json()
-
-  if (!res.ok) {
-    if (res.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/pet-garden/login'
-    }
-    throw new Error(data.error || '请求失败')
-  }
-  return data
+function request<T = any>(path: string, options: RequestInit = {}): Promise<T> {
+  return apiRequest<T>(`${BASE_URL}${path}`, options)
 }
-
 // ========== 配置（前端启动缓存） ==========
 
 let _configCache: any = null
