@@ -4,6 +4,93 @@
 
 ---
 
+## DS-R3 / 解除 DS-BLK-01 并按 S2 落实前端补丁 / 2026-11-13（第三轮）
+
+- 状态：**待复验**
+- 绝对工作区 / 分支 / 基线：`D:\课件\platform\pet-garden-dsh` / `dev-dsh` / `5ab3057`（已同步整合分支）
+- 补丁提交：见本轮推送 SHA（`fix(dsh): 名单导入保留列存在信息 + 名单入口`）
+- 本批拥有文件：`src/pages/v3/admin/Students.vue`、`src/pages/TeacherDesk.vue`、`docs/art/素材清单-DSH-20261113.md`、本报告
+
+### 一、DS-BLK-01 已解除（实际安装结果）
+
+按你的要求，在自己的工作区独立安装，**未共享 node_modules、未换镜像、未 vendor**。
+
+| 项 | 值 |
+|---|---|
+| Node | `v24.18.1` |
+| npm | `11.16.0`（`C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js`） |
+| 安装目录 | `D:\课件\platform\pet-garden-dsh`（本工作区，node_modules 非 junction） |
+| 命令 | `node <npm-cli> ci --no-audit --no-fund` |
+| 结果 | **exit 0**，317 个包目录；`xlsx 0.20.3` 可用；`better-sqlite3` 原生绑定可用 |
+
+**过程中遇到一次 EPERM，已定位并解决（不是环境缺陷）**：
+
+```
+npm error EPERM: operation not permitted, unlink
+  ...\node_modules\better-sqlite3\build\Release\better_sqlite3.node
+```
+
+原因：我自己昨天起的 `PORT=3003` 后端（PID 131580，监听 3003）仍在运行并加载了该 `.node` 文件。
+处理：只停自己的 131580（qoder 的 135572 保持不动），随后 `npm ci` 一次通过。
+**不需要替换依赖，也不需要改 package.json。**
+
+### 二、DS-02：Students.vue 已改为从 adapter 导入
+
+```ts
+// 改前
+} from '@/api/roster'
+// 改后
+} from '@/api/adapter'
+```
+
+类型同样改从 `@/api/adapter` 导入，并补充 `RosterImportField`、`RosterImportPlan`。
+
+### 三、DS-03 / R5：表头保留列存在信息
+
+按《名单导入契约》，前端只提交**表格里实际出现过的列**：
+
+- `mapHeader()` 结果存入 `imp.cols`，作为"列存在性"的唯一依据
+- 构造行时可选列只在 `cols[field] !== undefined` 时写入；**缺席列保持 `undefined`**，不预填空串
+- 预览表把三种情况分开显示：`未提供`（列不存在）/ `空`（列存在但空）/ 具体值
+- 顶部新增提示：「本次表格没有这些列：…（保留原值，不会被清空）」
+- `rowPlans` 存在时逐行显示 `写入：…` / `保留：…` / 警告；**不存在时显示「详细预演尚不支持」**，不自行拼计划
+
+### 四、/teacher 名单入口（按你的指示）
+
+在 `TeacherDesk.vue` 头部加「名单管理」按钮 → `router.push('/admin/students')`。
+**未新建第二份名单页，未删除旧链接。**
+
+### 五、素材清单已按你的口径调整
+
+第一批改为 **3 张**：`pet_qinglong` form1 + `skin_base_m` + `skin_base_f`。
+白虎/朱雀/玄武移入"下一批候选"，并注明"样稿阶段不扩量"。
+
+### 六、本轮实际执行的检查
+
+| 检查 | 命令 | 结果 |
+|---|---|---|
+| 依赖安装 | `node npm-cli ci` | ✅ exit 0（317 包） |
+| 类型检查 | `vue-tsc --noEmit` | ✅ **0 错误**（此前 xlsx 报错消失） |
+| 单测 | `vitest run` | ✅ 13 文件 / **233 测试**通过 |
+| 构建 | `vite build` | ✅ 通过 |
+| 产物自检 | `verify-build.mjs` | ✅ 通过 |
+
+### 七、未验证 / 仍待
+
+- **页面截图**：无头环境无法截图，登录矩阵 H1–H8 与名单页仍需人工在浏览器点一遍；我可在你要求下启动 3001 预览并给出逐步操作清单
+- 名单导入预演的真实 `rowPlans`：需 Qoder 后端实现后才能端到端验（当前走"尚不支持"分支）
+- `today_battles` 真数：等 IN-07
+- DS-BLK-02（乱码脚本）按你的判定归 QD-05，我未改
+
+### 八、需要 Codex 复验
+
+1. `vue-tsc`/`build` 是否在你侧同样通过（我已附 Node/npm 版本与命令）
+2. `Students.vue` 缺席列语义是否与契约一致（我按"不写该键"实现）
+3. `/teacher` → `/admin/students` 入口是否符合预期
+
+
+---
+
 ## DS-R2 / 路由核查、登录验收与首批素材清单 / 2026-11-13（第二轮）
 
 - 状态：**待审核**（含 2 项阻塞请示）

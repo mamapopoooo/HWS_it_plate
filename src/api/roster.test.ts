@@ -49,6 +49,13 @@ describe('名单请求与认证错误', () => {
     await expect(roster.previewImport(rows)).resolves.toEqual({ dryRun: true })
     await expect(roster.commitImport(rows)).rejects.toThrow('名单接口返回格式错误')
   })
+  it('服务端逐行方案缺字段时明确报错，不交给页面猜测', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ dryRun: true,
+      rowPlans: [{ studentNo: '0001', action: 'update', writeFields: ['name'] }] }))))
+    const roster = await import('./roster')
+    await expect(roster.previewImport([{ studentNo: '0001', name: '示例学生' }]))
+      .rejects.toThrow('逐行预演格式错误')
+  })
   it('错误登录401显示原因，不清除已有会话或强刷登录页', async () => {
     localStorage.setItem('token', 'existing-demo')
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"error":"姓名和学号对不上"}', { status: 401 })))
