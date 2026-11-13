@@ -168,6 +168,13 @@
           有 {{ imp.preview.garbled }} 行含乱码字符，通常是表格被另存成了非 UTF-8 编码。
           这种行服务端会拒绝写入，请先修正原表再导入。
         </p>
+        <p v-if="absentColumns.length" class="imp-warn">
+          本次表格没有这些列：<b>{{ absentColumns.join('、') }}</b> —— 这些字段会**保留原值，不会被清空**。
+          确实要清空请用单条编辑。
+        </p>
+        <p v-if="imp.preview && !hasRowPlans" class="dialog-note">
+          详细预演尚不支持（服务端未返回逐行方案），下面的「新增 / 更新」仅按学号是否已存在判断。
+        </p>
         <p class="dialog-note">
           按学号比对：学号已存在只更新档案，不会重置积分、宠物与抽卡记录；同一份表重复导入结果一致。
         </p>
@@ -181,13 +188,28 @@
             </thead>
             <tbody>
               <tr v-for="(r, i) in imp.rows" :key="i">
-                <td class="table-td"><span class="tag" :class="rowTag(r).cls">{{ rowTag(r).text }}</span></td>
+                <td class="table-td">
+                  <span class="tag" :class="rowTag(r).cls">{{ rowTag(r).text }}</span>
+                  <template v-if="planByNo.get(r.studentNo)">
+                    <span class="imp-plan">
+                      写入：{{ planByNo.get(r.studentNo)!.writeFields.map(fieldText).join(' / ') || '无' }}
+                    </span>
+                    <span v-if="planByNo.get(r.studentNo)!.skipFields.length" class="imp-plan imp-plan--skip">
+                      保留：{{ planByNo.get(r.studentNo)!.skipFields.map(fieldText).join(' / ') }}
+                    </span>
+                    <span
+                      v-for="w in planByNo.get(r.studentNo)!.warnings"
+                      :key="w"
+                      class="imp-plan imp-plan--warn"
+                    >{{ w }}</span>
+                  </template>
+                </td>
                 <td class="table-td">{{ r.studentNo || '—' }}</td>
-                <td class="table-td">{{ r.name || '—' }}</td>
-                <td class="table-td td-en">{{ r.nameEn || '—' }}</td>
-                <td class="table-td">{{ r.gender || '—' }}</td>
-                <td class="table-td">{{ r.class || '—' }}</td>
-                <td class="table-td">{{ r.course || '—' }}</td>
+                <td class="table-td">{{ r.name || '空' }}</td>
+                <td class="table-td td-en">{{ r.nameEn === undefined ? '未提供' : r.nameEn || '空' }}</td>
+                <td class="table-td">{{ r.gender === undefined ? '未提供' : r.gender || '空' }}</td>
+                <td class="table-td">{{ r.class === undefined ? '未提供' : r.class || '空' }}</td>
+                <td class="table-td">{{ r.course === undefined ? '未提供' : r.course || '空' }}</td>
               </tr>
             </tbody>
           </table>
@@ -212,8 +234,10 @@ import * as XLSX from 'xlsx'
 import {
   bulkDelete, bulkMove, commitImport, createRosterStudent, deleteRosterStudent,
   fetchDuplicateNames, fetchRosterClasses, fetchRosterStudents, previewImport, updateRosterStudent,
-} from '@/api/roster'
-import type { DryRunResult, RosterClass, RosterRow, RosterStudent } from '@/api/roster'
+} from '@/api/adapter'
+import type {
+  DryRunResult, RosterClass, RosterImportField, RosterImportPlan, RosterRow, RosterStudent,
+} from '@/api/adapter'
 
 const classes = ref<RosterClass[]>([])
 const students = ref<RosterStudent[]>([])
@@ -410,11 +434,42 @@ const imp = reactive({
   fileName: '',
   rows: [] as RosterRow[],
   preview: null as DryRunResult | null,
+  /** 表格里实际出现过的列。缺席列不提交，服务端因此保留旧值（导入契约 R5） */
+  cols: {} as Partial<Record<keyof RosterRow, number>>,
 })
 
 const importable = computed(() => imp.rows.filter(r => r.studentNo.trim() && r.name.trim()).length)
 
 const knownNos = computed(() => new Set(imp.preview?.existingNos ?? []))
+
+/** 服务端逐行预演方案（契约新增 rowPlans；旧响应没有该字段时不伪造） */
+const planByNo = computed(() => {
+  const map = new Map<string, RosterImportPlan>()
+  for (const p of imp.preview?.rowPlans ?? []) map.set(p.studentNo, p)
+  return map
+})
+
+const hasRowPlans = computed(() => (imp.preview?.rowPlans?.length ?? 0) > 0)
+
+/** 表格里缺席的列名，用于在预览里提示"这些列不会被改动" */
+const absentColumns = computed(() =>
+  (['nameEn', 'gender', 'class', 'course'] as Array<keyof RosterRow>)
+    .filter(k => imp.cols[k] === undefined)
+    .map(k => COLUMN_NAME[k]),
+)
+
+const COLUMN_NAME: Record<string, string> = {
+  studentNo: '学号',
+  name: '中文名',
+  nameEn: '英文名',
+  gender: '性别',
+  class: '班级',
+  course: '课程',
+}
+
+function fieldText(f: RosterImportField): string {
+  return COLUMN_NAME[f] ?? f
+}
 
 function rowTag(r: RosterRow) {
   if (!r.studentNo.trim() || !r.name.trim()) return { text: '无效', cls: 'tag--bad' }
@@ -453,16 +508,20 @@ async function onFile(e: Event) {
     const cell = (line: unknown[], field: keyof RosterRow) =>
       header.cols[field] === undefined ? '' : String(line[header.cols[field]!] ?? '').trim()
 
+    imp.cols = header.cols
+
+    // 只把「表格里出现过的列」写进 row：缺席列保持 undefined，
+    // 服务端据此保留旧值（契约：缺席列不清空）。这里不能预填空串。
+    const OPTIONAL: Array<keyof RosterRow> = ['nameEn', 'gender', 'class', 'course']
     imp.rows = matrix
       .slice(header.rowIdx + 1)
-      .map(line => ({
-        studentNo: cell(line, 'studentNo'),
-        name: cell(line, 'name'),
-        nameEn: cell(line, 'nameEn'),
-        gender: cell(line, 'gender'),
-        class: cell(line, 'class'),
-        course: cell(line, 'course'),
-      }))
+      .map(line => {
+        const row: RosterRow = { studentNo: cell(line, 'studentNo'), name: cell(line, 'name') }
+        for (const f of OPTIONAL) {
+          if (header.cols[f] !== undefined) row[f] = cell(line, f)
+        }
+        return row
+      })
       .filter(r => Object.values(r).some(v => v))
 
     if (!imp.rows.length) {
@@ -480,6 +539,7 @@ function closeImport() {
   imp.rows = []
   imp.preview = null
   imp.error = ''
+  imp.cols = {}
 }
 
 async function doImport() {
@@ -678,6 +738,12 @@ onMounted(async () => {
   max-height: 46vh; margin-top: 12px; overflow: auto;
   background: #FFFDf6; border: 1px solid rgba(201,162,39,0.6); border-radius: 8px;
 }
+/* 逐行预演：写入 / 保留 / 警告 */
+.imp-plan {
+  display: block; margin-top: 3px; font-size: 11px; line-height: 1.5; color: #4A4A5A;
+}
+.imp-plan--skip { color: #8A8577; }
+.imp-plan--warn { color: #C0392B; }
 .imp-table { font-size: 12px; }
 .imp-table .table-td { padding: 7px 10px; }
 
