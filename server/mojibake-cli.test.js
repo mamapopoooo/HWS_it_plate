@@ -26,4 +26,6 @@ it('乱码检查缺库/缺表不得假通过，自检独立可运行', () => {
     if (dirname(directory) !== resolve(tmpdir())) throw new Error('临时目录越界')
     rmSync(directory, { recursive: true, force: true })
   }
-}, 30_000)
+// 起 5 个 node 子进程，全量并行时冷启动会超过默认 5s；对齐 Codex 在 identity-audit
+// 采用的同一档 15s（单独跑约 0.8s），断言与全局超时不动。
+}, 15_000)
