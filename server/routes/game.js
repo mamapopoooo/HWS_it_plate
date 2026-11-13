@@ -310,19 +310,16 @@ router.post('/battle/:id/action', (req, res) => {
   if (state.status === 'finished') {
     const recordId = uuidv4()
     db.prepare(`
-      INSERT INTO battle_records (id, player_a_id, player_b_id, player_a_pet, player_b_pet, player_a_level, player_b_level, winner, battle_log, battle_type, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO battle_records (id, battle_type, player_a_id, player_b_id, winner_id, turn_count, log_json, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       recordId,
+      'pve',
       state.playerA.playerId,
       state.playerB.playerId,
-      state.playerA.petId,
-      state.playerB.petId,
-      state.playerA.level,
-      state.playerB.level,
-      state.winner,
+      state.winner === 'A' ? state.playerA.playerId : state.playerB.playerId,
+      state.turn,
       JSON.stringify(state.log),
-      'pve',
       Date.now()
     )
 
