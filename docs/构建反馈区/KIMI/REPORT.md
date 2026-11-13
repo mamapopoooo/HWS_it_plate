@@ -153,3 +153,107 @@
 - KIMI 自产修改范围：`src/utils/duel-core.js`、`.d.ts`、测试、`src/utils/duel.ts`、本报告与交接单。合并带入的其他 Agent 文件不属于 KIMI 补丁；未修改 `server/routes/game-v2.js`、`game-v3.js`、前端 API、`Duel.vue`、迁移文件或迁移版本 11，未重复提交已收口价格补丁。
 - 未验证与待 Codex 接续：权威 start/action/state、actionId 重放、唯一落库、固定 AI 服务端配置和页面接入仍未实施；`/api/v2/battle/pve/result` 继续保持 501，第一阶段不发奖励。重启/多进程恢复及持久 actionId 幂等未解决。未做真实浏览器 UI 验收、生产或现有数据库盘点、真实名单验证；未部署、未开启积分同步。
 
+## KM-06 / 服务端调用签名、状态序列化与 RNG / 事件顺序契约 / 2026-11-13
+
+- 状态：第七轮要求的接入契约已整理，待 Codex 技术复验后接续路由；本批没有生产代码补丁，生产继续冻结。
+- 绝对工作区 / 分支：`D:/课件/platform/pet-garden-kimi` / `dev-kimi`。
+- 最新接续基线：`origin/dev-codex-integration-20261113@28d196881e973c2b4b9eace256e311fbe550ee2d`；本地合并提交为 `273041e5af0d88a0e573da74e173573706159ec8`。
+- 已接收核心：`1f7197d77b29d4771beb08d22df0d28a4d786faa`；第七轮收件回复明确“无需重复提取”，因此本节只整理调用和序列化边界，未修改核心、路由、API 或页面。
+- 现状证据：`server/routes/game-v2.js:268-291` 的 start 只校验宠物并返回待集成消息；`src/pages/Duel.vue:125-146` 仍是本地“玩家技能→判胜→AI 技能→判胜→双方 endTurn→turn+1”；旧 result 在 `game-v2.js:19-22` 保持 501。
+
+### 1. 服务端调用签名与配置注入
+
+建议 Codex 在服务端会话编排层直接从共享核心导入，不在路由复制公式：
+
+```js
+import {
+  createFighter,
+  resolveSkill,
+  pickEnemySkill,
+  winnerOf,
+  endTurn,
+} from '../../src/utils/duel-core.js'
+```
+
+- start 的 `teamPetIds` 第一阶段必须恰好 1 个 `player_pets.id`；按 `id + req.userId` 查询后，以 `template_id / level / awakening_level` 调用 `createFighter(template_id, level, awakening_level, duelConfig)`。核心返回的 `fighter.petId` 是**模板 ID**，不能被玩家实例 ID 覆盖；实例 ID 在会话中另存 `playerPetInstanceId`。
+- AI 也由服务端配置调用 `createFighter(ai.templateId, ai.level, ai.awaken, duelConfig)`；不得接收客户端 AI 模板、成长、技能、RNG、seed 或 winner。固定演示参数放服务端配置，不硬编码进路由。
+- `duelConfig` 形状固定为 `{tiers,trigrams,pets,economy,skillEffects}`；`skillEffects` 是 `skill_effects.json` 的 `effects` 数组，不是整个 JSON 根对象。若从数据库读取 tiers/trigrams，需要显式把 `power_coef/skill_slots/opposite` 映射回核心 camelCase；经济参数可复用 `readEconomy(db)` 的 seeds 默认值 + 运行期覆盖，核心内部不查库。
+- `createFighter` 可能返回 `null`，配置缺失必须在 start 失败，不能继续战斗。`resolveSkill` 和 `endTurn` **原地修改** fighter；`resolveSkill` 的返回值只是本次事件数组，不能用返回值替换 fighter。`pickEnemySkill` 返回技能 code，`winnerOf` 不修改状态。
+
+### 2. action 编排与技能前置校验
+
+单个新 action 的服务端顺序固定如下：
+
+```js
+// 先完成认证、战斗归属与 actionId 重放检查；新请求再检查 active 和技能。
+const playerEvents = resolveSkill(player, enemy, skillCode, 'player', rng, duelConfig)
+events.push(...playerEvents)
+winner = winnerOf(player, enemy)
+
+if (!winner) {
+  const enemySkill = pickEnemySkill(enemy, rng)
+  events.push(...resolveSkill(enemy, player, enemySkill, 'enemy', rng, duelConfig))
+  winner = winnerOf(player, enemy)
+}
+
+session.log.push(...events)
+if (winner) {
+  status = 'finished'
+  // 由 Codex 在此处保证 battle_records 只写一次；log_json 已含终结事件，本阶段不发奖励。
+} else {
+  endTurn(player)
+  endTurn(enemy)
+  turn += 1
+}
+```
+
+- `resolveSkill` 当前会把未知技能回退到 `skillEffects[0]`，且不检查技能是否属于 actor、`remain` 是否为 0、战斗是否已结束。因此路由/会话层必须先找到 actor 自己的精确 `skillCode` 并拒绝冷却技能；非法请求不得调用核心、修改冷却或消耗 RNG，不能依赖核心 fallback 充当校验。
+- 玩家使 enemy HP 归零后不得选择或执行 AI 技能；任一方终结后不得执行 `endTurn` 或增加 turn。未终结时才按 player→enemy 顺序递减冷却/增益，再 `turn += 1`。
+- actionId 重放检查必须位于“已结束”拒绝之前：同 battleId、同 actionId、同请求体直接返回缓存响应，不推进 RNG、不重复写库；同 actionId 不同请求体返回 409。新 actionId 才按 active 状态继续校验。第一阶段这只是同进程重放，不声称跨进程幂等。
+
+### 3. 内部会话与可序列化传输快照
+
+第一阶段内存会话建议至少包含：
+
+```js
+{
+  battleId, ownerId, playerPetInstanceId,
+  status, turn, player, enemy, winner,
+  log, rng, recorded, replayByActionId
+}
+```
+
+- `player/enemy` 当前均为普通 JSON 数据：`petId,name,pinyin,tier,trigram,level,awaken,maxHp,hp,atk,def,spd,shield,atkBuff,buffTurns,skills[{code,name,cost,cd,remain}]`。这些字段必须完整保留；不能只存 HP，否则冷却、盾和增益无法继续。
+- `rng` 是函数，`replayByActionId` 可用 Map，均不能直接 JSON 序列化；`ownerId`、完整 `log`、落库标记和重放缓存也不应混入公开 fighter。传输快照只返回 `{battleId,status,turn,player,enemy,winner,events}`，其中 `winner` 未结束时为 `null`。
+- 如传输层需要 `petInstanceId/templateId`，应在响应映射时附加，同时保留内部 `petId=templateId`；不要让序列化/反序列化改变核心 ID 语义。`duel-core.d.ts` 的 `DuelState` 是通用核心状态声明，不等同于上述带 battleId/status/events 的 API 快照，不能直接混用字段名。
+- start 返回 `events=[]`；action 的 `events` 只放本 action 新事件，完整 `session.log` 在服务端累计。建议 GET state 返回 `events=[]`，避免刷新后重复播放旧特效；GET 不推进回合或 RNG。结束时 `turn_count` 取当前权威 turn，`log_json` 取累计 log，仍写现有 8 列 `battle_records`。
+
+### 4. RNG 调用次数与恢复限制
+
+- RNG 完全由服务端持有。伤害技能先抽 1 次闪避；只有未闪避时才再抽 1 次暴击。治疗、护盾、增益和 stun 不抽 RNG。`pickEnemySkill` 在技能池非空时抽 1 次；玩家已获胜时不再调用它。
+- 因此一个未终结、双方均用伤害技能的 action 通常消耗 5 次：玩家闪避/暴击 2 次、AI 选技 1 次、AI 闪避/暴击 2 次；玩家或 AI 任一方闪避会少 1 次，玩家直接获胜会少掉整个 AI 阶段。测试和重放必须按实际分支断言调用次数，不能固定假设每回合 5 次。
+- 非法/冷却技能、GET state、actionId 重放和 `endTurn` 均不得消耗 RNG。固定 RNG 单测可注入序列函数并在调用方记录 `drawCount`，该计数属于 RNG 适配器，不属于 fighter。
+- `Math.random` 闭包只能支持第一阶段单进程内存战斗，不能重启恢复。未来若获准持久化，需另行选择可序列化 PRNG 内部状态，或固定算法版本后保存 `seed + drawCount`；不能只把当前 rng 函数 JSON.stringify，也不能在恢复时重置 seed 从头抽。迁移与跨进程承诺不在本批。
+
+### 5. 事件顺序与消费限制
+
+- 单次伤害事件顺序固定为：可选的护盾吸收 `shield` → `hit/crit` → 可选 `ko`；闪避只返回 `miss`，治疗/获得护盾/增益分别只返回 `heal/shield/buff`，`first_strike` 当前兜底为 `hit` 后可选 `ko`。一个 action 的总事件是玩家事件数组在前、AI 事件数组在后，`endTurn` 无事件。
+- `DuelEvent.side` 表示**行动方**，不是目标方；事件当前没有 `target` 字段。尤其伤害前的护盾吸收事件也以攻击方为 side，却描述 target 的护盾，而 `shield_pct` 的获得护盾才作用于行动方自身。页面/适配层不能把所有 `shield` 都解释为“side 自己获得护盾”；若需显式 target，应由 Codex/DSH 以 additive API 字段另行接入，KIMI 本批未改事件结构。
+- 当前核心没有 burn/stun 状态字段：灼烧仍只有单次伤害，stun 只产生 0 伤害文案，不附加眩晕状态。不得在序列化设计中虚构已实现状态；DOT 或其他技能语义变更仍需另立任务。
+
+### 6. 给 Codex 路由复验的最小测试点
+
+- start 拒绝模板 ID 充当实例 ID、他人宠物、多只宠物和未知模板；响应不包含 rng、ownerId 或重放缓存。
+- 非法技能、非本人技能、冷却技能、已结束的新 action 均不改变状态且不消耗 RNG；actionId 同体重放返回原响应，不同体 409。
+- 用序列 RNG 分别覆盖命中暴击、首次闪避、AI 闪避、玩家首击终结、AI 反击终结和未终结回合，断言 RNG 次数、turn、冷却、事件数组和胜方。
+- GET state 无副作用且 events 不触发旧特效重放；玩家/AI 两种胜方只落一条 8 列记录，终结重放不重复写库；旧 result 继续 501，零奖励、零额外记录。
+
+## 第七轮交付门禁 / 2026-11-13
+
+- 修改范围：仅本报告与 `docs/handoffs/KIMI-2026-11-13.md`；没有生产代码、配置、seeds、迁移或页面改动。
+- 全量测试：`node node_modules/vitest/vitest.mjs run` → **26 文件 / 341 条全部通过**，其中共享核心 7/7、浏览器斗法 17/17、战斗记录 7/7。
+- 类型检查：`node node_modules/vue-tsc/bin/vue-tsc.js --noEmit` → 通过，0 输出、0 错误。
+- 构建：`node node_modules/vite/bin/vite.js build` → 通过，1514 个模块完成转换。
+- 产物自检：`node scripts/verify-build.mjs` → 通过；88 个产物，首屏 JS 112.0KB，懒加载 JS 6060.8KB，CSS 220.5KB，页面分包 16/16。既有 browserslist、`lobby.jpg`、大 chunk 和 CSS 偏大告警未顺手修改。
+- 未验证项：本节是服务端接入契约，尚未实现或运行权威 start/action/state 新路由；未做真实浏览器 UI、重启/多进程、生产数据库或真实名单验证；未部署、未开启积分同步、未启用战斗奖励。
+
