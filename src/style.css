@@ -4,7 +4,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f7fa;
+  background-color: var(--paper);
+  color: var(--ink);
 }
 
 /* 自定义滚动条 */
@@ -40,7 +41,7 @@ body {
 
   /* 渐变文字 */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-pink-400 to-purple-400;
+    color: var(--ink);
   }
 
   /* 玻璃态效果 */

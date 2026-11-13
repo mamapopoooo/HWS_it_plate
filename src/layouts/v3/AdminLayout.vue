@@ -8,7 +8,7 @@
     <!-- 侧边栏 -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-brand">王宠课堂</div>
+        <div class="sidebar-brand">墨境课堂</div>
         <div class="sidebar-subtitle">教师管理</div>
       </div>
       <nav class="sidebar-nav">

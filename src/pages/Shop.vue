@@ -199,7 +199,7 @@ function back() {
   color: #f7f7f7;
   background: linear-gradient(160deg, #7b7b7b, #4f4f4f);
   border-radius: 8px;
-  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.3);
+  box-shadow: inset 0 0 0 2px rgba(251, 252, 250, 0.3);
 }
 .goods__name {
   margin: 2px 0 0;

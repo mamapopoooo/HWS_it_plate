@@ -140,7 +140,7 @@ const onAvatar = () => emit('avatar')
   padding: 6px 12px;
   font-size: 13px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.72);
+  background: rgba(251, 252, 250, 0.72);
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: var(--r-sm);
   box-shadow: var(--sh-inset);
@@ -158,7 +158,7 @@ const onAvatar = () => emit('avatar')
   height: 34px;
   font-size: 15px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.72);
+  background: rgba(251, 252, 250, 0.72);
   border: 1px solid rgba(28, 28, 36, 0.2);
   border-radius: var(--r-sm);
   cursor: pointer;

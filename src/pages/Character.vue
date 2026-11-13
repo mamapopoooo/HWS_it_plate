@@ -227,7 +227,7 @@ function back() {
   width: 180px;
   height: 260px;
   border-radius: 10px;
-  box-shadow: inset 0 0 0 3px rgba(255, 253, 246, 0.4), 0 8px 20px rgba(28, 28, 36, 0.18);
+  box-shadow: inset 0 0 0 3px rgba(251, 252, 250, 0.4), 0 8px 20px rgba(28, 28, 36, 0.18);
 }
 /* 立绘缺失时的占位：姓氏印章，尺寸就是正式立绘的预留位 */
 .chr__avatar--female {
@@ -239,14 +239,14 @@ function back() {
 .chr__seal {
   font-family: var(--font-title);
   font-size: 72px;
-  color: rgba(255, 253, 246, 0.92);
+  color: rgba(251, 252, 250, 0.92);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 .chr__pose {
   position: absolute;
   bottom: 8px;
   font-size: 10px;
-  color: rgba(255, 253, 246, 0.7);
+  color: rgba(251, 252, 250, 0.7);
 }
 .chr__meta {
   display: flex;
@@ -268,7 +268,7 @@ function back() {
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: 999px;
 }
@@ -336,7 +336,7 @@ function back() {
   height: 58px;
   border-radius: 6px;
   background: linear-gradient(180deg, #d3d3d3, #aeaeae);
-  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.5);
+  box-shadow: inset 0 0 0 2px rgba(251, 252, 250, 0.5);
 }
 .skin__swatch[data-theme='base'] {
   background: linear-gradient(180deg, #dfdfdf, #b9b9b9);
@@ -395,7 +395,7 @@ function back() {
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.85);
+  background: rgba(251, 252, 250, 0.85);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: var(--r-sm);
 }

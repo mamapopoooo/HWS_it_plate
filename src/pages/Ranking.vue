@@ -212,7 +212,7 @@ function back() {
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: rgba(255, 253, 246, 0.7);
+  background: rgba(251, 252, 250, 0.7);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: 999px;
 }
@@ -298,7 +298,7 @@ function back() {
   font-size: 44px;
   color: #f7f7f7;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 3px rgba(255, 253, 246, 0.4), 0 8px 18px rgba(28, 28, 36, 0.22);
+  box-shadow: inset 0 0 0 3px rgba(251, 252, 250, 0.4), 0 8px 18px rgba(28, 28, 36, 0.22);
 }
 .podium__avatar--male {
   background: linear-gradient(160deg, #636363, #3e3e3e);
@@ -348,7 +348,7 @@ function back() {
   align-items: center;
   gap: 12px;
   padding: 8px 14px;
-  background: rgba(255, 253, 246, 0.66);
+  background: rgba(251, 252, 250, 0.66);
   border: 1px solid rgba(28, 28, 36, 0.14);
   border-radius: var(--r-md);
 }
@@ -369,7 +369,7 @@ function back() {
   font-size: 18px;
   color: #f7f7f7;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.35);
+  box-shadow: inset 0 0 0 2px rgba(251, 252, 250, 0.35);
 }
 .mid__avatar--male {
   background: linear-gradient(160deg, #636363, #3e3e3e);

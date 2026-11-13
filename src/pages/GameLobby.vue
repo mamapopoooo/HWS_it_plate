@@ -380,13 +380,13 @@ onUnmounted(() => {
   background-image:
     linear-gradient(
       90deg,
-      rgba(244, 244, 244, 0.9) 0%,
-      rgba(244, 244, 244, 0.7) 18%,
-      rgba(244, 244, 244, 0.34) 38%,
-      rgba(244, 244, 244, 0.14) 62%,
-      rgba(244, 244, 244, 0.38) 100%
+      rgba(245, 246, 244, 0.9) 0%,
+      rgba(245, 246, 244, 0.7) 18%,
+      rgba(245, 246, 244, 0.34) 38%,
+      rgba(245, 246, 244, 0.14) 62%,
+      rgba(245, 246, 244, 0.38) 100%
     ),
-    linear-gradient(180deg, rgba(244, 244, 244, 0.6) 0%, rgba(244, 244, 244, 0) 26%);
+    linear-gradient(180deg, rgba(245, 246, 244, 0.6) 0%, rgba(245, 246, 244, 0) 26%);
 }
 
 /* 镜头呼吸：极缓推近 + 微移，28s 一个来回，肉眼几乎察觉不到跳动 */
@@ -419,9 +419,9 @@ onUnmounted(() => {
   .lobby__bg::after {
     background-image: linear-gradient(
       180deg,
-      rgba(244, 244, 244, 0.9) 0%,
-      rgba(244, 244, 244, 0.45) 45%,
-      rgba(244, 244, 244, 0.9) 100%
+      rgba(245, 246, 244, 0.9) 0%,
+      rgba(245, 246, 244, 0.45) 45%,
+      rgba(245, 246, 244, 0.9) 100%
     );
   }
 }
@@ -438,7 +438,7 @@ onUnmounted(() => {
   position: absolute;
   border-radius: 50%;
   filter: blur(30px);
-  background: radial-gradient(closest-side, rgba(255, 253, 246, 0.92), rgba(255, 253, 246, 0));
+  background: radial-gradient(closest-side, rgba(251, 252, 250, 0.92), rgba(251, 252, 250, 0));
   will-change: transform;
 }
 .cloud--a {
@@ -493,7 +493,7 @@ onUnmounted(() => {
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: rgba(255, 253, 246, 0.92);
+  background: rgba(251, 252, 250, 0.92);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: 999px;
   box-shadow: var(--sh-paper);
@@ -536,7 +536,7 @@ onUnmounted(() => {
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: rgba(255, 253, 246, 0.78);
+  background: rgba(251, 252, 250, 0.78);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: 999px;
   box-shadow: var(--sh-inset);
@@ -764,7 +764,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 14px;
   padding: 12px 18px;
-  background: linear-gradient(0deg, rgba(220, 220, 214, 0.94), rgba(244, 244, 244, 0.4));
+  background: linear-gradient(0deg, rgba(232, 236, 231, 0.94), rgba(245, 246, 244, 0.4));
   border-top: 1px solid rgba(28, 28, 36, 0.16);
 }
 

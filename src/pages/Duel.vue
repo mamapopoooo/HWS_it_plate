@@ -375,10 +375,10 @@ function back() {
   width: 168px;
   height: 200px;
   flex: none;
-  background: radial-gradient(circle at 50% 45%, rgba(255, 253, 246, 0.9), rgba(228, 228, 228, 0.5));
+  background: radial-gradient(circle at 50% 45%, rgba(251, 252, 250, 0.9), rgba(228, 228, 228, 0.5));
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: 10px;
-  box-shadow: inset 0 0 0 3px rgba(255, 253, 246, 0.45);
+  box-shadow: inset 0 0 0 3px rgba(251, 252, 250, 0.45);
 }
 .fighter__glyph {
   font-family: var(--font-title);
@@ -468,7 +468,7 @@ function back() {
   font-size: 26px;
   font-weight: 700;
   color: var(--cinnabar);
-  text-shadow: 0 2px 6px rgba(255, 253, 246, 0.8);
+  text-shadow: 0 2px 6px rgba(251, 252, 250, 0.8);
   animation: float-up 900ms var(--e-out) forwards;
   pointer-events: none;
 }
@@ -616,7 +616,7 @@ function back() {
   justify-items: center;
   gap: 6px;
   padding: 26px 34px;
-  background: linear-gradient(180deg, #f5f5f0, #dcdcd4);
+  background: linear-gradient(180deg, #f5f5f0, var(--paper-2));
   border: 1px solid rgba(28, 28, 36, 0.3);
   border-radius: var(--r-lg);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);

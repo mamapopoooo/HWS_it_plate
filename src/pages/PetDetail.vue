@@ -222,7 +222,7 @@ function back() {
 }
 .pd__tag--ghost {
   color: var(--ink-2);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.2);
 }
 
@@ -346,7 +346,7 @@ function back() {
   align-items: center;
   gap: 1px;
   padding: 8px 4px;
-  background: rgba(255, 253, 246, 0.7);
+  background: rgba(251, 252, 250, 0.7);
   border: 1px solid rgba(28, 28, 36, 0.14);
   border-top: 3px solid var(--gc);
   border-radius: var(--r-sm);

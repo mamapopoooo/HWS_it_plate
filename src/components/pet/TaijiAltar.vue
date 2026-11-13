@@ -192,7 +192,7 @@ const styleVars = computed(() => ({
   font-family: var(--font-title);
   font-size: 52px;
   color: color-mix(in srgb, var(--accent) 70%, var(--ink));
-  background: radial-gradient(circle at 50% 45%, rgba(255, 253, 246, 0.9), var(--paper-2));
+  background: radial-gradient(circle at 50% 45%, rgba(251, 252, 250, 0.9), var(--paper-2));
   border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
   border-radius: 50%;
 }

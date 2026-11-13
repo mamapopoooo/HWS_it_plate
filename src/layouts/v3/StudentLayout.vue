@@ -11,7 +11,7 @@
     <nav class="top-nav">
       <div class="nav-inner">
         <div class="nav-left">
-          <router-link to="/student" class="nav-brand">王宠课堂</router-link>
+          <router-link to="/student" class="nav-brand">墨境课堂</router-link>
           <span class="nav-divider">·</span>
           <span class="nav-user">{{ authStore.user?.realName || '修行者' }}</span>
         </div>

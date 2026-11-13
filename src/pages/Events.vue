@@ -155,7 +155,7 @@ function back() {
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: 999px;
 }

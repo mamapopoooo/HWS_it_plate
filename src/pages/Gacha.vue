@@ -293,7 +293,7 @@ function accentOf(tier: number): string {
   text-align: center;
   font-size: 12px;
   color: var(--ink-3);
-  background: rgba(255, 253, 246, 0.5);
+  background: rgba(251, 252, 250, 0.5);
   border: 1px dashed rgba(28, 28, 36, 0.2);
   border-radius: var(--r-md);
 }
@@ -367,7 +367,7 @@ function accentOf(tier: number): string {
   padding: 4px 10px;
   font-size: 12px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.7);
+  background: rgba(251, 252, 250, 0.7);
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: 999px;
 }

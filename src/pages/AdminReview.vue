@@ -301,7 +301,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   padding: 5px 12px;
   font-size: 12px;
   color: var(--ink-2);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: var(--r-sm);
   white-space: nowrap;
@@ -357,7 +357,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   gap: 10px;
   padding: 8px 10px;
   text-align: left;
-  background: rgba(255, 253, 246, 0.6);
+  background: rgba(251, 252, 250, 0.6);
   border: 1px solid rgba(28, 28, 36, 0.14);
   border-radius: var(--r-sm);
   cursor: pointer;
@@ -496,7 +496,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   gap: 8px;
   padding: 6px 10px;
   font-size: 12px;
-  background: rgba(255, 253, 246, 0.7);
+  background: rgba(251, 252, 250, 0.7);
   border: 1px solid rgba(28, 28, 36, 0.12);
   border-radius: var(--r-sm);
 }
@@ -568,7 +568,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.85);
+  background: rgba(251, 252, 250, 0.85);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: var(--r-sm);
   resize: vertical;
@@ -591,7 +591,7 @@ const STATUS_NAME: Record<ReviewStatus, string> = {
   font-size: 13px;
   border-radius: var(--r-sm);
   border: 1px solid rgba(28, 28, 36, 0.18);
-  background: rgba(255, 253, 246, 0.7);
+  background: rgba(251, 252, 250, 0.7);
   display: flex;
   gap: 10px;
   flex-wrap: wrap;

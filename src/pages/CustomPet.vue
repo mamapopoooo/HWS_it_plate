@@ -250,7 +250,7 @@ function back() {
   padding: 6px 12px;
   font-size: 12px;
   color: var(--ink-2);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: var(--r-sm);
   white-space: nowrap;
@@ -318,7 +318,7 @@ function back() {
   line-height: 1.6;
   text-align: center;
   color: var(--ink-3);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: var(--r-sm);
 }
@@ -380,7 +380,7 @@ function back() {
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.85);
+  background: rgba(251, 252, 250, 0.85);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: var(--r-sm);
 }

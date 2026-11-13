@@ -38,7 +38,7 @@ defineProps<{
   background: linear-gradient(180deg, var(--paper-light), var(--paper-2));
   border: 1px solid rgba(28, 28, 36, 0.3);
   border-radius: var(--r-sm);
-  box-shadow: inset 0 0 0 2px rgba(255, 253, 246, 0.8), 0 3px 10px rgba(28, 28, 36, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(251, 252, 250, 0.8), 0 3px 10px rgba(28, 28, 36, 0.14);
 }
 .plate__who {
   display: flex;

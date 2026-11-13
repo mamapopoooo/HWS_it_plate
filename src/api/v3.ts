@@ -1,4 +1,4 @@
-// 王宠课堂 v3 API 封装
+// 墨境课堂 v3 API 封装
 // 基础路径 /api/v3，支持 config 缓存和图片回落链
 
 import { API_ROOT, request as apiRequest } from './index'

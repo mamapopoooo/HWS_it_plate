@@ -318,7 +318,7 @@ function onSelect(pet: PetTemplate) {
 .col__body {
   flex: 1;
   padding: 16px 20px 24px;
-  background: linear-gradient(180deg, rgba(255, 253, 246, 0.5), transparent);
+  background: linear-gradient(180deg, rgba(251, 252, 250, 0.5), transparent);
   border-top: 1px solid rgba(28, 28, 36, 0.14);
 }
 .col__grid {

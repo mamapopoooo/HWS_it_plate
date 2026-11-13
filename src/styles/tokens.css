@@ -6,22 +6,22 @@
 
 :root {
   /* ---------- 宣纸与墨 ---------- */
-  --paper: #f2f2f2;
-  --paper-2: #e4e4e4;
-  --paper-3: #cfcfcf;
-  --paper-light: #fafafa;
-  --ink: #111111;
-  --ink-2: #3a3a3a;
-  --ink-3: #767676;
+  --paper: #f5f6f4;
+  --paper-2: #e8ece7;
+  --paper-3: #d5dad5;
+  --paper-light: #fbfcfa;
+  --ink: #202927;
+  --ink-2: #444f49;
+  --ink-3: #68716d;
 
-  /* ---------- 国风强调色 ---------- */
-  --cinnabar: #1f1f1f;
-  --cinnabar-d: #0d0d0d;
-  --gold: #8a8a8a;
-  --jade: #6b6b6b;
-  --gamboge: #9a9a9a;
-  --stone-blue: #454545;
-  --stone-green: #3d3d3d;
+  /* ---------- 水墨强调色：控件以青墨为主，错误以淡朱区分 ---------- */
+  --cinnabar: #293830;
+  --cinnabar-d: #202927;
+  --gold: #7c8275;
+  --jade: #53685b;
+  --gamboge: #797968;
+  --stone-blue: #465b56;
+  --stone-green: #384d46;
 
   /* ---------- 八卦八色（与 trigrams.json 一致） ---------- */
   --trigram-qian: #454545;
@@ -47,9 +47,9 @@
   --tier-5: #5b5b5b;
 
   /* ---------- 语义 ---------- */
-  --ok: #3d3d3d;
-  --warn: #9a9a9a;
-  --bad: #1f1f1f;
+  --ok: #384d46;
+  --warn: #776c50;
+  --bad: #87564e;
 
   /* ---------- 字体 ---------- */
   --font-title: 'KaiTi', 'STKaiti', 'Kaiti SC', 'Songti SC', 'SimSun', serif;

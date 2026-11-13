@@ -346,7 +346,7 @@ function back() {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.9);
+  background: rgba(251, 252, 250, 0.9);
   border: 1px solid rgba(28, 28, 36, 0.2);
   border-radius: var(--r-sm);
 }
@@ -355,7 +355,7 @@ function back() {
   font-family: var(--font-title);
   font-size: 12px;
   color: var(--ink-2);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: 999px;
   cursor: pointer;
@@ -375,7 +375,7 @@ function back() {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
-  background: rgba(255, 253, 246, 0.6);
+  background: rgba(251, 252, 250, 0.6);
   border: 1px solid rgba(28, 28, 36, 0.14);
 }
 .ca__table th,

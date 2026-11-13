@@ -379,7 +379,7 @@ function back() {
   padding: 5px 12px;
   font-size: 12px;
   color: var(--ink-2);
-  background: rgba(255, 253, 246, 0.75);
+  background: rgba(251, 252, 250, 0.75);
   border: 1px solid rgba(28, 28, 36, 0.18);
   border-radius: var(--r-sm);
   white-space: nowrap;
@@ -448,7 +448,7 @@ function back() {
   font-size: 13px;
   line-height: 1.7;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.9);
+  background: rgba(251, 252, 250, 0.9);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: var(--r-sm);
   resize: vertical;
@@ -490,7 +490,7 @@ function back() {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.92);
+  background: rgba(251, 252, 250, 0.92);
   border: 1px solid rgba(28, 28, 36, 0.24);
   border-radius: var(--r-sm);
 }
@@ -639,7 +639,7 @@ function back() {
   font-family: var(--font-num);
   font-size: 13px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.85);
+  background: rgba(251, 252, 250, 0.85);
   border: 1px solid rgba(28, 28, 36, 0.2);
   border-radius: var(--r-sm);
   cursor: pointer;

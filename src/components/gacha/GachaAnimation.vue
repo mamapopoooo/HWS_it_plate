@@ -232,7 +232,7 @@ function onKey(e: KeyboardEvent) {
   border-left: 6px solid #505050;
   border-right: 6px solid #505050;
   border-radius: 3px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(255, 253, 246, 0.8);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 2px rgba(251, 252, 250, 0.8);
 }
 .reveal__row {
   display: flex;
@@ -269,7 +269,7 @@ function onKey(e: KeyboardEvent) {
 .reveal__hint {
   margin: 0;
   font-size: 11px;
-  color: rgba(255, 253, 246, 0.7);
+  color: rgba(251, 252, 250, 0.7);
 }
 
 .gacha__skip {
@@ -279,8 +279,8 @@ function onKey(e: KeyboardEvent) {
   padding: 6px 14px;
   font-size: 12px;
   color: #f5f5f5;
-  background: rgba(255, 253, 246, 0.14);
-  border: 1px solid rgba(255, 253, 246, 0.3);
+  background: rgba(251, 252, 250, 0.14);
+  border: 1px solid rgba(251, 252, 250, 0.3);
   border-radius: 999px;
   cursor: pointer;
 }

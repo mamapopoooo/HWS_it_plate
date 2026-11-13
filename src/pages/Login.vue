@@ -53,9 +53,9 @@ async function submit() {
 
     <main class="login__card gw-scroll">
       <header class="login__head">
-        <div class="login__seal">王宠</div>
+        <div class="login__seal">墨境</div>
         <div>
-          <h1>王宠课堂</h1>
+          <h1>墨境课堂</h1>
           <p>山海异兽 · 五阶品阶 · 八卦斗法</p>
         </div>
       </header>
@@ -167,7 +167,7 @@ async function submit() {
   gap: 4px;
   padding: 3px;
   margin-bottom: 16px;
-  background: rgba(255, 253, 246, 0.8);
+  background: rgba(251, 252, 250, 0.8);
   border: 1px solid rgba(28, 28, 36, 0.16);
   border-radius: 999px;
 }
@@ -204,7 +204,7 @@ async function submit() {
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--ink);
-  background: rgba(255, 253, 246, 0.9);
+  background: rgba(251, 252, 250, 0.9);
   border: 1px solid rgba(28, 28, 36, 0.22);
   border-radius: var(--r-sm);
 }
