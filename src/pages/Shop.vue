@@ -1,25 +1,25 @@
 <script setup lang="ts">
 /**
  * 集市（商城，P4）
- * 商品与价格全部来自 seeds：shop.json 提供条目，价格经 priceKey 指向 economy.json。
- * 购买暂为本地占位，M2 接 POST /api/v2/shop/buy。
+ *
+ * 商品与展示价来自 seeds：shop.json + economy.json（仅作价目参考）。
+ * **成交尚未开通**：POST /api/v2/shop/buy 需要数据库里的 itemId，而配置里的 id 是内容 id，
+ * 两者尚未建立映射（Codex 2026-11-13 指令：不要猜 id）。因此本页只展示，不扣款、不假装成交。
  */
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { SHOP_CATEGORIES, SHOP_ITEMS, itemPrice } from '@/config/contentConfig'
-import { fetchWallet } from '@/api/adapter'
+import { fetchProfile, fetchWallet } from '@/api/adapter'
 
 const router = useRouter()
 
-const grade = ref(6)
+const grade = ref<6 | 7>(6)
 const wallet = ref(0)
 const activeCat = ref('utility')
 
-/** 已购买次数（限购用）；M2 由服务端返回 */
-const bought = reactive<Record<string, number>>({})
-
 onMounted(async () => {
-  const w = await fetchWallet()
+  const [profile, w] = await Promise.all([fetchProfile(), fetchWallet()])
+  grade.value = profile.grade
   wallet.value = w.points
 })
 
@@ -33,19 +33,22 @@ function priceOf(id: string): number {
 function leftOf(id: string): number | null {
   const item = SHOP_ITEMS.find((i) => i.id === id)
   if (!item?.limit) return null
-  return Math.max(0, item.limit - (bought[id] ?? 0))
+  return item.limit
 }
 
-function canBuy(id: string): boolean {
-  const left = leftOf(id)
-  return wallet.value >= priceOf(id) && (left === null || left > 0)
+function canAfford(id: string): boolean {
+  return wallet.value >= priceOf(id)
 }
 
-function buy(id: string) {
-  if (!canBuy(id)) return
-  wallet.value -= priceOf(id)
-  bought[id] = (bought[id] ?? 0) + 1
+/**
+ * 成交未开通：这里**故意不做任何钱包变更**。
+ * 之前版本会本地扣余额、让教师以为真的买到了，属于误导。
+ */
+function notOpen() {
+  notice.value = '集市成交尚未开通（等待后端 itemId 映射与下单接口），现在浏览价目不会扣灵石。'
 }
+
+const notice = ref('')
 
 function back() {
   void router.push('/lobby')
@@ -62,6 +65,8 @@ function back() {
       </div>
       <div class="sp__wallet">⛁ <b class="num">{{ wallet }}</b> 灵石</div>
     </header>
+
+    <p class="sp__notice">集市成交尚未开通：当前只展示价目，不会扣灵石；开通后按后端商品下单项价结算。</p>
 
     <nav class="sp__tabs">
       <button
@@ -89,8 +94,14 @@ function back() {
         <div class="goods__foot">
           <span v-if="leftOf(item.id) !== null" class="goods__limit num">限购 {{ leftOf(item.id) }}</span>
           <span v-else class="goods__limit">不限购</span>
-          <button class="gw-seal goods__buy" :disabled="!canBuy(item.id)" @click="buy(item.id)">
-            {{ leftOf(item.id) === 0 ? '已售罄' : wallet < priceOf(item.id) ? '灵石不足' : '购买' }}
+          <!-- 成交未开通：按钮常禁用，不给"点了就买到"的错觉 -->
+          <button
+            class="gw-seal goods__buy"
+            disabled
+            :title="canAfford(item.id) ? '成交尚未开通' : '灵石不足'"
+            @click="notOpen"
+          >
+            {{ canAfford(item.id) ? '未开通' : '灵石不足' }}
           </button>
         </div>
       </article>

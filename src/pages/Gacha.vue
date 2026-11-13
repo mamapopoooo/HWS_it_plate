@@ -1,62 +1,105 @@
 <script setup lang="ts">
 /**
- * 求签（抽卡）页面（P3）
+ * 求签（抽卡）页面
  *
- * 数据：概率、保底、价格全部来自配置（utils/gacha.ts → seeds）。
- * 持有与余额走 api/adapter；随机与记账先用本地实现（服务端 draw 接口就绪后切成服务端权威）。
+ * 服务端权威：结果与扣款由 `drawWithReceipt` 一次返回，页面**只展示回执**，
+ * 不本地随机、不预扣钱包、失败不回落、不自动重试（Codex 2026-11-13 指令）。
+ * 失败或超时会提示"待核对"——因为请求可能已在服务端生效。
  */
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import GachaAnimation from '@/components/gacha/GachaAnimation.vue'
-import { ECONOMY, getTier, tierName } from '@/config/gameConfig'
-import { drawMany, drawOnce, drawPrice, pityProgress, rateTable, type DrawResult, type DrawState } from '@/utils/gacha'
-import { fetchOwned, fetchWallet } from '@/api/adapter'
+import { ECONOMY, getPet, getTier, tierName, type PetTemplate } from '@/config/gameConfig'
+import { drawPrice, pityProgress, rateTable } from '@/utils/gacha'
+import { drawWithReceipt, fetchOwned, fetchProfile, fetchWallet } from '@/api/adapter'
 
 const router = useRouter()
 
-const grade = ref(6)
+/** 展示模型：服务端只回 tier/petId/isNew/fragments，名字与注音从宠物库取 */
+interface Shown {
+  pet: PetTemplate
+  tier: number
+  isNew: boolean
+  fragments: number
+}
+
+const grade = ref<6 | 7>(6)
 const wallet = ref(0)
 const fragments = ref(0)
-
-const state = reactive<DrawState>({
-  pulls: 0,
-  owned: new Set<string>(),
-})
+const pulls = ref(0)
+const owned = ref<Set<string>>(new Set())
+const busy = ref(false)
+const error = ref('')
+/** 请求未确认：可能已扣款/已发放，必须让用户去核对，不能当失败重试 */
+const pendingCheck = ref(false)
 
 onMounted(async () => {
-  const [owned, w] = await Promise.all([fetchOwned(), fetchWallet()])
-  state.owned = new Set(Object.keys(owned))
+  const [profile, ownedMap, w] = await Promise.all([fetchProfile(), fetchOwned(), fetchWallet()])
+  grade.value = profile.grade
+  owned.value = new Set(Object.keys(ownedMap))
   wallet.value = w.points
   fragments.value = w.shards
 })
 
-const results = ref<DrawResult[]>([])
-const playing = ref<DrawResult | null>(null)
+const results = ref<Shown[]>([])
+const playing = ref<Shown | null>(null)
 
 const prices = computed(() => ({
   single: drawPrice('single', grade.value),
   ten: drawPrice('ten', grade.value),
 }))
 
-const pity = computed(() => pityProgress(state.pulls))
+const pity = computed(() => pityProgress(pulls.value))
 const rates = computed(() => rateTable())
-const ownedCount = computed(() => state.owned.size)
+const ownedCount = computed(() => owned.value.size)
 
 /** 十连时把最高品阶的那只拿出来演出 */
-function bestOf(list: DrawResult[]): DrawResult {
+function bestOf(list: Shown[]): Shown {
   return list.reduce((best, item) => (item.tier > best.tier ? item : best), list[0])
 }
 
-function play(kind: 'single' | 'ten') {
+function toShown(rows: Array<{ tier: number; petId: string; isNew: boolean; fragments: number }>): Shown[] {
+  const out: Shown[] = []
+  for (const r of rows) {
+    const pet = getPet(r.petId)
+    if (!pet) continue // 服务端返回了库外 id，宁可少显示也不崩
+    out.push({ pet, tier: r.tier, isNew: r.isNew, fragments: r.fragments })
+  }
+  return out
+}
+
+async function play(kind: 'single' | 'ten') {
+  if (busy.value || playing.value) return
   const cost = kind === 'single' ? prices.value.single : prices.value.ten
-  if (wallet.value < cost || playing.value) return
+  if (wallet.value < cost) {
+    error.value = '灵石不足，去找老师加分吧'
+    return
+  }
 
-  wallet.value -= cost
-  const drawn = kind === 'single' ? [drawOnce(state)] : drawMany(state, 10)
-
-  results.value = drawn
-  fragments.value += drawn.reduce((sum, r) => sum + r.fragments, 0)
-  playing.value = bestOf(drawn)
+  busy.value = true
+  error.value = ''
+  pendingCheck.value = false
+  try {
+    const receipt = await drawWithReceipt(kind)
+    // 一切以回执为准：余额、累计抽数、结果
+    wallet.value = receipt.points
+    pulls.value = receipt.pulls
+    const shown = toShown(receipt.results)
+    if (shown.length === 0) {
+      pendingCheck.value = true
+      error.value = '回执里没有可识别的宠物，请到图鉴核对是否已发放'
+      return
+    }
+    results.value = shown
+    for (const r of shown) owned.value.add(r.pet.id)
+    playing.value = bestOf(shown)
+  } catch {
+    // 超时/网络错误：不重试、不本地回落
+    pendingCheck.value = true
+    error.value = '请求未确认：可能已扣款或已发放，请到「图鉴 / 封神榜」核对后再操作'
+  } finally {
+    busy.value = false
+  }
 }
 
 function onDone() {
@@ -98,19 +141,33 @@ function accentOf(tier: number): string {
         <b class="num">{{ pity.toTier3 }}</b>
         <i class="gk__bar gk__bar--gold"><em :style="{ width: (100 - (pity.toTier3 / ECONOMY.gacha.pityTier3) * 100) + '%' }" /></i>
       </div>
-      <div class="gk__pity-note">已抽 <b class="num">{{ state.pulls }}</b> 次 · 太极无保底（靠两仪活动）</div>
+      <div class="gk__pity-note">已抽 <b class="num">{{ pulls }}</b> 次 · 太极无保底（靠两仪活动）</div>
     </section>
 
     <!-- 主操作 -->
     <section class="gk__actions">
-      <button class="gw-seal gw-seal--primary gk__draw" :disabled="wallet < prices.single || !!playing" @click="play('single')">
-        单签<span class="gw-seal__hint">{{ prices.single }} 灵石</span>
+      <button
+        class="gw-seal gw-seal--primary gk__draw"
+        :disabled="busy || !!playing || wallet < prices.single"
+        @click="play('single')"
+      >
+        {{ busy ? '开签中…' : '单签' }}<span class="gw-seal__hint">{{ prices.single }} 灵石</span>
       </button>
-      <button class="gw-seal gk__draw" :disabled="wallet < prices.ten || !!playing" @click="play('ten')">
-        十连<span class="gw-seal__hint">{{ prices.ten }} 灵石 · 省 5</span>
+      <button
+        class="gw-seal gk__draw"
+        :disabled="busy || !!playing || wallet < prices.ten"
+        @click="play('ten')"
+      >
+        {{ busy ? '开签中…' : '十连' }}<span class="gw-seal__hint">{{ prices.ten }} 灵石 · 省 5</span>
       </button>
       <button class="gw-seal gk__draw" disabled>祈福（待开放）</button>
     </section>
+
+    <!-- 请求未确认 / 余额不足等提示：不重试、不回落，让用户去核对 -->
+    <p v-if="error" class="gk__err" :class="{ 'gk__err--pending': pendingCheck }">
+      {{ error }}
+      <span v-if="pendingCheck">（未自动重试，避免重复扣款）</span>
+    </p>
 
     <!-- 最近结果 -->
     <section class="gk__result">
@@ -288,13 +345,26 @@ function accentOf(tier: number): string {
   border-left: 3px solid var(--cinnabar);
   padding-left: 8px;
 }
+.gk__err {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #1f1f1f;
+  background: rgba(31, 31, 31, 0.06);
+  border-left: 3px solid #1f1f1f;
+  border-radius: var(--r-sm);
+}
+.gk__err--pending {
+  background: rgba(31, 31, 31, 0.1);
+  font-weight: 600;
+}
 .gk__empty {
   padding: 24px;
   text-align: center;
   font-size: 12px;
   color: var(--ink-3);
-  background: rgba(255, 253, 246, 0.5);
-  border: 1px dashed rgba(28, 28, 36, 0.2);
+  background: rgba(255, 253, 246, 0.5);  border: 1px dashed rgba(28, 28, 36, 0.2);
   border-radius: var(--r-md);
 }
 .gk__grid {
