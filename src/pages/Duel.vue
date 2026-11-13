@@ -274,7 +274,7 @@ function back() {
       <div class="result__card">
         <h2>{{ winner === 'player' ? '胜' : '败' }}</h2>
         <p>{{ winner === 'player' ? `${player.name} 站到了最后` : `${enemy.name} 赢了这一场` }}</p>
-        <p class="result__fine">共 {{ turn }} 回合 · 战斗逻辑与表现层已解耦，可换服务端权威结算</p>
+        <p class="result__fine">共 {{ turn }} 回合 · 本场为本地演练，暂不计入正式战绩或奖励。</p>
         <div class="result__ops">
           <button class="gw-seal gw-seal--primary" @click="restart">再来一局</button>
           <button class="gw-seal" @click="back">返回大厅</button>

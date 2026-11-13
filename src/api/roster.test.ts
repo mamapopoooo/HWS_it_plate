@@ -13,7 +13,7 @@ describe('名单请求与认证错误', () => {
     vi.stubGlobal('fetch', fetcher)
     const { fetchConfig } = await import('./v3')
     await fetchConfig()
-    expect(fetcher).toHaveBeenCalledWith('/pet-garden/api/v3/config', expect.anything())
+    expect(fetcher).toHaveBeenCalledWith('/api/v3/config', expect.anything())
   })
   it('旧axios单例在Pinia登录后读取最新token', async () => {
     localStorage.setItem('token', 'guest')
@@ -24,7 +24,7 @@ describe('名单请求与认证错误', () => {
     const adapter = vi.fn(async config => ({ data: {}, status: 200, statusText: 'OK', headers: {}, config }))
     api.defaults.adapter = adapter
     await api.get('/v2/trainer/me')
-    expect(adapter.mock.calls[0][0].baseURL).toBe('/pet-garden/api')
+    expect(adapter.mock.calls[0][0].baseURL).toBe('/api')
     expect(adapter.mock.calls[0][0].headers.Authorization).toBe('Bearer student-demo-token')
   })
   it('沿用部署基路径和Bearer认证', async () => {
@@ -33,7 +33,7 @@ describe('名单请求与认证错误', () => {
     vi.stubGlobal('fetch', fetcher)
     const roster = await import('./roster')
     await roster.fetchRosterStudents()
-    expect(fetcher).toHaveBeenCalledWith('/pet-garden/api/v3/roster/students', expect.objectContaining({
+    expect(fetcher).toHaveBeenCalledWith('/api/v3/roster/students', expect.objectContaining({
       headers: expect.objectContaining({ Authorization: 'Bearer demo-token' }),
     }))
   })

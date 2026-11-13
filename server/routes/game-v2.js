@@ -9,6 +9,12 @@ import { createStudentLogin, toPublicUser } from '../utils/studentLogin.js'
 
 const router = Router()
 
+// 本地演出不是权威战斗：明确拒绝结果记账，不能把客户端自报胜负计入战绩或奖励。
+router.post('/battle/pve/result', authMiddleware, (_req, res) => {
+  res.status(501).json({ success: false, code: 'AUTHORITATIVE_BATTLE_REQUIRED',
+    error: '本地斗法暂不计入正式战绩，需接入服务端权威结算' })
+})
+
 // ========== 认证接口 ==========
 
 // 学生登录：学号 + 姓名（中文名或英文名任一匹配），名单是唯一准入依据

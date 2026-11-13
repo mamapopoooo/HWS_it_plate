@@ -17,7 +17,7 @@ export default defineConfig({
       // 与生产 nginx 的 `location /api/` 保持一致：前端一律请求 /api/*，
       // 不再 rewrite 去前缀，避免 dev 能跑、生产 404 的前缀分裂。
       '/api': {
-        target: 'http://localhost:3002',
+        target: process.env.API_PROXY_TARGET || 'http://localhost:3002',
         changeOrigin: true
       }
     }

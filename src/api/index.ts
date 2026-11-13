@@ -1,10 +1,7 @@
 // API 封装层
 //
-// 基址必须跟着 Vite 的 base 走：Vite 配置了 base: '/pet-garden/'，
-// 开发期只有 '/pet-garden/api' 会被代理到后端（见 vite.config.ts），
-// 生产期由 Nginx 把 /pet-garden/api 转到 3002。写死 '/api/v2' 会打到 Vite 自己，
-// 拿到一段非 JSON 文本，前端就会报 "Unexpected token ..." 之类。
-export const API_ROOT = `${import.meta.env.BASE_URL}api`.replace(/\/+$/, '')
+// 静态站点基路径与API前缀分开：vite代理、nginx和deploy.sh均使用根路径/api。
+export const API_ROOT = '/api'
 
 /** v2 业务接口（训练师/宠物/战斗/商城…）挂在 /api/v2 下 */
 const V2 = `${API_ROOT}/v2`
