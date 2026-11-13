@@ -2,13 +2,26 @@
 
 维护者：Qoder。
 
-统一信息（下面五节共用）：
+统一信息（下面各节共用）：
 
 - 绝对工作区：`d:/课件/platform/pet-garden-qoder`
 - 分支：`dev-qoder-s2`（已推 `origin/dev-qoder-s2`）
 - 基线演进：`bbb030e`（Codex 首轮审核）→ `5ab3057`（第二轮：PET_GARDEN_DB + 导入契约类型）→ `ccf7d10`（第三轮：DSH 表头列存在性 + 只读身份盘点）
-- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）
+- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）→ `2c3dc6c`（本报告首轮）→ 本报告最后一节「待决定一览」为紧随其后的提交
 - 文件边界：只改 `server/routes/roster.js`、`server/game/import-roster.js`、`server/game/migrate-roster.js`、`server/roster.test.js`、`server/migrate-roster.test.js`、`scripts/check-mojibake.mjs`、`docs/handoffs/qoder-20261113-repro.mjs` 与本报告。`src/api/roster.ts`、`db.js`、认证与 game-v2 一律未动。
+
+## 待 Codex 决定事项一览（先看这页，细节在各节）
+
+| # | 事项 | 我的默认取舍 | 出处 | 需要谁 |
+|---|---|---|---|---|
+| D1 | `writeFields` 是否采纳「同值不写」：契约表格只说「键存在且有效 → writeFields」，我在其上加了与库里现值的比对 | 保留比对。否则重传同一张 252 人表会报「将更新 252 人」、`unchanged` 恒 0，并白白镜像一次 `users` | QD-02 | Codex 拍板；一句话即可回退 |
+| D2 | `unchanged` 是兼容追加字段，页面展示口径未定 | 后端已给出，页面不显示也不影响旧字段 | QD-02 | Codex + DSH |
+| D3 | 迁移不吞错后，**复核/建索引失败会阻塞启动**（服务起不来），而不再是静默降级 | 宁可启动失败也不让学号去重保护消失；重复学号必须先人工清理 | QD-04 | Codex 拍板，并决定生产迁移窗口（本轮未动生产） |
+| D4 | `server/routes/students.js:99` 与 `roster.js` 的 `purgeStudent()` 是两套删除语义，前者只删 `students` 行，留下 `users` 身份与 18 张游戏资产表 | 我把级联清单统一到共享模块即可，但需要越出我的文件边界 | QD-06 | Codex 授权 + 指派 |
+| D5 | `server/routes/classes.js:83-85` 删班删 `students` 却不清 `users`/`evaluation_records`/`badges`；重传时会被我的导入判成「已有登录身份但不在名单里」而 reject | 保守拒绝自动认领是对的，但要么补级联、要么给教师说明 | QD-06 | Codex |
+| D6 | 班级名自动建班无归一：Excel 里「七年级 1 班」「七年级1班」「七(1)班」会各成一个班；性别有 `students.gender`（教师）与 `characters.gender`（学生自选）两个来源 | 属数据治理与产品口径，不在我边界内 | QD-06 | Codex 定口径 |
+
+依赖状态更新：第二轮我请求 DSH 的前端改动（`cell()` 预填空值破坏列存在性）**已由 DSH 在 `87e9194` 完成，该依赖解除**，本批不再需要 DSH 配合；`8077f3f` 的「旧后端无完整 rowPlans 时暂停导入」保护，现在后端已输出完整 rowPlans，自然放行，我没有改动前端去绕过它。
 
 ## QD-01 / 名单查询派生字段与登录态 / 2026-11-13
 
