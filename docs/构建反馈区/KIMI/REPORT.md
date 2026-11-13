@@ -134,3 +134,22 @@
 - 产物自检：`node scripts/verify-build.mjs` → 通过；88 个产物，首屏 JS 112.0KB，懒加载 JS 6057.9KB，CSS 220.1KB，页面分包 16/16。
 - 未验证项：未做真实浏览器 UI 验收；权威斗法新接口和 priceFor 公共补丁均尚未实施，因此没有对应新功能测试；未做跨进程战斗、生产数据库或真实名单验证；未部署、未开启积分同步。构建仍有 browserslist、`lobby.jpg` 运行时解析、大 chunk 与 CSS 偏大告警。
 
+## KM-05 / 共享斗法规则核心提取与双端回归 / 2026-11-13
+
+- 状态：共享核心已实现，待 Codex 审核与接续；生产冻结。本批只完成规则提取和回归，**不代表 `/duel` 服务端权威斗法闭环已完成**。
+- 绝对工作区 / 分支：`D:/课件/platform/pet-garden-kimi` / `dev-kimi`。
+- 原实施基线：`03ae4b4c26ba22b6ca142fe848f0cbdca461ccb8`；交付前按第六轮指令合并 `origin/dev-codex-integration-20261113@6cba9a859e9f68f813e7c7d0d7cb6599df9d3bf4`，合并提交为 `eb05f695052752e0b0305652158ee8e1fb3feda8`。
+- 核心补丁提交：`1f7197d77b29d4771beb08d22df0d28a4d786faa`（`feat(battle): 提取可注入配置的共享斗法核心`）。本报告与交接单随后续文档提交推送，文档提交完整 SHA 在最终推送回执中给出。
+- 问题与影响：原公式位于带 `@` alias 的浏览器 TS 模块，Node 不能直接加载；若服务端另写公式会形成第二套伤害、冷却和胜负规则。期望浏览器与 Node 共用同一无副作用核心，配置和 RNG 均由调用方注入，同时保持现有浏览器 API 和规则行为。
+- 实现：新增 `src/utils/duel-core.js`，无 import，导出 `statsOf/createFighter/coefAgainst/resolveSkill/endTurn/pickEnemySkill/winnerOf`；新增同模块 `.d.ts` 声明配置、战斗单位、技能、事件和函数签名。`src/utils/duel.ts` 改为浏览器适配层，注入 `TIERS/TRIGRAMS/PETS/ECONOMY/SKILL_EFFECTS` 并保留旧导出，未修改 `Duel.vue`。
+- 固定 RNG 回归：新增 `src/utils/duel-core.test.js` 7 条，直接加载真实 seeds；覆盖属性与技能推导、对宫系数、命中/暴击、护盾先于伤害及 KO 事件顺序、玩家与 AI 胜方、冷却与 AI 技能过滤、护盾/增益持续回合，以及核心与浏览器适配的深比较。双端对照覆盖普通攻击、对宫、灼烧现状、AOE 冷却、护盾、增益、胜负和事件顺序，不再只比较 `damage_single`。
+- DOT 事实边界：`docs/seeds/skill_effects.json` 的灼烧描述包含 2 回合持续伤害，但原 `duel.ts` 与提取后的核心都只有 70% 单次伤害，没有 burn 状态、DOT 跳伤或回合事件。本批按“保持现有行为”只用测试固定该现状，**未实现 DOT，也未把灼烧测试伪称为持续伤害已通过**；是否补齐属于另立行为变更任务。
+- TDD 红灯：首次运行 `node node_modules/vitest/vitest.mjs run src/utils/duel-core.test.js`，因 `./duel-core.js` 尚不存在而解析失败、0 条测试，确认失败原因后才添加核心实现。实现后定向运行 `node node_modules/vitest/vitest.mjs run src/utils/duel-core.test.js src/utils/duel.test.ts` → **2 文件 / 24 条全部通过**；原浏览器 17 条回归未改且通过。
+- 合并后全量：`node node_modules/vitest/vitest.mjs run` → **26 文件 / 341 条全部通过**，其中 `duel-core.test.js` 7/7、`duel.test.ts` 17/17、`server/battle-record.test.js` 7/7。
+- Node 无 alias 直连：以真实 seeds 创建双方并注入 `() => 0.5`，直接 `import './src/utils/duel-core.js'` 成功，返回 `{"nodeDirect":true,"events":[{"side":"player","kind":"hit","value":28,"message":"白虎·监兵 用单体伤害造成 28 点伤害"}],"targetHp":167}`。
+- 类型检查：`node node_modules/vue-tsc/bin/vue-tsc.js --noEmit` → 通过，0 输出、0 错误。
+- 构建：`node node_modules/vite/bin/vite.js build` → 通过，1514 个模块完成转换。
+- 产物自检：`node scripts/verify-build.mjs` → 通过；88 个产物，首屏 JS 112.0KB，懒加载 JS 6060.8KB，CSS 220.5KB，页面分包 16/16。构建仍有 browserslist 数据旧、`lobby.jpg` 运行时解析、大 chunk 与 CSS 偏大告警，未在本批顺手修改；产物自检通过不等于允许部署。
+- KIMI 自产修改范围：`src/utils/duel-core.js`、`.d.ts`、测试、`src/utils/duel.ts`、本报告与交接单。合并带入的其他 Agent 文件不属于 KIMI 补丁；未修改 `server/routes/game-v2.js`、`game-v3.js`、前端 API、`Duel.vue`、迁移文件或迁移版本 11，未重复提交已收口价格补丁。
+- 未验证与待 Codex 接续：权威 start/action/state、actionId 重放、唯一落库、固定 AI 服务端配置和页面接入仍未实施；`/api/v2/battle/pve/result` 继续保持 501，第一阶段不发奖励。重启/多进程恢复及持久 actionId 幂等未解决。未做真实浏览器 UI 验收、生产或现有数据库盘点、真实名单验证；未部署、未开启积分同步。
+
