@@ -71,17 +71,23 @@ export function drawMany(
 }
 
 /** 单抽或十连价格，按年级系数取整且至少为 1。 */
+export function priceFor(base, grade, economy = ECONOMY) {
+  const coefficient = economy.gradeCoef[String(grade)] ?? 1
+  if (!Number.isFinite(base) || base < 0 || !Number.isFinite(coefficient) || coefficient <= 0) {
+    throw new Error('价格配置无效')
+  }
+  return base === 0 ? 0 : Math.max(1, Math.round(base * coefficient))
+}
+
 export function drawPrice(kind, grade, economy = ECONOMY) {
   const base = kind === 'single' ? economy.gacha.single : economy.gacha.ten
-  const coefficient = economy.gradeCoef[String(grade)] ?? 1
-  return Math.max(1, Math.round(base * coefficient))
+  return priceFor(base, grade, economy)
 }
 
 /** 计算觉醒的碎片抵扣与仍需支付的积分。 */
 export function awakeningPayment(tier, grade, fragments, economy = ECONOMY) {
   const base = economy.awaken[`tier${tier}`]
-  const coefficient = economy.gradeCoef[String(grade)] ?? 1
-  const price = Math.max(1, Math.round(base * coefficient))
+  const price = priceFor(base, grade, economy)
   const fragmentLimit = Math.floor(price * economy.fragment.payRatio)
   const fragmentCost = Math.min(fragmentLimit, Math.max(0, fragments))
 

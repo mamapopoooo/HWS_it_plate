@@ -34,6 +34,7 @@ import type {
   CustomPetSubmission,
   EvaluationRow,
   GachaDrawn,
+  GachaReceipt,
   Gender,
   ImportRow,
   Opponent,
@@ -296,26 +297,31 @@ export async function reviewSubmission(id: string, action: 'approve' | 'reject',
   )
 }
 
-/* ---------------- 求签（服务端权威前先用本地） ---------------- */
+/* ---------------- 求签：仅接受服务端已提交回执 ---------------- */
 
-export async function drawOnServer(kind: 'single' | 'ten'): Promise<GachaDrawn[] | null> {
-  try {
-    const res = await api.post('/v2/gacha/draw', { kind }, { timeout: TIMEOUT })
-    const rows = asArray(asRecord(res.data)?.results)
-    if (!rows) return null
-    return rows.map((raw) => {
-      const r = asRecord(raw) ?? {}
-      return {
-        tier: num(r.tier, 1),
-        petId: str(r.pet_id),
-        isNew: Boolean(r.is_new),
-        fragments: num(r.fragments),
-      }
-    })
-  } catch (err) {
-    console.warn('[adapter] POST /v2/gacha/draw 失败，改用本地求签：', err)
-    return null
+export async function drawWithReceipt(kind: 'single' | 'ten'): Promise<GachaReceipt> {
+  // 写请求不做本地回落或自动重试；超时后需刷新核对已提交结果。
+  const res = await api.post('/v2/gacha/draw', { kind }, { timeout: 10000 })
+  const data = asRecord(res.data)
+  const rows = asArray(data?.results)
+  const validInteger = (value: unknown) => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+  if (!data || !rows || rows.length !== (kind === 'ten' ? 10 : 1) ||
+      ![data.newPoints, data.pityCount, data.cost].every(validInteger)) {
+    throw new Error('求签回执不完整，请刷新核对结果，不要重复提交')
   }
+  const results = rows.map(raw => {
+    const row = asRecord(raw)
+    if (!row || typeof row.pet_id !== 'string' || !row.pet_id || typeof row.is_new !== 'boolean' ||
+        !validInteger(row.tier) || Number(row.tier) < 1 || !validInteger(row.fragments)) {
+      throw new Error('求签结果格式错误，请刷新核对结果，不要重复提交')
+    }
+    return { tier: Number(row.tier), petId: row.pet_id, isNew: row.is_new, fragments: Number(row.fragments) }
+  })
+  return { results, points: Number(data.newPoints), pulls: Number(data.pityCount), cost: Number(data.cost) }
+}
+
+export async function drawOnServer(kind: 'single' | 'ten'): Promise<GachaDrawn[]> {
+  return (await drawWithReceipt(kind)).results
 }
 
 /* ---------------- 斗法：匹配与结算 ---------------- */
