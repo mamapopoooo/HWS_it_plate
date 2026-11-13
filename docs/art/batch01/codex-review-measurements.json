@@ -1,0 +1,77 @@
+{
+  "source_ref": "dev-gpt-art@ccec38d",
+  "status": "candidate_only",
+  "formal_art_missing": 108,
+  "files": [
+    {
+      "file": "public/art-review/20261113/base_f-plain.png",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ],
+      "bytes": 1569053,
+      "sha256": "9cbc1e8fea151845377e20c5a084c478284d79fb18e02bd661ab7d6b4f066241"
+    },
+    {
+      "file": "public/art-review/20261113/base_m-plain.png",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ],
+      "bytes": 1620170,
+      "sha256": "e089cbb35cc72b67e774ef9bceecf726c2d78bbb0a9a4d8bd3968260211d5c9a"
+    },
+    {
+      "file": "public/art-review/20261113/outfit_f.png",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ],
+      "bytes": 1610421,
+      "sha256": "68fa994a38f05c188ba65e0cd178188ac677737c27648ed72c260350d1d9c042"
+    },
+    {
+      "file": "public/art-review/20261113/outfit_m.png",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        254
+      ],
+      "bytes": 1697130,
+      "sha256": "dc49b6df31a71595216b9c07f3a7f1cc071b216140d6d08820508b2ee60e68af"
+    },
+    {
+      "file": "public/art-review/20261113/qinglong-form1.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "bytes": 1378404,
+      "sha256": "4a1ba7f44f6d9d0b6b1fcfdeeef216c85c80d1a28ef6b85916c1cb9d2b73fa44"
+    }
+  ]
+}

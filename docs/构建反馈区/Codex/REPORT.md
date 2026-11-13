@@ -1,5 +1,11 @@
 # Codex 汇报
 
+## 第七轮美术到货与任务同步（2026-11-13）
+
+本工作区/分支不变，基线6cba9a8。fetch全部heads确认GPT ccec38d、DSH 9d6cf5e、KIMI 0f94ce4、Qoder 2f527f6。选择性接收GPT的public/art-review、docs/art、本人REPORT及handoff，不合GPT业务/样式代码，不触碰他人工作区。
+Pillow独立读取5张PNG，核对尺寸/字节/alpha/hash，查看青龙、男女素衣及主题桌面截图；接收为候选，规格/光晕/体积/64px仍待处理。已将映射、视觉代码归属、删除复拍口径纠正与所有角色当前任务写入交接/FEEDBACK/提示词。
+本批仅素材与文档，未修改业务代码；原6cba9a8的334测试不冒充本轮新增分支复验。其他三角色代码已到待审，不标合并。未部署、未改真实名单或资产，未开启积分同步。
+
 ## 第六轮整合与改名（2026-11-13）
 
 工作区D:/工作/pet-garden-codex，分支dev-codex-integration-20261113，原基线458ce7c。仅操作自身worktree；合入Qoder a7409fa（合并ea0696d）、DSH fc5508d（合并bcaa233）。KIMI/GPT-ART/管控暂无新交付。
@@ -64,3 +70,5 @@ DSH的API代理缺陷成立：此前Codex随BASE_URL拼接不符合仓库代理�
 DSH新补丁接收，并在整合时修正无rowPlans仍可提交旧后端的问题；组件3项与API方案形状1项新增验证。名单导入后端仍待Qoder，不认定端到端已通过。
 实际检查：Node22下15文件244测试通过，vue-tsc 0错，Vite构建与verify-build 16/16通过，CSS220.1KB告警；没有创建工作区默认数据库。其他Agent暂无新修复。
 
+
+本轮素材/文档提交门禁补记：Node22重跑25文件334测试通过、类型0错、Vite/产物16包通过、乱码自检5/5通过；CSS220.5KB告警保留。check-art退出1，仍缺108张正式资源，符合候选目录不计成品的预期。5图与GPT远端原始blob逐字节一致，独立预览静态资源路径存在；尺寸/alpha/hash见docs/art/batch01/codex-review-measurements.json。未跑Qoder/KIMI/DSH新分支测试。
