@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'
 import { authMiddleware } from '../middleware/auth.js'
 import { calculateLevel } from '../utils/level.js'
+import { studentRefs, studentDeletable, studentBlockReason } from '../utils/rosterRefs.js'
 
 const router = Router()
 
@@ -80,7 +81,19 @@ router.put('/:id', authMiddleware, (req, res) => {
     return res.status(404).json({ error: '学生不存在或无权访问' })
   }
 
-  db.prepare('UPDATE students SET name = ?, student_no = ? WHERE id = ?').run(name, studentNo || null, req.params.id)
+  // 没带的键保留原值（undefined 直接绑给 better-sqlite3 会抛异常崩成 500）
+  const nextName = name === undefined ? student.name : String(name).trim()
+  if (!nextName) return res.status(400).json({ error: '中文名不能为空' })
+  // 学号就是登录名：这个旧入口只写 students，不动 users.username，
+  // 一改学号就把身份和档案掰开，学生下次用新学号直接进不来。改名可以，改学号不行。
+  const nextNo = studentNo === undefined ? student.student_no : String(studentNo).trim() || null
+  if (nextNo !== (student.student_no || null)) {
+    return res.status(409).json({
+      error: '旧接口不能改学号（学号即登录名，改了就和学生账号脱钩），请到教师端「名单管理」修改'
+    })
+  }
+
+  db.prepare('UPDATE students SET name = ?, student_no = ? WHERE id = ?').run(nextName, nextNo, req.params.id)
   res.json({ success: true })
 })
 
@@ -93,10 +106,24 @@ router.delete('/:id', authMiddleware, (req, res) => {
     return res.status(404).json({ error: '学生不存在或无权访问' })
   }
 
-  // 先删除相关的评价记录
-  db.prepare('DELETE FROM evaluation_records WHERE student_id = ?').run(req.params.id)
-  // 再删除学生
-  db.prepare('DELETE FROM students WHERE id = ?').run(req.params.id)
+  // 没开外键，所以旧入口直接删主行会把登录身份和游戏资产留成孤儿。
+  // 库里没有 foreign_keys 兜底，这一层检查就是唯一的闸。
+  const refs = studentRefs(student.student_no)
+  if (!studentDeletable(refs)) {
+    const reason = studentBlockReason(refs)
+    return res.status(409).json({
+      error: reason
+        ? `该学号还有${reason}，旧接口不删以免留下孤儿账号；请到教师端「名单管理」删除（带确认并同事务清理）`
+        : '无法核对该学号的登录身份表，旧接口不删；请先完成数据库迁移',
+      refs
+    })
+  }
+
+  db.transaction(() => {
+    db.prepare('DELETE FROM evaluation_records WHERE student_id = ?').run(req.params.id)
+    db.prepare('DELETE FROM badges WHERE student_id = ?').run(req.params.id)
+    db.prepare('DELETE FROM students WHERE id = ?').run(req.params.id)
+  })()
   res.json({ success: true })
 })
 
