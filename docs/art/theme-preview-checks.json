@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Original video loaded and playing",
+    "ok": true,
+    "detail": {
+      "readyState": 4,
+      "paused": false,
+      "currentTime": 1.9012,
+      "loop": true,
+      "muted": true,
+      "source": "file:///D:/%E5%B7%A5%E4%BD%9C/pet-garden-gpt-art/public/backgrounds/lobby.mp4"
+    }
+  },
+  {
+    "name": "Video time advances",
+    "ok": true
+  },
+  {
+    "name": "Pause button",
+    "ok": true
+  },
+  {
+    "name": "Collection navigation and filter",
+    "ok": true
+  },
+  {
+    "name": "Teacher preview stays local",
+    "ok": true
+  },
+  {
+    "name": "Login preview stays local",
+    "ok": true
+  },
+  {
+    "name": "Mobile no horizontal overflow",
+    "ok": true,
+    "detail": {
+      "scroll": 390,
+      "viewport": 390
+    }
+  }
+]
