@@ -125,7 +125,7 @@ describe('QD-02 按列存在性导入', () => {
       body: { rows: [{ studentNo: '990000003', name: '示例丙' }] }
     })
     expect(status).toBe(200)
-    expect(data.rejected).toEqual([{ index: 0, studentNo: '990000003', reason: '新增学生必须有班级' }])
+    expect(data.rejected).toEqual([{ studentNo: '990000003', reason: '新增学生必须有班级' }])
     expect(student('990000003')).toBeUndefined()
     expect(db.prepare("SELECT COUNT(*) AS n FROM students WHERE class_id = '' OR class_id IS NULL").get().n).toBe(0)
   })
@@ -199,6 +199,116 @@ describe('QD-02 按列存在性导入', () => {
     expect(second.data).toMatchObject({ created: 0, updated: 0, unchanged: 2 })
     expect(db.prepare('SELECT COUNT(*) AS n FROM students').get().n).toBe(2)
   })
+
+  // 契约 docs/名单导入契约-Codex-20261113.md：action 只有 create/update/reject，
+  // writeFields/skipFields 只用五个字段 code，warnings/errors 是中文句子且不泄露别人资料。
+  it('rowPlans 逐行给出写/跳/警/错，且与提交时的计划一致', async () => {
+    const rows = [
+      { studentNo: '990000001', name: '示例甲', nameEn: 'Demo A' },
+      { studentNo: '990000002', name: '示例乙', nameEn: '', gender: '', class: '', course: '' },
+      { studentNo: '990000003', name: '示例丙', class: '甲班' },
+      { studentNo: '990000003', name: '示例丙', class: '七年级B班' }
+    ]
+    const expectPlans = [
+      {
+        studentNo: '990000001', action: 'update', writeFields: ['nameEn'],
+        skipFields: ['name', 'gender', 'class', 'course'], warnings: [], errors: []
+      },
+      {
+        studentNo: '990000002', action: 'update', writeFields: [],
+        skipFields: ['name', 'nameEn', 'gender', 'class', 'course'],
+        warnings: [
+          '英文名列为空，本次保留原值', '性别列为空，本次保留原值',
+          '班级列为空，本次保留原值', '课程列为空，本次保留原值',
+          '本次没有需要更新的列，档案保持原样'
+        ],
+        errors: []
+      },
+      {
+        studentNo: '990000003', action: 'reject', writeFields: [], skipFields: [], warnings: [],
+        errors: ['同一份表格里这个学号出现多次，请合并成一行后重传']
+      },
+      {
+        studentNo: '990000003', action: 'reject', writeFields: [], skipFields: [], warnings: [],
+        errors: ['同一份表格里这个学号出现多次，请合并成一行后重传']
+      }
+    ]
+    const preview = await call('/import', { body: { rows, dryRun: true } })
+    expect(preview.data.rowPlans).toEqual(expectPlans)
+    expect(preview.data.rejected).toEqual([
+      { studentNo: '990000003', reason: '同一份表格里这个学号出现多次，请合并成一行后重传' },
+      { studentNo: '990000003', reason: '同一份表格里这个学号出现多次，请合并成一行后重传' }
+    ])
+
+    const commit = await call('/import', { body: { rows } })
+    expect(commit.data.rowPlans).toEqual(expectPlans)
+    expect(commit.data).toMatchObject({
+      created: preview.data.wouldCreate,
+      updated: preview.data.wouldUpdate,
+      unchanged: preview.data.unchanged
+    })
+  })
+
+  it('同批重复学号两行都拒绝，后行不覆盖前行', async () => {
+    const rows = [
+      { studentNo: '990000001', name: '示例甲', nameEn: 'First' },
+      { studentNo: '990000001', name: '示例甲', nameEn: 'Second' }
+    ]
+    const { data } = await call('/import', { body: { rows } })
+    expect(data).toMatchObject({ created: 0, updated: 0 })
+    expect(data.rejected.every(r => r.reason.includes('出现多次'))).toBe(true)
+    expect(student('990000001').name_en).toBe('Demo One')
+    expect(identity('990000001').game_points).toBe(1234)
+  })
+
+  it('已有学生的姓名单元格空白是跳过并警告，不是拒绝也不是清空', async () => {
+    const { data } = await call('/import', {
+      body: { rows: [{ studentNo: '990000001', name: '   ', nameEn: 'Demo A' }] }
+    })
+    expect(data.rejected).toEqual([])
+    expect(data.updated).toBe(1)
+    expect(student('990000001')).toMatchObject({ name: '示例甲', name_en: 'Demo A' })
+    expect(data.rowPlans[0].skipFields).toContain('name')
+    expect(data.rowPlans[0].warnings).toContain('中文名列为空，本次保留原值')
+  })
+
+  it('新增学生的班级和课程都推不出年级时拒绝，宁可让教师补全也不猜', async () => {
+    const { data } = await call('/import', {
+      body: { rows: [{ studentNo: '990000007', name: '示例庚', class: '甲班' }] }
+    })
+    expect(data.rejected[0].reason).toContain('无法从班级或课程确定年级')
+    expect(student('990000007')).toBeUndefined()
+  })
+
+  it('库里 grade=0 的脏数据在下次导入时被校正，users 同步', async () => {
+    db.prepare('UPDATE students SET grade = 0, course = ? WHERE id = ?').run('', 's-2')
+    const { data } = await call('/import', { body: { rows: [{ studentNo: '990000002', name: '示例乙' }] } })
+    expect(data.updated).toBe(1)
+    expect(student('990000002').grade).toBe(6)
+    expect(identity('990000002').grade).toBe(6)
+    expect(data.rowPlans[0].warnings).toContain('年级按班级或课程校正为 6 年级')
+  })
+
+  it('数据库意外失败整批回滚，绝不把未提交行计成成功', async () => {
+    db.exec(`CREATE TRIGGER boom BEFORE INSERT ON students
+      WHEN NEW.student_no = '990000004' BEGIN SELECT RAISE(ABORT, '模拟数据库故障'); END;`)
+    try {
+      const rows = [
+        { studentNo: '990000001', name: '示例甲', nameEn: 'Demo Z' },
+        { studentNo: '990000003', name: '示例丙', class: '八年级C班' },
+        { studentNo: '990000004', name: '示例丁', class: '八年级C班' }
+      ]
+      const preview = await call('/import', { body: { rows, dryRun: true } })
+      expect(preview.data).toMatchObject({ wouldCreate: 2, wouldUpdate: 1 })
+      const { status } = await call('/import', { body: { rows } })
+      expect(status).toBe(500)
+      expect(student('990000001').name_en).toBe('Demo One')
+      expect(student('990000003')).toBeUndefined()
+      expect(student('990000004')).toBeUndefined()
+      expect(db.prepare('SELECT COUNT(*) AS n FROM classes').get().n).toBe(3)
+      expect(db.prepare('SELECT COUNT(*) AS n FROM students').get().n).toBe(2)
+    } finally { db.exec('DROP TRIGGER boom') }
+  })
 })
 
 describe('QD-03 转班与年级同步', () => {
@@ -250,5 +360,26 @@ describe('QD-03 转班与年级同步', () => {
     expect(status).toBe(200)
     expect(student('990000010').grade).toBeNull()
     expect(identity('990000010').grade).toBeNull()
+  })
+})
+
+// Codex 决定本轮不全局开启 foreign_keys，所以这里锁住「关系断了也不丢人」的底线，
+// 并把 classes.js 删班不清 students 这个孤儿来源写进反馈区等收口。
+describe('孤儿关联兜底', () => {
+  it('班级被别处删掉后名单仍列出该生，班级名为空而不是整行消失', async () => {
+    db.prepare('DELETE FROM classes WHERE id = ?').run('class-a')
+    const { status, data } = await call('/students')
+    expect(status).toBe(200)
+    expect(data.total).toBe(2)
+    expect(data.students).toHaveLength(2)
+    expect(data.students.every((s) => s.className === '')).toBe(true)
+    expect(data.students.find((s) => s.studentNo === '990000001').gamePoints).toBe(1234)
+  })
+
+  it('库里 grade 为 NULL 的学生照旧列出，教师端不会把人筛丢', async () => {
+    db.prepare('UPDATE students SET grade = NULL WHERE id = ?').run('s-2')
+    const { data } = await call('/students')
+    expect(data.students).toHaveLength(2)
+    expect(data.students.find((s) => s.studentNo === '990000002').grade).toBeNull()
   })
 })

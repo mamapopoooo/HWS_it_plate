@@ -332,6 +332,7 @@ router.post('/import', (req, res) => {
       unchanged: plan.unchanged,
       invalid: plan.rejected.length,
       rejected: plan.rejected,
+      rowPlans: plan.rowPlans,
       garbled: badRows,
       existingNos: plan.existingNos
     })

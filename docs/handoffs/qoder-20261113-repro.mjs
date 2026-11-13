@@ -1,8 +1,10 @@
 // 名单缺陷复现脚本：IN-03 / IN-04 / IN-05 / IN-06（Codex 整合方案 2026-11-13）
 //
 // 隔离方式（对应方案 §8 的硬要求）：
-//   把整棵 server/ 复制到运行期沙箱目录，**排除 *.db**，所以副本里的 db.js
+//   把整棵 server/ 复制到运行期沙箱目录，**排除 *.db / *.db-wal / *.db-shm**，所以副本里的 db.js
 //   打开的是沙箱内一个全新的空库 —— 既不碰真实数据库，也不碰冻结源码。
+//   目录名由 mkdtemp 分配，不复用固定路径，因此不会删掉别人正在用的沙箱；
+//   并且断言沙箱始终落在仓库根目录内，扩展配置不可能把库指到仓库外。
 //   端口用 listen(0) 随机分配，进程退出即回收，不占用他人端口。
 //
 // 用法：node docs/handoffs/qoder-20261113-repro.mjs
@@ -18,12 +20,19 @@ const REPO = path.resolve(import.meta.dirname, '..', '..')
 const sandboxes = []
 const handles = []
 
+// WAL 模式的副产物必须一起排除：只排 .db 的话，真库的 -wal 会被复制进沙箱，
+// 副本打开新库后再合并这个 wal，等于把生产数据悄悄读进复现环境。
+const DB_ARTIFACT = /\.(db|db-wal|db-shm)$/
+
 function sandbox(tag) {
-  const dir = path.join(REPO, `.repro-${tag}-${process.pid}`)
-  fs.rmSync(dir, { recursive: true, force: true })
+  const root = fs.mkdtempSync(path.join(REPO, `.repro-${tag}-`))
+  const dir = fs.realpathSync(root)
+  if (!dir.startsWith(fs.realpathSync(REPO) + path.sep)) {
+    throw new Error(`沙箱越出仓库目录：${dir}`)
+  }
   fs.cpSync(path.join(REPO, 'server'), path.join(dir, 'server'), {
     recursive: true,
-    filter: (p) => !p.endsWith('.db')
+    filter: (p) => !DB_ARTIFACT.test(p)
   })
   sandboxes.push(dir)
   return { dir, load: (rel) => import(pathToFileURL(path.join(dir, 'server', rel)).href) }
