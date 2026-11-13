@@ -1,8 +1,10 @@
 // 名单缺陷复现脚本：IN-03 / IN-04 / IN-05 / IN-06（Codex 整合方案 2026-11-13）
 //
 // 隔离方式（对应方案 §8 的硬要求）：
-//   把整棵 server/ 复制到运行期沙箱目录，**排除 *.db**，所以副本里的 db.js
+//   把整棵 server/ 复制到运行期沙箱目录，**排除 *.db / *.db-wal / *.db-shm**，所以副本里的 db.js
 //   打开的是沙箱内一个全新的空库 —— 既不碰真实数据库，也不碰冻结源码。
+//   目录名由 mkdtemp 分配，不复用固定路径，因此不会删掉别人正在用的沙箱；
+//   并且断言沙箱始终落在仓库根目录内，扩展配置不可能把库指到仓库外。
 //   端口用 listen(0) 随机分配，进程退出即回收，不占用他人端口。
 //
 // 用法：node docs/handoffs/qoder-20261113-repro.mjs
@@ -18,12 +20,19 @@ const REPO = path.resolve(import.meta.dirname, '..', '..')
 const sandboxes = []
 const handles = []
 
+// WAL 模式的副产物必须一起排除：只排 .db 的话，真库的 -wal 会被复制进沙箱，
+// 副本打开新库后再合并这个 wal，等于把生产数据悄悄读进复现环境。
+const DB_ARTIFACT = /\.(db|db-wal|db-shm)$/
+
 function sandbox(tag) {
-  const dir = path.join(REPO, `.repro-${tag}-${process.pid}`)
-  fs.rmSync(dir, { recursive: true, force: true })
+  const root = fs.mkdtempSync(path.join(REPO, `.repro-${tag}-`))
+  const dir = fs.realpathSync(root)
+  if (!dir.startsWith(fs.realpathSync(REPO) + path.sep)) {
+    throw new Error(`沙箱越出仓库目录：${dir}`)
+  }
   fs.cpSync(path.join(REPO, 'server'), path.join(dir, 'server'), {
     recursive: true,
-    filter: (p) => !p.endsWith('.db')
+    filter: (p) => !DB_ARTIFACT.test(p)
   })
   sandboxes.push(dir)
   return { dir, load: (rel) => import(pathToFileURL(path.join(dir, 'server', rel)).href) }
@@ -181,7 +190,12 @@ server.close()
   const b = bMod.db
   handles.push(b)
   const { migrateRoster: mRoster } = await B.load('game/migrate-roster.js')
+  const { migrateV2: v2B } = await B.load('game/migrate-v2.js')
+  const { migrateV3: v3B } = await B.load('game/migrate-v3.js')
+  // 与生产启动同序：名单迁移的索引依赖 v2/v3 先建好 users.class_id_ref
   bMod.initDb()
+  v2B()
+  v3B()
 
   // v1 建表语句里 student_no 没有表级 UNIQUE，所以重复学号能插进来
   b.prepare('INSERT INTO classes (id, user_id, name, created_at, updated_at) VALUES (?, NULL, ?, ?, ?)')
@@ -191,7 +205,12 @@ server.close()
       .run(id, 'c-dup', name, '900002', NOW)
   }
 
-  mRoster()
+  let migError = ''
+  try {
+    mRoster()
+  } catch (e) {
+    migError = e.message
+  }
 
   const idx = b.prepare("SELECT name FROM pragma_index_list('students') WHERE \"unique\" = 1").all()
   const hasUnique = idx.some((i) => i.name === 'idx_students_student_no')
@@ -200,8 +219,28 @@ server.close()
     'IN-05',
     '学号唯一索引建失败被 catch 吞掉，仍把 v9 记为已完成',
     '重复学号应中止迁移并报错，不得标记版本 9',
-    `唯一索引存在=${hasUnique}；schema_migrations 已记 v9=${!!marked}`,
-    !hasUnique && !!marked
+    `中止原因="${migError.split('。')[0]}"；唯一索引存在=${hasUnique}；schema_migrations 已记 v9=${!!marked}`,
+    // 缺陷仍在的判据：没报错，或者报了错却仍然记了版本号
+    !migError || !!marked || hasUnique
+  )
+
+  // 重复学号清理掉之后，同一条迁移应当自动补齐索引
+  b.prepare('DELETE FROM students WHERE id = ?').run('s-b')
+  let retryError = ''
+  try {
+    mRoster()
+  } catch (e) {
+    retryError = e.message
+  }
+  const afterUnique = b
+    .prepare("SELECT name FROM pragma_index_list('students') WHERE \"unique\" = 1")
+    .all().some((i) => i.name === 'idx_students_student_no')
+  report(
+    'IN-05R',
+    '重复学号清理后迁移能自愈（补齐唯一索引并记账）',
+    '清理完重复行再跑一次，索引应建成且版本已记录',
+    `重试报错="${retryError}"；唯一索引存在=${afterUnique}`,
+    !!retryError || !afterUnique
   )
 }
 

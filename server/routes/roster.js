@@ -10,7 +10,7 @@ import { Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db.js'
 import { teacherMiddleware } from '../middleware/auth.js'
-import { importRoster, parseGrade } from '../game/import-roster.js'
+import { importRoster, parseGrade, planRoster, resolveGrade } from '../game/import-roster.js'
 import { GARBLED_HINT, garbled, garbledRows } from '../utils/garbled.js'
 
 const router = Router()
@@ -77,9 +77,12 @@ router.get('/students', (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 500, 1000)
   const offset = Number(req.query.offset) || 0
 
+  // 别名和下面的映射一一对应：SELECT 用 AS 起别名，映射只读别名键，
+  // 否则 r.game_points / r.last_login_at 这类原始列名在这里恒为 undefined，
+  // 教师端会看到「所有人 0 积分、所有人未登录」这种看起来很正常的假数据。
   const students = db.prepare(`
     SELECT s.*, c.name AS className,
-           u.id AS userId, u.game_points AS gamePoints,
+           u.id AS userId, u.game_points AS gamePoints, u.last_login_at AS lastLoginAt,
            t.level AS trainerLevel, t.title AS trainerTitle,
            (SELECT COUNT(*) FROM player_pets p WHERE p.user_id = u.id) AS petCount
     FROM students s
@@ -104,12 +107,12 @@ router.get('/students', (req, res) => {
       course: r.course,
       classId: r.class_id,
       className: r.className || '',
-      totalPoints: r.total_points,
-      gamePoints: r.game_points ?? 0,
+      totalPoints: r.total_points ?? 0,
+      gamePoints: r.gamePoints ?? 0,
       trainerLevel: r.trainerLevel ?? 1,
       trainerTitle: r.trainerTitle || '',
       petCount: r.petCount ?? 0,
-      loggedIn: !!r.last_login_at
+      loggedIn: !!r.lastLoginAt
     }))
   })
 })
@@ -134,12 +137,15 @@ router.post('/students', (req, res) => {
 
   const cls = classIdOf(req.body)
   if (cls.error) return res.status(400).json({ error: cls.error })
+  // students.class_id 是 NOT NULL：不拦的话这里会抛 500，教师只看到一个「请求失败（500）」
+  if (!cls.classId) return res.status(400).json({ error: '新增学生需要选择或填写班级' })
 
   const nameEn = String(req.body.nameEn || '').trim()
   const gender = String(req.body.gender || '').trim()
   const course = String(req.body.course || '').trim()
   const className = String(req.body.className || '').trim()
-  const grade = Number(req.body.grade) || parseGrade(course, className)
+  // 显式 grade=0 / 非数字一律视为「没给」，交给课程名和班级名推断；推不出来写 NULL，不写 0
+  const grade = resolveGrade(req.body.grade, course, className, null)
 
   const now = Date.now()
   const id = uuidv4()
@@ -187,7 +193,8 @@ router.put('/students/:id', (req, res) => {
   const gender = req.body.gender !== undefined ? String(req.body.gender).trim() : student.gender
   const course = req.body.course !== undefined ? String(req.body.course).trim() : student.course
   const className = db.prepare('SELECT name FROM classes WHERE id = ?').get(classId)?.name || ''
-  const grade = Number(req.body.grade) || parseGrade(course, className)
+  // 推不出年级时沿用库里原值，绝不把已有年级刷成 0
+  const grade = resolveGrade(req.body.grade, course, className, student.grade)
 
   const user = db.prepare("SELECT id FROM users WHERE username = ? AND role = 'student'").get(student.student_no)
   // 改学号前先确认新学号没被别人占着，否则 username 唯一索引会炸
@@ -260,22 +267,31 @@ router.post('/bulk', (req, res) => {
   if (!list.length) return res.status(400).json({ error: '未选择学生' })
 
   if (action === 'move') {
+    if (!req.body.classId && !parseGrade('', String(req.body.className || ''))) {
+      return res.status(400).json({ error: '目标班级无法确定年级，请先完善班级信息' })
+    }
     const cls = classIdOf(req.body)
     if (cls.error) return res.status(400).json({ error: cls.error })
     if (!cls.classId) return res.status(400).json({ error: '请选择目标班级' })
 
     const className = db.prepare('SELECT name FROM classes WHERE id = ?').get(cls.classId).name
-    const move = db.prepare('UPDATE students SET class_id = ? WHERE id = ?')
+    // 转班要同时改 students.grade：登录时 studentLogin 用 students 覆盖 users，
+    // 只同步 users 的话，学生下次登录年级就被 students 的旧值带回去了。
+    const move = db.prepare('UPDATE students SET class_id = ?, grade = ? WHERE id = ?')
     const sync = db.prepare("UPDATE users SET class_id_ref = ?, grade = ? WHERE username = ? AND role = 'student'")
-    const findNo = db.prepare('SELECT student_no, grade FROM students WHERE id = ?')
+    const findNo = db.prepare('SELECT student_no, grade, course FROM students WHERE id = ?')
+    const classGrade = parseGrade('', className)
+    if (!classGrade) return res.status(400).json({ error: '目标班级无法确定年级，请先完善班级信息' })
 
     let moved = 0
     db.transaction(() => {
       for (const id of list) {
         const s = findNo.get(id)
         if (!s) continue
-        move.run(cls.classId, id)
-        sync.run(cls.classId, parseGrade('', className) || s.grade, s.student_no)
+        // 目标班级名优先，其次学生自己的课程名，最后沿用原值；三条路都推不出来就保持未知（NULL），不写 0
+        const grade = classGrade > 0 ? classGrade : resolveGrade(undefined, s.course, '', s.grade)
+        move.run(cls.classId, grade, id)
+        sync.run(cls.classId, grade, s.student_no)
         moved += 1
       }
     })()
@@ -307,29 +323,22 @@ router.post('/import', (req, res) => {
   }
   const badRows = garbledRows(rows)
   if (dryRun) {
-    // 预演：只报会新增/更新多少，不落库，教师先看差异再决定
+    // 预演和实际写入跑同一个 planRoster：按列存在性判定新增/更新/无变化/拒绝，
+    // 不再是「行数减一减等于更新数」那种估算，教师看到的数字就是提交后会发生的数字。
     // existingNos 是给前端逐行判定用的——前端的列表可能正被班级/关键词筛选着，
     // 只拿筛选结果判断会把库里已有的学生标成「新增」。
-    const nos = [...new Set(rows.map(r => String(r.studentNo || '').trim()).filter(Boolean))]
-    const known = new Set(
-      nos.length
-        ? db.prepare(`SELECT student_no FROM students WHERE student_no IN (${nos.map(() => '?').join(',')})`)
-            .all(...nos).map(r => r.student_no)
-        : []
-    )
-    const invalid = rows.filter((r) => !String(r.studentNo || '').trim() || !String(r.name || '').trim()).length
-    const wouldCreate = rows.filter(r => {
-      const no = String(r.studentNo || '').trim()
-      return no && !known.has(no)
-    }).length
+    const plan = planRoster(rows)
     return res.json({
       dryRun: true,
       total: rows.length,
-      wouldCreate,
-      wouldUpdate: rows.length - wouldCreate - invalid,
-      invalid,
+      wouldCreate: plan.created,
+      wouldUpdate: plan.updated,
+      unchanged: plan.unchanged,
+      invalid: plan.rejected.length,
+      rejected: plan.rejected,
+      rowPlans: plan.rowPlans,
       garbled: badRows,
-      existingNos: [...known]
+      existingNos: plan.existingNos
     })
   }
 
