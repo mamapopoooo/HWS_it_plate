@@ -32,7 +32,10 @@ export function createStudentLogin(db) {
 
     const user = db.prepare('SELECT * FROM users WHERE username = ?').get(studentNo)
     const legacy = db.prepare('SELECT id FROM users WHERE username = ?').get(`stu_${studentNo}`)
-    if (legacy || (user && user.role !== 'student')) {
+    // 真实学号也可能以stu_开头，不能认领另一名册学生的旧前缀账号。
+    const namespaceConflict = studentNo.startsWith('stu_') &&
+      db.prepare('SELECT 1 FROM students WHERE student_no = ?').get(studentNo.slice(4))
+    if (legacy || namespaceConflict || (user && (user.role !== 'student' || user.is_guest))) {
       return { status: 409, error: '登录身份需要核对，请找老师处理，原有积分和宠物不会被合并或清除' }
     }
     const now = Date.now()

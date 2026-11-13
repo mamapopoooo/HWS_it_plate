@@ -101,4 +101,14 @@ describe.each(paths)('%s 名单认证', path => {
       expect(db.prepare('SELECT COUNT(*) AS n FROM users').get().n).toBe(0)
     } finally { db.exec('DROP TRIGGER reject_trainer') }
   })
+  it('真实学号与他人旧前缀重合时不得认领对方资产', async () => {
+    db.exec(`INSERT INTO students VALUES ('prefix-roster-demo','stu_0001','示例另一学生','Another Demo',7,'class-demo');
+      INSERT INTO users (id,username,role,game_points) VALUES ('legacy-owner-demo','stu_0001','student',89);`)
+    expect((await login(path, 'stu_0001', '示例另一学生')).status).toBe(409)
+    expect(db.prepare("SELECT id,game_points,real_name FROM users WHERE username='stu_0001'").get())
+      .toEqual({ id: 'legacy-owner-demo', game_points: 89, real_name: null })
+    db.exec("DELETE FROM users")
+    expect((await login(path, 'stu_0001', '示例另一学生')).status).toBe(409)
+    expect(db.prepare('SELECT COUNT(*) AS n FROM users').get().n).toBe(0)
+  })
 })

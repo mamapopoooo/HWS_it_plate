@@ -11,6 +11,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = await apiRequest<unknown>(`${BASE_URL}${path}`, options)
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('名单接口返回格式错误')
   const value = data as Record<string, unknown>
+  if ('rowPlans' in value && (!Array.isArray(value.rowPlans) || !value.rowPlans.every(isImportPlan))) {
+    throw new Error('名单接口逐行预演格式错误')
+  }
   const method = options.method || 'GET'
   const valid = method !== 'GET'
     ? (path === '/import' && JSON.parse(String(options.body)).dryRun ? value.dryRun === true : value.success === true)
@@ -19,6 +22,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     : path === '/duplicate-names' && Array.isArray(value.english) && Array.isArray(value.chinese)
   if (!valid) throw new Error('名单接口返回格式错误，请刷新核对后重试')
   return data as T
+}
+
+function isImportPlan(plan: unknown): boolean {
+  if (!plan || typeof plan !== 'object') return false
+  const p = plan as Record<string, unknown>
+  const fields = ['name', 'nameEn', 'gender', 'class', 'course']
+  return typeof p.studentNo === 'string' && ['create', 'update', 'reject'].includes(String(p.action)) &&
+    ['writeFields', 'skipFields'].every(key => Array.isArray(p[key]) && p[key].every(f => typeof f === 'string' && fields.includes(f))) &&
+    ['warnings', 'errors'].every(key => Array.isArray(p[key]) && p[key].every(message => typeof message === 'string'))
 }
 
 export interface RosterClass {
