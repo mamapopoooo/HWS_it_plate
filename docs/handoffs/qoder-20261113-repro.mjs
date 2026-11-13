@@ -3,6 +3,7 @@
 // 隔离方式（对应方案 §8 的硬要求）：
 //   把整棵 server/ 复制到运行期沙箱目录，**排除 *.db / *.db-wal / *.db-shm**，所以副本里的 db.js
 //   打开的是沙箱内一个全新的空库 —— 既不碰真实数据库，也不碰冻结源码。
+//   docs/seeds/ 只带配置类 JSON（**排除 students-real.json**），因为 game-v2 会在导入期读它们。
 //   目录名由 mkdtemp 分配，不复用固定路径，因此不会删掉别人正在用的沙箱；
 //   并且断言沙箱始终落在仓库根目录内，扩展配置不可能把库指到仓库外。
 //   端口用 listen(0) 随机分配，进程退出即回收，不占用他人端口。
@@ -23,6 +24,8 @@ const handles = []
 // WAL 模式的副产物必须一起排除：只排 .db 的话，真库的 -wal 会被复制进沙箱，
 // 副本打开新库后再合并这个 wal，等于把生产数据悄悄读进复现环境。
 const DB_ARTIFACT = /\.(db|db-wal|db-shm)$/
+// 真实名单（252 名未成年人姓名+学号，已 gitignore）绝不进沙箱：seed 里只带配置，不带人。
+const PII_SEED = /students-real\.json$/
 
 function sandbox(tag) {
   const root = fs.mkdtempSync(path.join(REPO, `.repro-${tag}-`))
@@ -34,6 +37,15 @@ function sandbox(tag) {
     recursive: true,
     filter: (p) => !DB_ARTIFACT.test(p)
   })
+  // routes/game-v2.js 经 utils/economy.js 在**模块顶层**读 docs/seeds/*.json，
+  // 只复制 server/ 会让 import 直接 ENOENT，所以把配置 seed 一起带进沙箱。
+  fs.cpSync(path.join(REPO, 'docs', 'seeds'), path.join(dir, 'docs', 'seeds'), {
+    recursive: true,
+    filter: (p) => !PII_SEED.test(p)
+  })
+  if (fs.existsSync(path.join(dir, 'docs', 'seeds', 'students-real.json'))) {
+    throw new Error('沙箱里出现了真实名单，立即中止')
+  }
   sandboxes.push(dir)
   return { dir, load: (rel) => import(pathToFileURL(path.join(dir, 'server', rel)).href) }
 }

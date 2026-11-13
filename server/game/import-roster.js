@@ -34,13 +34,14 @@ export function knownGrade(grade) {
 }
 
 /**
- * 年级统一口径：显式有效值 > 从课程/班级名推断 > 保留原值 > null（未知）。
- * 只给单条编辑用；批量导入不接受表格里的 grade。
+ * 年级统一口径：显式有效值 > 班级名 > 课程名 > 保留原值 > null（未知）。
+ * 班级名排在课程名前头，和 Codex 定的导入口径一致：学生转班后课程列往往还是旧年级，
+ * 让课程名抢先就会把刚转过去的班又算回原年级（只给单条编辑与批量转班用）。
  */
 export function resolveGrade(explicit, course, className, keep) {
   const n = Number(explicit)
   if (Number.isInteger(n) && n > 0) return n
-  const parsed = parseGrade(course, className)
+  const parsed = parseGrade('', className) || parseGrade(course, '')
   if (parsed > 0) return parsed
   return knownGrade(keep)
 }
