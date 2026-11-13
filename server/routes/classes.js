@@ -48,7 +48,10 @@ router.get('/:classId/students', authMiddleware, (req, res) => {
   if (!canManage(cls, req.userId)) {
     return res.status(403).json({ error: '无权访问此班级' })
   }
-  const students = db.prepare('SELECT * FROM students WHERE class_id = ? ORDER BY name').all(req.params.classId)
+  // 旧字段只增不删：课堂累计仍保留，教师余额与HUD统一读取游戏账本。
+  const students = db.prepare(`SELECT s.*, COALESCE(u.game_points,0) AS game_points
+    FROM students s LEFT JOIN users u ON u.username=s.student_no AND u.role='student'
+    WHERE s.class_id=? ORDER BY s.name`).all(req.params.classId)
   res.json({ students })
 })
 

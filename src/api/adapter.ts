@@ -386,7 +386,7 @@ function pickStudents(data: unknown): TeacherStudent[] | null {
       id: str(s.id),
       name: str(s.name, str(s.real_name)),
       studentNo: str(s.student_no, str(s.username)),
-      points: num(s.points, num(s.total_points)),
+        points: num(s.game_points, num(s.points, num(s.total_points))),
       petName: str(s.pet_name, '—'),
       petLevel: num(s.pet_level, 1),
     }
@@ -428,7 +428,7 @@ function pickClassStudents(data: unknown): TeacherStudent[] | null {
       id: str(s.id),
       name: str(s.name),
       studentNo: str(s.student_no),
-      points: num(s.total_points),
+        points: num(s.game_points, num(s.total_points)),
       petName: str(s.pet_name, '—'),
       petLevel: num(s.pet_level, 1),
     }
