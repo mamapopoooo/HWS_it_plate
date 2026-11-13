@@ -71,6 +71,20 @@ export interface ImportResult {
   created: number
   updated: number
   rejected: Array<{ studentNo: string; reason: string }>
+  /** 兼容扩展：待Qoder实现，旧响应可缺省；不能据此假定服务端已支持列保留。 */
+  rowPlans?: RosterImportPlan[]
+}
+
+export type RosterImportField = 'name' | 'nameEn' | 'gender' | 'class' | 'course'
+
+/** 学号只作定位键；grade从有效班级/课程推导，不接受导入端猜测。 */
+export interface RosterImportPlan {
+  studentNo: string
+  action: 'create' | 'update' | 'reject'
+  writeFields: RosterImportField[]
+  skipFields: RosterImportField[]
+  warnings: string[]
+  errors: string[]
 }
 
 export interface DryRunResult {
@@ -82,6 +96,8 @@ export interface DryRunResult {
   garbled: number
   /** 库里已存在的学号，供预览逐行判定「新增/更新」，不受页面筛选影响 */
   existingNos: string[]
+  /** 同一批rows的预演与提交必须由服务端同一规划函数生成。 */
+  rowPlans?: RosterImportPlan[]
 }
 
 export function fetchRosterClasses(): Promise<{ classes: RosterClass[] }> {

@@ -1,11 +1,14 @@
 import Database from 'better-sqlite3'
-import { join, dirname } from 'path'
+import { join, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const dbPath = join(__dirname, 'pet-garden.db')
+// 测试/本地服务可显式指定隔离库；未配置时保持原生产路径。
+const configuredPath = process.env.PET_GARDEN_DB
+const dbPath = configuredPath === ':memory:' ? ':memory:'
+  : configuredPath ? resolve(configuredPath) : join(__dirname, 'pet-garden.db')
 export const db = new Database(dbPath)
 
 // 初始化数据库表
