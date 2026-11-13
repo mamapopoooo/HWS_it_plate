@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# 缺陷复现脚本的运行期沙箱（server/ 的临时副本），脚本退出即回收
+.repro-*/
+
 # Database
 *.db
 
