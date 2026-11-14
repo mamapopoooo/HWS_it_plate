@@ -5,10 +5,11 @@
  * 皮肤从宠物端整体迁到这里（总纲 §7）：纯装饰、不加属性，G7 不买也不影响战力。
  * 定义来自 seeds/skins.json，价格按 theme 读 economy.json —— 组件不写死数量与价格。
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type Gender, SKINS, skinPrice } from '@/config/contentConfig'
 import { ECONOMY } from '@/config/gameConfig'
+import { previewSkinImage } from '@/config/artPreview'
 import { fetchCharacter, fetchWallet, saveSkin } from '@/api/adapter'
 
 const router = useRouter()
@@ -40,6 +41,15 @@ const list = computed(() =>
 )
 
 const current = computed(() => SKINS.find((s) => s.id === wearing.value))
+
+/**
+ * 立绘加载状态：缺图或加载失败时退回姓氏印章，不出破图。
+ * 美术分批交付期间这是常态（seeds 里的 image 路径可能还没有文件）。
+ */
+const portraitFailed = ref(false)
+/** 开发期：候选图优先（详见 src/config/artPreview.ts），正式构建自动回落 */
+const portraitSrc = computed(() => previewSkinImage(current.value?.id ?? '') || current.value?.image || '')
+watch(current, () => { portraitFailed.value = false })
 
 const canWear = (id: string) => owned.value.has(id)
 
@@ -97,8 +107,17 @@ function back() {
       <!-- 当前形象 -->
       <section class="chr__stage">
         <div class="chr__avatar" :class="`chr__avatar--${gender}`">
-          <span class="chr__seal">{{ realname.slice(-1) || '生' }}</span>
-          <span class="chr__pose">全身立绘位</span>
+          <img
+            v-if="portraitSrc && !portraitFailed"
+            class="chr__img"
+            :src="portraitSrc"
+            :alt="current?.name ?? '角色立绘'"
+            @error="portraitFailed = true"
+          />
+          <template v-else>
+            <span class="chr__seal">{{ realname.slice(-1) || '生' }}</span>
+            <span class="chr__pose">{{ current?.image ? '立绘加载失败 · 占位' : '立绘未交付 · 占位' }}</span>
+          </template>
         </div>
         <div class="chr__meta">
           <span class="chr__name">{{ displayName }}</span>
@@ -235,6 +254,12 @@ function back() {
 }
 .chr__avatar--male {
   background: linear-gradient(180deg, #8b8b8b, #3e3e3e);
+}
+.chr__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .chr__seal {
   font-family: var(--font-title);
