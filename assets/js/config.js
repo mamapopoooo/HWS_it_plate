@@ -4,6 +4,8 @@
 window.PLATFORM_CONFIG = {
   // 教师机运行 node server/index.js 后的局域网地址（按实际 IP/端口修改）
   petBase: 'http://192.168.1.10:3000/pet-garden/',
+  // 线上墨境入口（同域部署，直接用相对路径最稳）
+  petGardenUrl: '/pet-garden/',
   // 探测超时（毫秒）
   petProbeTimeout: 2500
 };
