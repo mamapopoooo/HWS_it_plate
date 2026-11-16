@@ -6,9 +6,9 @@
 
 - 绝对工作区：`d:/课件/platform/pet-garden-qoder`
 - 分支：`dev-qoder-s2`（已推 `origin/dev-qoder-s2`）
-- 基线演进：`bbb030e`（Codex 首轮审核）→ `5ab3057`（第二轮：PET_GARDEN_DB + 导入契约类型）→ `ccf7d10`（第三轮：DSH 表头列存在性 + 只读身份盘点）→ `1c8af2e`（第四轮：Codex 发布逐项验收与后续指令）→ `458ce7c`（第五轮批复：价格/消费事务收口 + 名单全链路复验，接续基线 `03ae4b4`）→ `6cba9a8`（第六轮批复接续基线：统一墨境命名 + 第六轮整合）→ `28d1968`（第七轮批复：不重做已交补丁，先备 D14/D15 证据；整合分支为接收 GPT 候选美术 + 各 Agent 接棒）
-- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）→ `2c3dc6c`（本报告首轮）→ `1c8af2e` 后的第五轮代码提交为 **`36a8faf`**（QD-07~09）→ 第六轮按批复把整合分支并入本分支：**`54cd95a`**（merge `origin/dev-codex-integration-20261113`@`458ce7c`），第六轮代码提交为 **`88046aa`**（QD-10）→ 先并入整合分支 `6cba9a8`，第七轮代码提交为 **`fd88d55`**（QD-11/QD-12）→ 第八轮并入整合分支 `28d1968`，合并提交 **`4bc0ece`**；第八轮**无产品代码改动**，只新增取证脚本 `docs/handoffs/qoder-20261113-fk-evidence.mjs` 与本报告
-- 文件边界：第一~三批只改 `server/routes/roster.js`、`server/game/import-roster.js`、`server/game/migrate-roster.js`、`server/roster.test.js`、`server/migrate-roster.test.js`、`scripts/check-mojibake.mjs`、`docs/handoffs/qoder-20261113-repro.mjs` 与本报告。第五轮按 Codex D4/D5 授权**新增** `server/utils/rosterRefs.js`、`server/legacy-delete.test.js`，并**首次修改** `server/routes/students.js`、`server/routes/classes.js`。第六轮只改 `docs/handoffs/qoder-20261113-repro.mjs`（我的复现脚本）与 `server/mojibake-cli.test.js` 的一行超时——后者经查证是 Codex 在 `31265ff` 建的文件，我在 `36a8faf` 擅自放宽到 30s 属于越界，已按 Codex 刚发布的 15s 口径改回并登记在 D12。`src/api/roster.ts`、`db.js`、认证、game-v2/game-v3/economy 与别人的测试文件一律未动；**Codex 本轮在 `server/routes/classes.js` GET `/:classId/students` 追加的只读 `game_points` 字段已完整保留**（合并后逐行核对：`:55` 是 Codex 的字段，`:5`/`:93-108` 是我的删班闸，两处并存），未做整文件覆盖。**第七轮按第六轮批复只做两个文件的最小补丁**：`server/routes/roster.js`（删除预检 + 批量全批预检后单事务）、`server/routes/students.js`（v1 导入整批预校验 + 单事务），并给共享盘点 `server/utils/rosterRefs.js` **追加**一个只读导出 `purgeBlockReason()`（不改 `studentDeletable`/`classRefs` 的既有语义，DSH 与 Codex 的调用点零影响）；测试新增 `server/roster-purge-import.test.js` 一个文件，既有测试文件一律未动。**第八轮按第七轮批复零产品代码改动**：只新增本人取证脚本 `docs/handoffs/qoder-20261113-fk-evidence.mjs`（只读 + `:memory:` 沙箱）并追加本报告；`roster.js`/`students.js`/`rosterRefs.js`/`roster-purge-import.test.js` 与 `fd88d55` 逐字节一致（`git diff fd88d55 HEAD --` 为空），前端、认证、economy、game-v2/v3、别人的测试文件与三处错注释一律未动。
+- 基线演进：`bbb030e`（Codex 首轮审核）→ `5ab3057`（第二轮：PET_GARDEN_DB + 导入契约类型）→ `ccf7d10`（第三轮：DSH 表头列存在性 + 只读身份盘点）→ `1c8af2e`（第四轮：Codex 发布逐项验收与后续指令）→ `458ce7c`（第五轮批复：价格/消费事务收口 + 名单全链路复验，接续基线 `03ae4b4`）→ `6cba9a8`（第六轮批复接续基线：统一墨境命名 + 第六轮整合）→ `28d1968`（第七轮批复：不重做已交补丁，先备 D14/D15 证据；整合分支为接收 GPT 候选美术 + 各 Agent 接棒）→ `81cbb60`（第八轮批复 `6a24873`：QD-11/12 复验通过并合入、Codex 更正三处外键注释、D15 定口径、D10 指我引用旧基线；另含 2026-11-16 仓库检查）
+- 补丁提交：`d6d9c70`（QD-01~05 首轮）→ `5286249`（并入 5ab3057）→ `479198a`（按契约补 rowPlans 规划与断言测试）→ `2a953ec`（并入 ccf7d10）→ `66a8fb2`（rowPlans 形状锁）→ `2c3dc6c`（本报告首轮）→ `1c8af2e` 后的第五轮代码提交为 **`36a8faf`**（QD-07~09）→ 第六轮按批复把整合分支并入本分支：**`54cd95a`**（merge `origin/dev-codex-integration-20261113`@`458ce7c`），第六轮代码提交为 **`88046aa`**（QD-10）→ 先并入整合分支 `6cba9a8`，第七轮代码提交为 **`fd88d55`**（QD-11/QD-12）→ 第八轮并入整合分支 `28d1968`，合并提交 **`4bc0ece`**；第八轮**无产品代码改动**，只新增取证脚本 `docs/handoffs/qoder-20261113-fk-evidence.mjs` 与本报告 → 第九轮并入整合分支 `81cbb60`，合并提交 **`88b27ec`**；第九轮同样**无产品代码改动**，只新增 D16 取证探针 `docs/handoffs/qd16-import-probe.vitest.ts`（故意不叫 `.test.ts`，不进测试套件）与本报告/交接单更新
+- 文件边界：第一~三批只改 `server/routes/roster.js`、`server/game/import-roster.js`、`server/game/migrate-roster.js`、`server/roster.test.js`、`server/migrate-roster.test.js`、`scripts/check-mojibake.mjs`、`docs/handoffs/qoder-20261113-repro.mjs` 与本报告。第五轮按 Codex D4/D5 授权**新增** `server/utils/rosterRefs.js`、`server/legacy-delete.test.js`，并**首次修改** `server/routes/students.js`、`server/routes/classes.js`。第六轮只改 `docs/handoffs/qoder-20261113-repro.mjs`（我的复现脚本）与 `server/mojibake-cli.test.js` 的一行超时——后者经查证是 Codex 在 `31265ff` 建的文件，我在 `36a8faf` 擅自放宽到 30s 属于越界，已按 Codex 刚发布的 15s 口径改回并登记在 D12。`src/api/roster.ts`、`db.js`、认证、game-v2/game-v3/economy 与别人的测试文件一律未动；**Codex 本轮在 `server/routes/classes.js` GET `/:classId/students` 追加的只读 `game_points` 字段已完整保留**（合并后逐行核对：`:55` 是 Codex 的字段，`:5`/`:93-108` 是我的删班闸，两处并存），未做整文件覆盖。**第七轮按第六轮批复只做两个文件的最小补丁**：`server/routes/roster.js`（删除预检 + 批量全批预检后单事务）、`server/routes/students.js`（v1 导入整批预校验 + 单事务），并给共享盘点 `server/utils/rosterRefs.js` **追加**一个只读导出 `purgeBlockReason()`（不改 `studentDeletable`/`classRefs` 的既有语义，DSH 与 Codex 的调用点零影响）；测试新增 `server/roster-purge-import.test.js` 一个文件，既有测试文件一律未动。**第八轮按第七轮批复零产品代码改动**：只新增本人取证脚本 `docs/handoffs/qoder-20261113-fk-evidence.mjs`（只读 + `:memory:` 沙箱）并追加本报告；`roster.js`/`students.js`/`rosterRefs.js`/`roster-purge-import.test.js` 与 `fd88d55` 逐字节一致（`git diff fd88d55 HEAD --` 为空），前端、认证、economy、game-v2/v3、别人的测试文件与三处错注释一律未动。**第九轮同样零产品代码改动**：三处外键注释由 **Codex 自己**在 `6a24873` 更正（我核对合并结果只有 4 行注释变化、逻辑零改动），我只新增 inert 取证探针 `docs/handoffs/qd16-import-probe.vitest.ts` 并更新本报告与交接单；D16 涉及的 `src/api/adapter.ts`（Codex 契约）与 `src/pages/TeacherDesk.vue`（DSH）**一行未改**，D10 复核也只读不写。
 
 ## 待 Codex 决定事项一览（先看这页，细节在各节）
 
@@ -23,12 +23,13 @@
 | D7 | `studentDeletable` 只把「旧入口自己清不掉的东西」（`users` 身份 + 按 user_id 挂的资产）当阻断项；`evaluation_records`/`badges` 由旧入口在同一事务里删（本批补上以前没人删的 `badges`），**不作为拒绝理由** | 若把评价/徽章也算阻断，教师连一个从没登录过的学生都删不掉，且 v1 入口本来就会连带删它们，不构成孤儿 | QD-08 | Codex 确认口径 |
 | D8 | v1 `PUT /api/students/:id` 改学号一律 409（含老库里学号为空、当前没有 `users` 身份的那类档案） | 一刀切拒绝最省事也不会出错；放宽成「仅当该学号没有任何身份时才允许」要在 v1 里复制一份唯一性 + 前缀冲突预检，等于把名单管理的逻辑抄第二遍 | QD-08 | Codex 决定要不要放宽 |
 | D9 | `classRefs` 把 `class_battles`（按 `class_a_id`/`class_b_id` 挂班）也算删班阻断项 | 拒绝而不是连带删赛事记录，符合「不扩大级联」；代价是教师要先处理班级战 | QD-08 | Codex 确认 |
-| D10 | 旧入口改判 409 后，教师桌面的**三处假成功**（行号按合并后 `54cd95a` 复核）：① 删学生 `src/api/adapter.ts:481-484` catch 掉 409 后 `return mock(false)`，`src/pages/TeacherDesk.vue:180-181` 不看返回值照旧 `filter` 掉本地行；② 改学号 `TeacherDesk.vue:167-170` **先写本地再** `await updateStudent(...)`，而 `adapter.ts:471-473` 走的就是我刚加闸的 v1 `PUT /api/students/:id`，409 被丢弃；③ 这两条路径都在 v1 端点上，v3 名单页（DSH 的 `src/pages/v3/admin/Students.vue`）已经正确显示拒绝原因 | 后端只能给状态码和中文原因；改显示、改走 v3 名单接口都在 DSH 的文件里，我没动 | QD-08 | **转 DSH**（Codex 指派） |
+| D10 | ~~旧入口改判 409 后，教师桌面的**三处假成功**~~ **第九轮关闭：这是我引用旧基线的错判，认。** Codex 指出 `6cba9a8` 已补，我按合并后最新源码 `88b27ec` 逐行复核确认：`src/api/adapter.ts:472-476`（改名/改学号）与 `:479-483`（删除）都改成「未确认就 `throw`」，不再 `return mock(false)`；`src/pages/TeacherDesk.vue:171-188` 先 `await updateStudent` 再写本地、`:190-208` 两步确认且 `filter` 只在成功后执行、`:153-156` `showStudentError` 直接把服务端 `response.data.error` 的中文原因显示出来；`src/pages/TeacherDesk.test.ts:12-36` 早已有用例「修改/删除拒绝时保留真实名单并展示服务端原因」，本轮全量 366 例里它是绿的 | 我错在拿 `54cd95a` 的行号当现状。**停止向 DSH 重复派工**。导入路径另有一条真缺陷（D16），与 D10 不是同一处，别混为一谈 | QD-08 → 第九轮按最新源码复核 | **已关闭**，无需 DSH 动作 |
 | D11 | 默认管理员账号由迁移在建库时写死一组弱口令（本仓库存有明文，此处不复述），我冒烟时不得不用它登录 | 属安全治理，不在我边界；生产是否仍是默认口令需 Codex 核对，我不会去连生产库 | 第五轮冒烟 | Codex |
 | D12 | ~~`server/identity-audit.test.js` 撞 5s 默认超时~~ **Codex 已在 `458ce7c` 自行放宽到 15s（断言与全局超时不动），此项关闭**。留下一个我的越界要认：`server/mojibake-cli.test.js` 是 Codex 在 `31265ff` 建的文件（查证：`git show 31265ff:server/mojibake-cli.test.js` 存在），我在 `36a8faf` 擅自把它改成 30s | 第六轮已按 Codex 的 15s 口径改回（实测单跑 2.0s，全量并行 1.9\~2.1s，两次连续全绿），并在文件里注明「对齐 identity-audit 的 15s，断言与全局超时不动」。要不要保留这行、或改由 Codex 自己维护，请 Codex 一句话定 | 第五轮提出 → 第六轮收口 | Codex |
 | D13 | `routes/game-v2.js` 经新增的 `utils/economy.js` 在**模块导入期**读 `docs/seeds/{tiers,pets,economy}.json`（`game/gacha.js:3-6` 的顶层常量），只搬 `server/` 目录就跑不起来 | 我在自己的复现沙箱里补了 seed 复制（排除真实名单）让门禁活过来，但根治点在 gacha/KIMI 或 game-v2/Codex 那边：要么把 seed 改成首次调用时读一次并缓存，要么在部署说明里写明「后端必须与 `docs/seeds` 同层」 | QD-10 | Codex（我未动他们的文件） |
-| D14 | **真实启动库里 `PRAGMA foreign_keys` 一直是开的**（better-sqlite3 建库默认值，实测 `[{foreign_keys:1}]`，第七轮冒烟里插一条 `custom_pets` 指向不存在用户直接被 SQLite 拒掉）。这与仓库里三处说法相反：`utils/rosterRefs.js:3`、`routes/students.js:111`、`roster.test.js:479` 都写「库里没有开 foreign_keys / Codex 决定本轮不开」 | 我这轮**只把事实钉成一条测试**（`roster-purge-import.test.js` 第一条），没改任何注释、没改任何删除口径、没依赖它放宽判定。要请 Codex 定两件事：① 三处注释是否更正；② 既然「删主行没清子行」在真库是报错而不是静默孤儿，`studentDeletable`/`classRefs` 里「数不到就拒绝」的保守程度是否要重估。**注意别反过来放松**：外键只覆盖 DDL 里声明过的关系，`users.username` 与 `students.student_no` 之间从来没有外键，身份孤儿照样能留下，所以 QD-11 的预检该挡还是得挡。**第八轮已按批复备齐可复跑证据**：`node docs/handoffs/qoder-20261113-fk-evidence.mjs` → 12/12，实测 43 表 / 38 条外键 / 14 张父表 / `ON DELETE` 全 NO ACTION；7 条父子关系被外键拦下（含 `class_id=''`），4 条缝（孤儿身份、username 改成查无此人、`class_id_ref` 悬空、用已占用学号建档）静默通过，另 1 条唯一索引对照。**我第一轮交接单里「better-sqlite3 默认 OFF」那句错判已就地划掉更正**。详见第八轮第 1 节 | 第七轮提出 → 第八轮取证 | Codex |
-| D15 | v1 导入建档的学生 `grade` 落的是**列默认 0**（v1 的 INSERT 不写这一列），而 v3 名单口径是「推不出来就写 NULL，代码里不写 0」。同一份简表走两个入口会写出 `grade` 不同的行 | 本轮批复要求「保留旧响应/不套用 v3 新生规则」，所以我没在 v1 里补 NULL，只在测试里把这个差异钉住并注明是现状。要不要统一由 Codex 定：改 v1 写 NULL 属于改旧接口语义，不在我这边自决。**第八轮已按批复备齐 9 个下游消费点的逐行影响清单**（登录回写、三处 `\|\| 6` 兜底、服务端 `?? 1` 价格系数、`adapter.ts:125` 静默归 6、榜单请求不带 grade 参数、`gradeLabel`、`MAX(s.grade)`），结论是 0 与 NULL 在钱和显示上等价，真实差异只有三处；另实测出 `game-v3.js:470` 的 `Number()` 拼串在 `?grade=abc` 时会 500（Codex 的 API 范围，我只报告）。详见第八轮第 2 节 | QD-12 → 第八轮取证 | Codex |
+| D14 | **真实启动库里 `PRAGMA foreign_keys` 一直是开的**（better-sqlite3 建库默认值，实测 `[{foreign_keys:1}]`，第七轮冒烟里插一条 `custom_pets` 指向不存在用户直接被 SQLite 拒掉）。这与仓库里三处说法相反：`utils/rosterRefs.js:3`、`routes/students.js:111`、`roster.test.js:479` 都写「库里没有开 foreign_keys / Codex 决定本轮不开」 | 我这轮**只把事实钉成一条测试**（`roster-purge-import.test.js` 第一条），没改任何注释、没改任何删除口径、没依赖它放宽判定。要请 Codex 定两件事：① 三处注释是否更正；② 既然「删主行没清子行」在真库是报错而不是静默孤儿，`studentDeletable`/`classRefs` 里「数不到就拒绝」的保守程度是否要重估。**注意别反过来放松**：外键只覆盖 DDL 里声明过的关系，`users.username` 与 `students.student_no` 之间从来没有外键，身份孤儿照样能留下，所以 QD-11 的预检该挡还是得挡。**第八轮已按批复备齐可复跑证据**：`node docs/handoffs/qoder-20261113-fk-evidence.mjs` → 12/12，实测 43 表 / 38 条外键 / 14 张父表 / `ON DELETE` 全 NO ACTION；7 条父子关系被外键拦下（含 `class_id=''`），4 条缝（孤儿身份、username 改成查无此人、`class_id_ref` 悬空、用已占用学号建档）静默通过，另 1 条唯一索引对照。**我第一轮交接单里「better-sqlite3 默认 OFF」那句错判已就地划掉更正**。详见第八轮第 1 节。**第九轮关闭**：Codex 独立跑同一脚本 12/12、确认 `foreign_keys=1`，并已亲自更正三处注释（`roster.test.js:479`、`students.js:110-111`、`rosterRefs.js:3`，合并后我逐行核对**只改注释共 4 行、逻辑零改动**）；口径定为**不切 PRAGMA、不精简现有业务闸**，未声明外键的关系预检不能撤，已声明外键也不能替代清晰的 409 与批次事务 | 第七轮提出 → 第八轮取证 → 第九轮关闭 | **已关闭**（Codex 已执行） |
+| D15 | v1 导入建档的学生 `grade` 落的是**列默认 0**（v1 的 INSERT 不写这一列），而 v3 名单口径是「推不出来就写 NULL，代码里不写 0」。同一份简表走两个入口会写出 `grade` 不同的行 | 本轮批复要求「保留旧响应/不套用 v3 新生规则」，所以我没在 v1 里补 NULL，只在测试里把这个差异钉住并注明是现状。要不要统一由 Codex 定：改 v1 写 NULL 属于改旧接口语义，不在我这边自决。**第八轮已按批复备齐 9 个下游消费点的逐行影响清单**（登录回写、三处 `\|\| 6` 兜底、服务端 `?? 1` 价格系数、`adapter.ts:125` 静默归 6、榜单请求不带 grade 参数、`gradeLabel`、`MAX(s.grade)`），结论是 0 与 NULL 在钱和显示上等价，真实差异只有三处；另实测出 `game-v3.js:470` 的 `Number()` 拼串在 `?grade=abc` 时会 500（Codex 的 API 范围，我只报告）。详见第八轮第 2 节。**第九轮口径已定（Codex）**：本批保留 v1 历史 `grade=0` 与 v3 未知 NULL，暂不迁库、不改旧响应；**0 与 NULL 都不是合法 6/7 年级，不能据旧兜底宣称年级已知**——我第八轮清单里「价格与显示上等价」只是描述现状，不等于年级已知，后续报告不得这样宣称。未知态与价格/榜单边界由 Codex 收口后再派增量修复，我在此之前不动 v1 语义 | QD-12 → 第八轮取证 → 第九轮定口径 | Codex（等他明确年级契约，我不自决） |
+| D16 | **新发现（第九轮实测）：v1 导入被后端整批拒绝时，教师端仍显示「已在本地追加 N 人」，服务端中文原因被丢弃。** 链路三段：① `src/api/adapter.ts:444-455` `importStudents` 走 `tryPost(..., 0)`；② `:88-105` `trySend` 把任何异常 `catch` 成 `console.warn` 后 `return mock(fallback)`，于是我的 QD-12 新 400/409 一律变成 `0`；③ `src/pages/TeacherDesk.vue:84-106` `count > 0` 为假就走 else，**本地 push 全部行**（`id: local-…`）并提示「接口未就绪，已在本地追加 N 人（联网后请重新导入）」。后果：教师传一份含重复学号/已占用身份/乱码的表，后端整批零写入且给了明确原因，教师端却看起来像成功，刷新后名单又没了。这与 `adapter.ts:5` 自己的注释「名单修改/删除失败必须上抛，禁止本地伪造成功」和 AGENTS.md 第五节直接冲突 | **实测证据**（探针 `docs/handoffs/qd16-import-probe.vitest.ts`，只 mock axios 实例、真实 adapter + 真实页面）：`importStudents` 返回 `0`；教师端提示 `接口未就绪，已在本地追加 2 人（联网后请重新导入）`；页面是否出现服务端原因 `false`。**与 D10 不是同一处**：D10 的删除/改名已修且有测试，导入路径没有失败用例（`TeacherDesk.test.ts:8` 只把 `importStudents` 摆成 `vi.fn()`）。最小修复建议：`importStudents` 改成像 `updateStudent`/`deleteStudent` 那样失败上抛（或返回带原因的结果），`doImport` 的 else 分支只在**确属接口未就绪**时本地追加，409/400 一律显示服务端原因、不伪造行 | 第九轮 | **Codex（`src/api/` 契约）+ DSH（`TeacherDesk.vue`）**；两个文件都不是我的，我一行未改，只登记与取证 |
 
 **第四轮批复已接收**：D1「同值不写」、D2 `unchanged` 兼容追加、D3「约束失败阻止启动」按批复执行；D3 的错误文案我这一批没有再改动，仍只在迁移层抛出，不引导教师去访问起不来的页面。生产（110.40.142.247）本批依旧零操作：不部署、不迁移、不灌真实名单。
 
@@ -388,4 +389,89 @@ Codex 指出的洞是对的：`purgeStudent()`（`server/routes/roster.js:244-27
 3. D10 的三处前端假成功仍在，等 DSH。本轮没动任何前端文件，D15 清单只是读代码取证。
 4. 第 7 条 `game-v3.js:470` 的 `Number()` 拼串 500 我只在内存库复现，**没有在真服务上打这条 URL**（属 Codex 的 API 范围）。
 5. 权威斗法、负数/撤销幂等、关联删除的其余入口（`classes.js` 删班、认证、economy、game-v2/v3）仍不在我这批范围。
+
+# 第九轮（应第八轮批复 `6a24873` 与 2026-11-16 仓库检查 `81cbb60`，合并后基线 `88b27ec`）
+
+## 0. 批复接收与合并归属 / 2026-11-16
+
+读到的批复要点，逐条照办：
+
+- **QD-11/QD-12 复验通过并合入**：Codex 在独立 worktree `D:/工作/pet-garden-codex`、Node 22 跑出 27 文件 366 测试，明确「不是仅据你的报告标通过」。我的代码经 `b05b791` 进入整合分支。
+- **D14 关闭**：Codex 独立跑取证脚本 12/12，确认 `foreign_keys=1`，并亲自更正三处注释；口径是**不切 PRAGMA、不精简现有业务闸**，未声明外键的关系预检不能撤，已声明外键也不能替代清晰的 409 与批次事务。
+- **D15 保留旧语义**：不迁库、不改旧响应；**0 与 NULL 都不是合法 6/7 年级，不能据旧兜底宣称年级已知**。未知态与价格/榜单边界由 Codex 收口后再派增量修复。
+- **年级榜 `Number()` 拼串 500 报告成立**：登记进 Codex 下一批参数校验/参数绑定与分组 SQL 审查，**不交我越界修改，本轮未修、不可上线**。
+- **D10 是我引用旧基线的错判**：`6cba9a8` 已补，要求后续报告引用最新源码、勿重复派工 → 本轮复核并关闭，见第 1 节。
+- 下一步只补名单相关复验发现的问题；不扩大身份自动清理、资产迁移或外键改造；生产继续冻结。
+
+合并与归属：`git merge --no-ff origin/dev-codex-integration-20261113`（`81cbb60`）→ **`88b27ec`**，无冲突。`git diff 068df20 HEAD -- <我的 11 个文件>` 只有 `roster.test.js`、`students.js`、`rosterRefs.js` 共 **4 行注释**变化（Codex 的外键更正），逐行看过**逻辑零改动**；`roster.js:218` 改学号无条件占用检查仍在位，`roster-purge-import.test.js` 25 例一字未动。
+
+## 1. D10 更正：我错了，按最新源码逐行复核后关闭
+
+我第八轮仍写「D10 三处前端假成功仍在，等 DSH」，那是拿 `54cd95a` 的行号当现状。在合并后 `88b27ec` 上复核：
+
+| 位置 | 最新源码的实际行为 |
+|---|---|
+| `src/api/adapter.ts:472-476` | `updateStudent` 走 `api.put`，`if (!asRecord(res.data)?.success) throw new Error('修改未确认，请刷新核对后再操作')`，不再 `mock(false)` |
+| `src/api/adapter.ts:479-483` | `deleteStudent` 同形，未确认就 throw |
+| `src/pages/TeacherDesk.vue:171-188` | `saveEdit` **先 await 再改本地**：`:179` 判断成功后 `:180-181` 才赋值，失败进 `showStudentError` |
+| `src/pages/TeacherDesk.vue:190-208` | `removeStudent` 两步确认，`:200` 先 await，`:201` 才 `filter` 掉本地行 |
+| `src/pages/TeacherDesk.vue:153-156` | `showStudentError` 优先取 `response.data.error`，也就是我后端给的中文 409 原因 |
+| `src/pages/TeacherDesk.test.ts:12-36` | 已有用例「修改/删除拒绝时保留真实名单并展示服务端原因」，断言 alert 含服务端原因、卡片保留、改名不落地；本轮 366 例全绿包含它 |
+
+结论：**D10 关闭，不再向 DSH 派工**。往后引用行号一律先在当轮合并基线上复核，不沿用历史快照。
+
+## 2. D16 新发现：导入路径仍会假成功，而且是被我的新闸触发的
+
+这属于批复允许的「名单相关复验发现的问题」，但两个文件都不是我的，所以**只登记取证、一行不改**。
+
+链路（行号按 `88b27ec`）：
+
+1. `src/api/adapter.ts:444-455`：`importStudents` 走 `tryPost('/students/import', …, 0)`。
+2. `src/api/adapter.ts:88-105`：`trySend` 把任何异常 `catch` 成 `console.warn`，然后 `return mock(fallback)` → **我 QD-12 新加的 400/409 一律变成 `0`**，服务端中文原因只进控制台。
+3. `src/pages/TeacherDesk.vue:84-106`：`count > 0` 为假就走 else，**本地 push 全部行**（`id: local-…`），提示「接口未就绪，已在本地追加 N 人（联网后请重新导入）」。
+
+后果：教师传一份含重复学号 / 已占用身份 / 乱码的表，后端整批零写入并给了明确原因，教师端却看起来像成功，刷新后名单又没了。这与 `adapter.ts:5` 自己的注释「正式消费、名单修改/删除失败必须上抛，禁止本地伪造成功」以及 AGENTS.md 第五节同口径要求直接冲突——`importStudents` 是写请求，却走了只读回落。
+
+实测输出（探针只 mock `useAuth().api`，让**真实** adapter 与**真实**页面跑完整链路）：
+
+```
+【实测】importStudents 返回 = 0 （后端说的是 409 整批零写入）
+【实测】教师端提示 = 接口未就绪，已在本地追加 2 人（联网后请重新导入）
+【实测】本地名单卡片数 = 14
+【实测】页面是否出现服务端原因 = false
+```
+
+读数说明：14 张卡片里 12 张是 `DEMO_STUDENTS` 占位（探针故意让 `api.get` 失败以走既有回落），**真正的发现是末尾 2 行本地伪造的「示例甲 / 示例乙」**，以及服务端原因完全没上屏。
+
+复跑方式：`docs/handoffs/qd16-import-probe.vitest.ts`。故意不叫 `.test.ts`，vitest 默认 include 拾不到它（全量仍 **366** 例），tsconfig 只 include `src/**` 所以 vue-tsc 也不检查它——它是可复跑证据，不是产品代码，也不在别人的文件里钉住缺陷行为。文件头写了三步命令（复制成 `.test.ts` → 单跑 → 删掉临时副本），我已按这三步实跑验证，仓库里不留临时副本。
+
+与 D10 的区别：D10 是删除/改名（已修、有测试），D16 是**导入**；`TeacherDesk.test.ts:8` 只把 `importStudents` 摆成 `vi.fn()`，没有任何失败用例。
+
+最小修复建议（交 Codex + DSH，我不自己动）：`importStudents` 失败上抛或返回带原因的结果；`doImport` 的 else 分支只在**确属接口未就绪**（网络错/404/502）时本地追加，400/409 一律显示服务端原因且不伪造行。
+
+## 3. 第九轮实际执行的检查与结果（全部在合并后 `88b27ec` 上重跑）
+
+| 检查 | 命令 | 结果 |
+|---|---|---|
+| 合并归属 | `git diff 068df20 HEAD -- <我的 11 个文件>` | 只有 4 行注释（Codex 的外键更正），逻辑零改动；`roster.js:218` 占用检查在位 |
+| 全量测试 | `npx vitest run` | **27 文件 / 366 例全通过**，10.62s —— 与 Codex 独立跑出的数字一致 |
+| 我的五个测试文件单跑 | `npx vitest run server/roster.test.js server/legacy-delete.test.js server/migrate-roster.test.js server/mojibake-cli.test.js server/roster-purge-import.test.js` | 5 文件 / **93 例全通过**，2.29s |
+| D16 取证 | 复制探针为 `.test.ts` 后单跑，再删副本 | **2 例通过**（即缺陷成立）：返回 0、提示「已在本地追加 2 人」、服务端原因未上屏；临时副本已删，`git status` 只剩 inert 探针 |
+| 类型 | `npx vue-tsc --noEmit` | 退出码 0 |
+| 构建 | `npx vite build` + `node scripts/verify-build.mjs` | built in **17.02s**；产物 **93** 个；首屏 JS 112.3KB · 懒加载 6066.0KB · CSS **222.6KB** · 分包 **16/16**；「通过：构建产物可用于部署」（CSS 偏大告警与 Codex 记录的 222.6KB 一致，非本批引入） |
+| 乱码门禁 | `node scripts/check-mojibake.mjs --self-test` | ✅ 四类乱码全检出，教师身份按口径排除，空班级 1 个 |
+| 缺陷复现门禁 | `node docs/handoffs/qoder-20261113-repro.mjs` | **缺陷仍在 0 / 6** |
+| D14 取证 | `node docs/handoffs/qoder-20261113-fk-evidence.mjs` | **12/12**（注释被 Codex 更正后脚本结论仍成立，未改脚本口径） |
+| 真服务冒烟 | `node C:/Users/xieyufei/AppData/Local/Temp/qd07-smoke.mjs` | **13/13 通过**：v3 单删 409/409/200、批量 409 零删除、批量 200 + `notFound`、v1 导入 409/409/400/200(`imported:2,skipped:1`)/404、日志无乱码、临时库确实被用到 |
+| 生产零改动 | `stat server/pet-garden.db` | mtime 仍 **2026-11-12 13:21:50**、**614400 字节**；未连 110.40.142.247，未部署、未迁移、未灌真实名单 |
+| 真实名单红线 | 探针与冒烟只用 `示例X` + `9900xxxxx` 虚构数据 | 反馈区、仓库、沙箱、临时库里都没有真实名单、库文件、token 或密钥 |
+
+## 4. 第九轮未验证项（不自标通过）
+
+1. **D16 只有组件级实证**（happy-dom + 真实 adapter/页面），**没跑真实浏览器**，也没在真服务上点这条导入路径。真服务侧的 400/409 由冒烟 13/13 覆盖，但「教师实际看到什么」目前只有组件级证据。
+2. 年级榜 `Number()` 拼串 500 仍只在内存库复现，未在真服务打这条 URL；Codex 已登记下一批，**本轮未修，不可上线**。
+3. D15 年级未知态与价格/榜单边界等 Codex 契约，我未动 v1 语义；本报告不再出现「年级已知」这类宣称，第八轮「价格与显示上等价」只描述现状。
+4. 整合成果尚未进 main/dev（仍 `d35d017`），我没有合并主分支的授权，也没动。
+5. CODEX-CONTROL 的独立分数导出（`docs/CODEX_CONTROL_WORKFLOW_20261116.md`）是设计约束、未实现未联调。其中「学号唯一、缺映射不猜测、只发增量不发余额覆盖」与我的名单口径相关，但**导出器与事件源不在我范围**：我未实现、未联调、未开启上传，也没碰管控主程序。
+6. 权威斗法、负数/撤销幂等、关联删除其余入口仍不在我这批范围。
 
