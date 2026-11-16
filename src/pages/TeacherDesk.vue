@@ -19,7 +19,16 @@ const classes = ref<ClassRow[]>(DEMO_CLASSES)
 const activeClassId = ref(DEMO_CLASSES[0]?.id ?? '')
 const students = ref<TeacherStudent[]>([])
 const todayDelta = ref(0)
-const pending = ref<PointsRecord[]>([])
+function currentTeacherId(): string {
+  try { return JSON.parse(localStorage.getItem('user') || '{}').id || 'anonymous' } catch { return 'anonymous' }
+}
+const teacherId = currentTeacherId()
+const queueKey = 'mojing-teacher-points-' + teacherId
+function restoreQueue(): PointsRecord[] {
+  try { const rows = JSON.parse(localStorage.getItem(queueKey) || '[]'); return Array.isArray(rows) ? rows : [] } catch { return [] }
+}
+const pending = ref<PointsRecord[]>(restoreQueue())
+const syncing = ref(false)
 const flash = ref<string | null>(null)
 
 /** 导入面板 */
@@ -209,18 +218,33 @@ async function removeStudent(s: TeacherStudent) {
 
 /** 加减分：本地即时反馈 + 进待同步队列 */
 function addPoints(s: TeacherStudent, delta: number) {
-  s.points = Math.max(0, s.points + delta)
-  todayDelta.value += delta
-  pending.value.push({ studentNo: s.studentNo, amount: delta, reason: delta > 0 ? '课堂表现' : '扣分' })
-  flash.value = `${s.name} ${delta > 0 ? '+' : ''}${delta}`
-  setTimeout(() => (flash.value = null), 900)
+  if (!s.studentNo) return
+  const eventId = Array.from(crypto.getRandomValues(new Uint8Array(16)), n => n.toString(16).padStart(2, '0')).join('')
+  const record = { eventId, studentNo: s.studentNo, amount: delta, reason: delta > 0 ? '课堂表现' : '扣分' }
+  const next = [...pending.value, record]
+  try { localStorage.setItem(queueKey, JSON.stringify(next)) } catch {
+    studentError.value = '无法保存待提交记录，请检查浏览器存储'; return
+  }
+  pending.value = next
+  flash.value = `${s.name} ${delta > 0 ? '+' : ''}${delta} 待提交`
 }
 
-/** 批量提交（接口未就绪时返回 false，队列保留） */
 async function flush() {
-  if (pending.value.length === 0) return
-  const ok = await syncPoints(pending.value)
-  if (ok) pending.value = []
+  if (syncing.value || !pending.value.length) return
+  if (currentTeacherId() !== teacherId || teacherId === 'anonymous') {
+    studentError.value = '登录身份已改变，请重新打开教师页面'; return
+  }
+  const batch = pending.value.slice(0, 200)
+  syncing.value = true
+  studentError.value = ''
+  try {
+    if (!await syncPoints(batch)) throw new Error('积分回执不完整，队列保留供核对')
+    const ids = new Set(batch.map(r => r.eventId))
+    const remaining = pending.value.filter(r => !ids.has(r.eventId))
+    localStorage.setItem(queueKey, JSON.stringify(remaining))
+    pending.value = remaining
+    await loadStudents()
+  } catch (err) { showStudentError(err) } finally { syncing.value = false }
 }
 
 function goReview() {
@@ -239,7 +263,7 @@ function back() {
       <button class="td__back" @click="back">← 学生端</button>
       <div class="td__title">
         <h1>{{ className }}</h1>
-        <p>教师工作台 · 加减分即时生效，联网后批量同步</p>
+        <p>教师工作台 · 加减分先存待提交，提交确认后刷新余额</p>
       </div>
       <div class="td__stats">
         <span class="td__stat">人数 <b class="num">{{ students.length }}</b></span>
@@ -247,7 +271,7 @@ function back() {
         <span class="td__stat">最高 <b class="num">{{ maxPoints }}</b></span>
         <span class="td__stat">最低 <b class="num">{{ minPoints }}</b></span>
         <span class="td__stat td__stat--hot">今日 <b class="num">{{ todayDelta > 0 ? '+' : '' }}{{ todayDelta }}</b></span>
-        <button class="gw-seal td__flush" :disabled="pending.length === 0" @click="flush">
+        <button class="gw-seal td__flush" :disabled="syncing || pending.length === 0" @click="flush">
           待同步 <span class="num">{{ pending.length }}</span>
         </button>
         <button class="gw-seal" @click="toggleFlow">{{ showFlow ? '收起流水' : '积分流水' }}</button>

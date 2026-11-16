@@ -435,44 +435,19 @@ router.get('/rankings/:id', (req, res) => {
   const config = db.prepare('SELECT * FROM ranking_config WHERE id = ?').get(req.params.id)
   if (!config) return res.status(404).json({ error: '榜单不存在' })
 
-  let sql = ''
-  if (config.metric === 'points') {
-    sql = `
-      SELECT u.username, u.real_name, u.grade, u.game_points as value,
-             RANK() OVER (ORDER BY u.game_points DESC) as rank
-      FROM users u WHERE u.role = 'student'
-    `
-  } else if (config.metric === 'power') {
-    sql = `
-      SELECT u.username, u.real_name, u.grade,
-             COALESCE(SUM(pp.power), 0) as value,
-             RANK() OVER (ORDER BY SUM(pp.power) DESC) as rank
-      FROM users u
-      LEFT JOIN player_pets pp ON pp.user_id = u.id
-      WHERE u.role = 'student'
-      GROUP BY u.id
-    `
-  } else if (config.metric === 'collection_rate') {
-    sql = `
-      SELECT u.username, u.real_name, u.grade,
-             COUNT(DISTINCT pp.template_id) as value,
-             RANK() OVER (ORDER BY COUNT(DISTINCT pp.template_id) DESC) as rank
-      FROM users u
-      LEFT JOIN player_pets pp ON pp.user_id = u.id
-      WHERE u.role = 'student'
-      GROUP BY u.id
-    `
+  const rawGrade = req.query.grade
+  if (rawGrade !== undefined && (typeof rawGrade !== 'string' || !['6', '7'].includes(rawGrade))) {
+    return res.status(400).json({ error: '年级仅支持6或7' })
   }
-
-  if (config.scope === 'grade') {
-    // 按年级分榜需要前端传 grade 参数
-    const grade = req.query.grade
-    if (grade) sql += ` AND u.grade = ${Number(grade)}`
-  }
-
-  sql += ' ORDER BY value DESC LIMIT 100'
-
-  const rankings = db.prepare(sql).all()
+  const filterGrade = config.scope === 'grade' && rawGrade !== undefined
+  const metrics = { points: 'MAX(u.game_points)', power: 'COALESCE(SUM(pp.power),0)', collection_rate: 'COUNT(DISTINCT pp.template_id)' }
+  const metric = metrics[config.metric]
+  if (!Object.hasOwn(metrics, config.metric)) return res.status(400).json({ error: '不支持的榜单指标' })
+  const rankings = db.prepare(`SELECT username,real_name,grade,value,RANK() OVER (ORDER BY value DESC) AS rank
+    FROM (SELECT u.username,u.real_name,u.grade,${metric} AS value
+      FROM users u LEFT JOIN player_pets pp ON pp.user_id=u.id
+      WHERE u.role='student' ${filterGrade ? 'AND u.grade=?' : ''} GROUP BY u.id)
+    ORDER BY value DESC,username LIMIT 100`).all(...(filterGrade ? [Number(rawGrade)] : []))
   res.json({ config, rankings })
 })
 

@@ -146,6 +146,7 @@ export interface TeacherStudent {
 
 /** 教师端：一条加分/扣分记录 */
 export interface PointsRecord {
+  eventId: string
   studentNo: string
   amount: number
   reason: string

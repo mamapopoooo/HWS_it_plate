@@ -400,7 +400,13 @@ export async function fetchTeacherStudents(): Promise<TeacherStudent[]> {
 
 /** 批量同步积分（教师端加减分） */
 export async function syncPoints(records: PointsRecord[]): Promise<boolean> {
-  return tryPost('/v2/teacher/sync-points', { records }, (d) => Boolean(asRecord(d)?.success), false)
+  const { data } = await api.post('/v2/teacher/sync-points', { records }, { timeout: 10000 })
+  const results = asArray(data?.results)
+  return data?.success === true && results?.length === records.length &&
+    records.every(r => results.some(raw => {
+      const row = asRecord(raw)
+      return row?.eventId === r.eventId && ['applied', 'duplicate'].includes(String(row.status))
+    })) === true
 }
 
 /* ---------------- 班级与学生（v2 接口，教师端在用） ---------------- */
