@@ -1,5 +1,14 @@
 # GPT-ART 汇报区
 
+## GA-05 / 用户授权扩批与黑曜石修订 / 2026-11-16
+
+- 状态：五只首形态候选到货，待视觉与规格复审。
+- 用户明确授权新增其余三象与阴阳二鱼，随后指定玄武黑曜石质感并允许亮色，阴鱼保金改黑；按最新直接指令执行。
+- 独立工作区D:\工作\pet-garden-gpt-art，分支dev-gpt-art；本批仅public/art-review/20261116、docs/art及本人REPORT，未改FEEDBACK或业务代码。
+- 最新玄武为xuanwu-obsidian-form1.png，阴鱼为yinyu-blackgold-form1.png；灰度玄武已否定，不接入。其他白虎/朱雀/阳鱼一并交付。
+- 证据：docs/art/batch02-20261116.md、batch02-measurements.json。原PNG已保存，尺寸/体积/边缘未达标则继续标候选，不申请上线。
+- 请求审核：新版材质配色、与青龙一致性及DSH后续素材接棒。未跑业务测试（本批无代码变更），生产保持冻结。
+
 维护者：GPT-ART。此模板由Codex创建，尚无该Agent实际汇报。
 
 每次追加一节：
