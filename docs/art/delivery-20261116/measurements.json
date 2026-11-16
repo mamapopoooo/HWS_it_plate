@@ -1,0 +1,242 @@
+[
+  {
+    "id": "qinglong",
+    "source": "public/art-review/20261113/qinglong-form1.png",
+    "path": "public/pets/qinglong/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 235771,
+    "colors": 96,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      95,
+      205,
+      930,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "baihu",
+    "source": "public/art-review/20261116/baihu-form1.png",
+    "path": "public/pets/baihu/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 221319,
+    "colors": 24,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      89,
+      205,
+      935,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "zhuque",
+    "source": "public/art-review/20261116/zhuque-form1.png",
+    "path": "public/pets/zhuque/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 236776,
+    "colors": 64,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      155,
+      205,
+      869,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "xuanwu",
+    "source": "public/art-review/20261116/xuanwu-obsidian-form1.png",
+    "path": "public/pets/xuanwu/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 230849,
+    "colors": 48,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      112,
+      205,
+      913,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "yinyu",
+    "source": "public/art-review/20261116/yinyu-blackgold-form1.png",
+    "path": "public/pets/yinyu/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 222332,
+    "colors": 128,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      192,
+      205,
+      833,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "yangyu",
+    "source": "public/art-review/20261116/yangyu-form1.png",
+    "path": "public/pets/yangyu/form1.png",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 224209,
+    "colors": 64,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      141,
+      205,
+      883,
+      942
+    ],
+    "subjectHeight": 0.7197265625,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "base_m",
+    "source": "public/art-review/20261113/base_m-plain.png",
+    "path": "public/characters/base_m.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 241215,
+    "colors": 128,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      340,
+      307,
+      685,
+      1413
+    ],
+    "subjectHeight": 0.7200520833333334,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "base_f",
+    "source": "public/art-review/20261113/base_f-plain.png",
+    "path": "public/characters/base_f.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 231532,
+    "colors": 128,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      332,
+      307,
+      692,
+      1413
+    ],
+    "subjectHeight": 0.7200520833333334,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "outfit_m",
+    "source": "public/art-review/20261113/outfit_m.png",
+    "path": "public/art-delivery/20261116/outfit_m.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 232539,
+    "colors": 96,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      338,
+      307,
+      687,
+      1413
+    ],
+    "subjectHeight": 0.7200520833333334,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  },
+  {
+    "id": "outfit_f",
+    "source": "public/art-review/20261113/outfit_f.png",
+    "path": "public/art-delivery/20261116/outfit_f.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 227267,
+    "colors": 128,
+    "quality": "nearest-palette",
+    "alpha": [
+      0,
+      255
+    ],
+    "bounds": [
+      332,
+      307,
+      693,
+      1413
+    ],
+    "subjectHeight": 0.7200520833333334,
+    "bottomMargin": 0.080078125,
+    "nonTransparentBorderPixels": 0,
+    "pngColorType": 6
+  }
+]
