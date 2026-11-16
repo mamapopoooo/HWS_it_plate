@@ -12,6 +12,7 @@
  */
 
 const DIR = `${import.meta.env.BASE_URL}art-review/20261113`
+const DIR2 = `${import.meta.env.BASE_URL}art-review/20261116`
 
 const query = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
 export const ART_PREVIEW_ENABLED = import.meta.env.DEV && query?.get('art') !== 'off'
@@ -19,6 +20,12 @@ export const ART_PREVIEW_ENABLED = import.meta.env.DEV && query?.get('art') !== 
 /** 宠物首形态候选（青龙只对应 form1，其它形态不得复用） */
 const PET_PREVIEW: Record<string, Record<number, string>> = {
   pet_qinglong: { 1: `${DIR}/qinglong-form1.png` },
+  // 第二批（2026-11-16）：三象 + 阴阳二鱼；玄武用黑曜石修订版
+  pet_baihu: { 1: `${DIR2}/baihu-form1.png` },
+  pet_zhuque: { 1: `${DIR2}/zhuque-form1.png` },
+  pet_xuanwu: { 1: `${DIR2}/xuanwu-obsidian-form1.png` },
+  pet_yinyu: { 1: `${DIR2}/yinyu-blackgold-form1.png` },
+  pet_yangyu: { 1: `${DIR2}/yangyu-form1.png` },
 }
 
 /** 角色基础形象候选 */

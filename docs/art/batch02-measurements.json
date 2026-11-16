@@ -1,0 +1,80 @@
+[
+  {
+    "file": "baihu-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 2059107,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "xuanwu-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1824975,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "xuanwu-obsidian-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1803695,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "yangyu-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1658550,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "yinyu-blackgold-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1694790,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "file": "zhuque-form1.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 2083216,
+    "mode": "RGBA",
+    "alpha": [
+      0,
+      255
+    ]
+  }
+]
