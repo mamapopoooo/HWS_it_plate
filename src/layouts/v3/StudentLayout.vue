@@ -84,9 +84,9 @@ pointsStore.loadPoints()
 <style scoped>
 .v3-student-layout {
   min-height: 100vh;
-  background: #F2E8D5;
+  background: #f2f2f2;
   font-family: 'Songti SC', 'STSong', 'Noto Serif SC', Georgia, serif;
-  color: #1C1C24;
+  color: #111111;
   position: relative;
 }
 
@@ -127,8 +127,8 @@ pointsStore.loadPoints()
   position: sticky;
   top: 0;
   z-index: 50;
-  background: linear-gradient(to bottom, #E8DCC2, #E8DCC2ee);
-  border-bottom: 2px solid #C9A227;
+  background: linear-gradient(to bottom, #e4e4e4, #e4e4e4ee);
+  border-bottom: 2px solid #8a8a8a;
   backdrop-filter: blur(8px);
 }
 .nav-inner {
@@ -150,14 +150,14 @@ pointsStore.loadPoints()
   font-family: 'KaiTi', 'STKaiti', serif;
   font-size: 18px;
   font-weight: bold;
-  color: #C0392B;
+  color: #1f1f1f;
   text-decoration: none;
   letter-spacing: 0.1em;
 }
-.nav-divider { color: #C9A227; }
+.nav-divider { color: #8a8a8a; }
 .nav-user {
   font-size: 13px;
-  color: #4A4A5A;
+  color: #3a3a3a;
 }
 .nav-center {
   display: flex;
@@ -173,7 +173,7 @@ pointsStore.loadPoints()
   padding: 4px 10px;
   border-radius: 6px;
   text-decoration: none;
-  color: #4A4A5A;
+  color: #3a3a3a;
   font-size: 12px;
   transition: all 0.15s;
   white-space: nowrap;
@@ -181,12 +181,12 @@ pointsStore.loadPoints()
 }
 .nav-link:hover {
   background: rgba(201,162,39,0.1);
-  color: #1C1C24;
+  color: #111111;
 }
 .nav-link.active {
-  background: #C9A227;
+  background: #8a8a8a;
   color: white;
-  border-color: #8B6914;
+  border-color: #2b2b2b;
 }
 .nav-icon { font-size: 16px; line-height: 1; }
 .nav-label {
@@ -204,21 +204,21 @@ pointsStore.loadPoints()
   font-family: Georgia, serif;
   font-size: 14px;
   font-weight: bold;
-  color: #C9A227;
+  color: #8a8a8a;
 }
 .nav-logout {
   padding: 4px 12px;
   background: transparent;
-  border: 1px solid #C0392B;
+  border: 1px solid #1f1f1f;
   border-radius: 4px;
-  color: #C0392B;
+  color: #1f1f1f;
   font-size: 12px;
   cursor: pointer;
   font-family: 'KaiTi', 'STKaiti', serif;
   transition: all 0.12s;
 }
 .nav-logout:hover {
-  background: #C0392B;
+  background: #1f1f1f;
   color: white;
 }
 
@@ -242,8 +242,8 @@ pointsStore.loadPoints()
 .seal-stamp {
   width: 40px;
   height: 40px;
-  background: #C0392B;
-  color: #F2E8D5;
+  background: #1f1f1f;
+  color: #f2f2f2;
   border-radius: 4px;
   display: flex;
   align-items: center;

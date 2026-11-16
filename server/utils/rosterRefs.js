@@ -1,6 +1,6 @@
 // 名单关联引用的只读盘点。
 //
-// 为什么要这个模块：库里没有开 PRAGMA foreign_keys（Codex 决定本轮仍不开），
+// foreign_keys 在实际启动连接上为 1，但只保护 DDL 已声明的关系；
 // 所以「删一个学生 / 删一个班级」会不会留下孤儿，只能靠写入方自己查。
 // 旧 v1 入口（routes/students.js、routes/classes.js）曾经直接 DELETE 主行，
 // 把 users 登录身份和十几张游戏资产表留在库里 —— 学生档案没了，账号和宠物还在，

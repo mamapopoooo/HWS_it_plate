@@ -10,6 +10,7 @@ import tiersSeed from '../../docs/seeds/tiers.json'
 import trigramsSeed from '../../docs/seeds/trigrams.json'
 import petsSeed from '../../docs/seeds/pets.json'
 import economySeed from '../../docs/seeds/economy.json'
+import { previewPetImage } from './artPreview'
 
 /* ---------------- 类型 ---------------- */
 
@@ -113,6 +114,9 @@ export function getTrigram(code: string): TrigramConfig | undefined {
  * （缺图由组件退化为卦象占位，不报错）
  */
 export function formImage(pet: PetTemplate, form = 1): string {
+  // 开发期：候选美术覆盖（仅 DEV 生效，正式构建返回空串）
+  const preview = previewPetImage(pet.id, form)
+  if (preview) return preview
   const custom = pet.formImages?.[String(form)]
   if (custom) return custom
   const fallback = pet.formImages?.['1']

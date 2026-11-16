@@ -85,9 +85,9 @@ pointsStore.loadPoints()
 .v3-admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #F2E8D5;
+  background: #f2f2f2;
   font-family: 'Songti SC', 'STSong', serif;
-  color: #1C1C24;
+  color: #111111;
   position: relative;
 }
 
@@ -110,8 +110,8 @@ pointsStore.loadPoints()
 /* 侧边栏 */
 .sidebar {
   width: 200px;
-  background: #E8DCC2;
-  border-right: 2px solid #C9A227;
+  background: #e4e4e4;
+  border-right: 2px solid #8a8a8a;
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -129,12 +129,12 @@ pointsStore.loadPoints()
   font-family: 'KaiTi', 'STKaiti', serif;
   font-size: 20px;
   font-weight: bold;
-  color: #C0392B;
+  color: #1f1f1f;
   letter-spacing: 0.1em;
 }
 .sidebar-subtitle {
   font-size: 12px;
-  color: #8A8577;
+  color: #767676;
   margin-top: 4px;
 }
 .sidebar-nav {
@@ -151,19 +151,19 @@ pointsStore.loadPoints()
   padding: 10px 12px;
   border-radius: 6px;
   text-decoration: none;
-  color: #4A4A5A;
+  color: #3a3a3a;
   font-size: 14px;
   transition: all 0.15s;
   border: 1px solid transparent;
 }
 .sidebar-link:hover {
   background: rgba(201,162,39,0.1);
-  color: #1C1C24;
+  color: #111111;
 }
 .sidebar-link.active {
-  background: #C9A227;
+  background: #8a8a8a;
   color: white;
-  border-color: #8B6914;
+  border-color: #2b2b2b;
   font-weight: bold;
 }
 .link-icon { font-size: 18px; }
@@ -180,20 +180,20 @@ pointsStore.loadPoints()
 }
 .footer-user {
   font-size: 13px;
-  color: #4A4A5A;
+  color: #3a3a3a;
 }
 .footer-logout {
   padding: 4px 10px;
   background: transparent;
-  border: 1px solid #C0392B;
+  border: 1px solid #1f1f1f;
   border-radius: 4px;
-  color: #C0392B;
+  color: #1f1f1f;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.12s;
 }
 .footer-logout:hover {
-  background: #C0392B;
+  background: #1f1f1f;
   color: white;
 }
 
@@ -207,7 +207,7 @@ pointsStore.loadPoints()
 .top-bar {
   padding: 12px 24px;
   background: rgba(232,220,194,0.9);
-  border-bottom: 2px solid #C9A227;
+  border-bottom: 2px solid #8a8a8a;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -226,7 +226,7 @@ pointsStore.loadPoints()
   font-family: Georgia, serif;
   font-size: 16px;
   font-weight: bold;
-  color: #C9A227;
+  color: #8a8a8a;
 }
 .main-content {
   padding: 24px;

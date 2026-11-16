@@ -107,8 +107,8 @@ router.delete('/:id', authMiddleware, (req, res) => {
     return res.status(404).json({ error: '学生不存在或无权访问' })
   }
 
-  // 没开外键，所以旧入口直接删主行会把登录身份和游戏资产留成孤儿。
-  // 库里没有 foreign_keys 兜底，这一层检查就是唯一的闸。
+  // 外键已开启，但 username 与 student_no 没有声明关联，删档案仍可能留下身份。
+  // 显式预检保护这类未被 DDL 外键覆盖的关系。
   const refs = studentRefs(student.student_no)
   if (!studentDeletable(refs)) {
     const reason = studentBlockReason(refs)
