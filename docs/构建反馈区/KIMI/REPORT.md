@@ -257,3 +257,19 @@ if (winner) {
 - 产物自检：`node scripts/verify-build.mjs` → 通过；88 个产物，首屏 JS 112.0KB，懒加载 JS 6060.8KB，CSS 220.5KB，页面分包 16/16。既有 browserslist、`lobby.jpg`、大 chunk 和 CSS 偏大告警未顺手修改。
 - 未验证项：本节是服务端接入契约，尚未实现或运行权威 start/action/state 新路由；未做真实浏览器 UI、重启/多进程、生产数据库或真实名单验证；未部署、未开启积分同步、未启用战斗奖励。
 
+## KM-07 / 桌面版 KIMI 完整交接与基线同步 / 2026-11-14
+
+- 状态：交接文档已上传，待用户/Codex 确认；生产继续冻结。本批没有生产代码补丁。
+- 绝对工作区 / 分支：`D:/课件/platform/pet-garden-kimi` / `dev-kimi`。
+- 基线同步：已接收 Codex 2026-11-14 审核（核心 `1f7197d` 与 KM-06 契约通过并合入，整合合并提交 `7f77d9a42f38f6376ffd33e144882603d46b3c64`）。dev-kimi 由 `0d74a4ba29e7da3d495f3d35c0cae84533964ce0` **快进**至最新整合基线 `81cbb6001451e8dfa4bc8c6aaf268faf952e7cc9`，无冲突；带入的 Qoder 名单/DSH 美术预览文件不属于 KIMI 自产补丁。
+- 交接文档：`docs/handoffs/KIMI-2026-11-14-完整交接.md`。自包含：阅读顺序、身份与硬边界、最新授权范围（等待 Codex 权威路由接棒，只做算法维护与最小补修）、全部任务台账与已核实 SHA、核心行为细节、KM-06 契约要点、未完成/待决清单、实测门禁、本机踩坑、每轮协作流程与用户偏好。桌面版 KIMI 只读仓库即可接续。
+- 修改范围：仅新增上述交接文档与本节；未修改核心、路由、API、页面、seeds、迁移或他人文件。
+- 新基线门禁（同步后实测）：
+  - 全量测试：`node node_modules/vitest/vitest.mjs run` → **27 文件 / 366 条全部通过**（核心 7/7、浏览器斗法 17/17、战斗记录 7/7），与 Codex 独立验证 366 一致。
+  - 类型检查：`node node_modules/vue-tsc/bin/vue-tsc.js --noEmit` → 通过，0 输出、0 错误。
+  - 构建：`node node_modules/vite/bin/vite.js build` → 通过，1518 个模块。
+  - 产物自检：`node scripts/verify-build.mjs` → 通过；93 个产物，首屏 JS 112.3KB，懒加载 JS 6066.0KB，CSS 222.6KB，页面分包 16/16。browserslist、`lobby.jpg`、大 chunk 与 CSS 偏大告警仍在，未顺手修改。
+- 当前授权范围（按最新 FEEDBACK 与任务提示词）：KIMI 保留算法维护，先不新增路由或调整技能语义；发现类型/序列化边界问题才追加最小测试及说明；保持 20/60 保底、G7 等已收口数值；不发正式战斗奖励。权威 start/action/state、实例归属、胜负只写一次与零奖励由 Codex 接续。
+- 未验证项：权威路由仍未实现，`/duel` 仍本地演练，旧 result 仍 501；DOT/stun、重启/多进程恢复、持久 actionId 幂等、正式奖励未实现；未做真实浏览器 UI、生产数据库或真实名单验证；未部署、未开启积分同步。产物自检通过不等于允许部署。
+- 交接提交完整 SHA 在最终推送回执中给出；推送后请用户以「KIMI / dev-kimi / SHA / KM-07」转发 Codex。
+
