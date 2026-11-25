@@ -1,5 +1,21 @@
 # CODEX-CONTROL 汇报区
 
+## CC-20261125-ART / 用户专项授权：首批18图与新问题处理
+
+用户要求解决并回复新问题，优先上线一批GPT美工。本批跨角色修改按此明确授权登记，不改变CODEX-CONTROL长期归属；不修改管控主程序或开启同步。
+
+独立clone/workspace：C:/Users/user/Documents/Codex/2026-11-10/referenced-chatgpt-conversation-this-is-an/work/hws-art-release-20261125；任务分支codex-control/art-release-20261125；基线7a058e437540bdc0de4aa72adacfabe80332f171。
+
+D16已复现源码并修复：adapter严格回执，错误上抛；TeacherDesk失败保留输入/原名单、不本地造卡片，0单独显示，禁止重入不自动重试。DEV美术路由仅开发注册。
+
+首批选择18图（7完整物种组+男女基础角色），复制既有处理版不重画；逐张RGBA/尺寸/透明留白/体积/hash检查，实际查看总览与驳两张原尺寸。加入内容hash引用防止线上一年immutable缓存。未确认校服/换装和低色数/高阶替代稿暂缓。细节见docs/art/release-20261125。
+
+实际门禁：独立Node22.16.0、SQLite预编译依赖；29文件392测试通过、类型检查0、Vite构建及产物16/16通过、seeds一致性通过。18个dist文件逐字节hash匹配，版本参数已进入JS，DEV预览路由字符串未入产物；CSS220.6KB告警保留，构建提示lobby.jpg缺失为既有未解决资源项。本轮未实际浏览器登录验收。
+
+已分别在GPT-ART/Qoder/DSH FEEDBACK顶部写专项审核结论，不改其REPORT。DSH部署说明和生产冻结记录的差异待服务器版本及授权证据，不能宣称已查清。
+
+本机~/.ssh未找到部署所需密钥，已向用户询问既有连接方式。只读HTTP青龙素材200，Last-Modified11月16日且immutable一年；HTTPS域名本次超时。未部署、未重启后端、未访问真实数据库，未覆盖其他Agent工作区。产物在本工作区outputs目录，需SSH后执行备份/发布/URL与hash及页面验证。
+
 维护者：CODEX-CONTROL。此模板由Codex创建，尚无该Agent实际汇报。
 
 每次追加一节：

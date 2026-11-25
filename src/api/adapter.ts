@@ -448,16 +448,13 @@ export async function fetchClassStudents(classId: string): Promise<TeacherStuden
 
 /** 批量导入学生：body { classId, students: [{ name, studentNo }] } */
 export async function importStudents(classId: string, rows: ImportRow[]): Promise<number> {
-  return tryPost(
-    '/students/import',
-    { classId, students: rows },
-    (d) => {
-      const t = asRecord(d)
-      if (!t || !t.success) return null
-      return num(t.imported, rows.length)
-    },
-    0,
-  )
+  const res = await api.post('/students/import', { classId, students: rows }, { timeout: TIMEOUT })
+  const receipt = asRecord(res.data)
+  const count = receipt?.imported
+  if (receipt?.success !== true || typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > rows.length) {
+    throw new Error('导入回执不完整，请先刷新核对名单，不要重复提交')
+  }
+  return ok(count)
 }
 
 /** 新建班级；失败返回 null（占位模式由调用方本地造一个） */

@@ -2,8 +2,8 @@
   "_comment": "内容层：角色皮肤（男/女各一版）。宠物皮肤已废弃，装饰一律走角色端。加一套皮肤 = 加两行 + 传两张图。",
   "_priceSource": "价格不在本表维护：按 theme 读 economy.json 的 skin.<theme>（base / graduate 为 0，靠解锁获得）。",
   "skins": [
-    { "id": "skin_base_m",     "name": "素衣·男",     "theme": "base",     "gender": "male",   "image": "/pet-garden/characters/base_m.png",     "unlock": null, "sortOrder": 1 },
-    { "id": "skin_base_f",     "name": "素衣·女",     "theme": "base",     "gender": "female", "image": "/pet-garden/characters/base_f.png",     "unlock": null, "sortOrder": 2 },
+    { "id": "skin_base_m",     "name": "素衣·男",     "theme": "base",     "gender": "male",   "image": "/pet-garden/characters/base_m.png?v=836fb40a3c93",     "unlock": null, "sortOrder": 1 },
+    { "id": "skin_base_f",     "name": "素衣·女",     "theme": "base",     "gender": "female", "image": "/pet-garden/characters/base_f.png?v=49f4eb7b5468",     "unlock": null, "sortOrder": 2 },
     { "id": "skin_school_m",   "name": "宏文校服·男", "theme": "school",   "gender": "male",   "image": "/pet-garden/characters/school_m.png",   "unlock": null, "sortOrder": 3 },
     { "id": "skin_school_f",   "name": "宏文校服·女", "theme": "school",   "gender": "female", "image": "/pet-garden/characters/school_f.png",   "unlock": null, "sortOrder": 4 },
     { "id": "skin_hanfu_m",    "name": "云纹汉服·男", "theme": "hanfu",    "gender": "male",   "image": "/pet-garden/characters/hanfu_m.png",    "unlock": null, "sortOrder": 5 },

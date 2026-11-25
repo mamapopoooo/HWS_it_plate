@@ -83,6 +83,7 @@ function parseRows(text: string): ImportRow[] {
 }
 
 async function doImport() {
+  if (importing.value) return
   const rows = parseRows(importText.value)
   if (rows.length === 0) {
     importMsg.value = '没解析出学生，请每行一个「学号 姓名」'
@@ -90,33 +91,17 @@ async function doImport() {
   }
   importing.value = true
   importMsg.value = ''
-  const count = await importStudents(activeClassId.value, rows)
-  importing.value = false
-
-  if (count > 0) {
-    importMsg.value = `成功导入 ${count} 人`
+  try {
+    const count = await importStudents(activeClassId.value, rows)
+    importMsg.value = count > 0 ? `成功导入 ${count} 人` : '本次未新增学生，请核对名单'
+    importText.value = ''
     await loadStudents()
-  } else {
-    // 接口未就绪：本地追加，便于教师端先行试用
-    let added = 0
-    for (const r of rows) {
-      if (!r.name) continue
-      students.value.push({
-        id: `local-${Date.now()}-${added}`,
-        name: r.name,
-        studentNo: r.studentNo ?? '',
-        points: 0,
-        petName: '—',
-        petLevel: 1,
-      })
-      added += 1
-    }
-    importMsg.value = `接口未就绪，已在本地追加 ${added} 人（联网后请重新导入）`
+  } catch (err) {
+    const response = err as { response?: { data?: { error?: string } }; message?: string }
+    importMsg.value = response?.response?.data?.error || response?.message || '导入未确认，请先刷新核对名单，不要重复提交'
+  } finally {
+    importing.value = false
   }
-  importText.value = ''
-  setTimeout(() => {
-    if (importMsg.value.startsWith('成功')) showImport.value = false
-  }, 900)
 }
 
 const totalPoints = computed(() => students.value.reduce((s, x) => s + x.points, 0))

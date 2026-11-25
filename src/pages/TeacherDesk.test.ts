@@ -1,14 +1,34 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-const mocks = vi.hoisted(() => ({ updateStudent: vi.fn(), deleteStudent: vi.fn(), syncPoints: vi.fn() }))
+const mocks = vi.hoisted(() => ({ updateStudent: vi.fn(), deleteStudent: vi.fn(), syncPoints: vi.fn(), importStudents: vi.fn() }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/api/adapter', () => ({
   fetchClasses: async () => [{ id: 'demo', name: '示例班' }],
   fetchClassStudents: async () => [{ id: 'student', name: '示例甲', studentNo: '990001', points: 10, petName: '—', petLevel: 1 }],
-  fetchEvaluations: async () => [], importStudents: vi.fn(), ...mocks,
+  fetchEvaluations: async () => [], ...mocks,
 }))
 import TeacherDesk from './TeacherDesk.vue'
 afterEach(() => vi.clearAllMocks())
+it('导入409保留粘贴内容及原名单，零新增也不伪造卡片', async () => {
+  const wrapper = mount(TeacherDesk)
+  const button = (text: string) => wrapper.findAll('button').find(b => b.text() === text)!
+  try {
+    await flushPromises()
+    await button('导入学生').trigger('click')
+    await wrapper.get('textarea').setValue('990002 示例乙')
+    mocks.importStudents.mockRejectedValueOnce({ response: { data: { error: '学号已存在' } } })
+    await wrapper.get('.import__ops button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('学号已存在')
+    expect(wrapper.get('textarea').element.value).toBe('990002 示例乙')
+    expect(wrapper.findAll('.stu')).toHaveLength(1)
+    mocks.importStudents.mockResolvedValueOnce(0)
+    await wrapper.get('.import__ops button').trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('本次未新增学生')
+    expect(wrapper.findAll('.stu')).toHaveLength(1)
+  } finally { wrapper.unmount() }
+})
 it('待提交先持久化；丢响应后重试沿用事件，确认前不显示假余额', async () => {
   localStorage.setItem('user', JSON.stringify({id:'test-teacher'}))
   localStorage.removeItem('mojing-teacher-points-test-teacher')
