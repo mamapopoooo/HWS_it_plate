@@ -1,0 +1,1 @@
+Columns: first form, previous form, original draft, revised draft. These five are alternative high forms. Check presence and scale before selection; the horizontal and diving fish read smaller. All five sprites are RGBA 1024x1024 under 250000 bytes.
