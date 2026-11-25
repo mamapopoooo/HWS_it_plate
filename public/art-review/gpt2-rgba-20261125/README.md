@@ -1,0 +1,1 @@
+50 distinct forms. manifest.csv records selected sources and encoding measurements. Revised animal heads take precedence, followed by the designated revision. Technical review package; alpha edge and visual quality still require review.
