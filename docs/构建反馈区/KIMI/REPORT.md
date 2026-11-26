@@ -273,3 +273,20 @@ if (winner) {
 - 未验证项：权威路由仍未实现，`/duel` 仍本地演练，旧 result 仍 501；DOT/stun、重启/多进程恢复、持久 actionId 幂等、正式奖励未实现；未做真实浏览器 UI、生产数据库或真实名单验证；未部署、未开启积分同步。产物自检通过不等于允许部署。
 - 交接提交完整 SHA 在最终推送回执中给出；推送后请用户以「KIMI / dev-kimi / SHA / KM-07」转发 Codex。
 
+## KM-08 / 2026-11-16 反馈同步、基线复验与交接事实修正 / 2026-11-16
+
+- 状态：同步复验与文档交付，生产继续冻结；本批没有生产代码补丁，也未获得新的 KIMI 编码派工。
+- 绝对工作区 / 分支：`D:/课件/platform/pet-garden-kimi` / `dev-kimi`。
+- 最新反馈：Codex 2026-11-16 节仅收口教师原始增量积分，不套消费 G7 倍率；消费余额与名单累计积分分开存储；金额为非零安全整数且每条绝对值不超过 10000，余额不足整批 409、不截断。未实现撤销事件、负分自动上传或战斗规则变更；纯战斗核心接棒待办保留，不重复修改已收口路由。
+- 基线同步：在 KM-07 交接提交 `cc2dcd07ebf709210c93507deed11d674e2ebcd0` 上合并 `origin/dev-codex-integration-20261113@7a058e437540bdc0de4aa72adacfabe80332f171`，本地合并提交为 `129037c207b1730f45d3a9ad59e03e823f68a9d0`，无冲突。合并带入的教师积分、年级榜、管理员初始化及其他 Agent 文件不属于 KIMI 自产补丁。
+- 只读核对：`server/routes/game-v2.js:20-22` 的旧 `/battle/pve/result` 仍在第 21 行返回 501 + `AUTHORITATIVE_BATTLE_REQUIRED`；`:269-291` 的 start 仍在第 289 行返回战斗引擎待集成，尚无权威 action/state。`server/game/migrate-v2.js:126-135` 的 `battle_records` 仍为原 8 列。共享核心、浏览器适配与既有技能语义均未改变。
+- 修改范围：仅更新 `docs/handoffs/KIMI-2026-11-14-完整交接.md` 的本轮基线、上述行号、KM-08 台账与门禁数据，并追加本节；未修改核心、路由、API、页面、seeds、迁移或他人文件。
+- 新基线门禁（KIMI 本地合并后实测）：
+  - 全量测试：`node node_modules/vitest/vitest.mjs run` → **29 文件 / 385 条全部通过**，其中共享核心 7/7、浏览器斗法 17/17、战斗记录 7/7、名单清除/导入 25/25。
+  - 类型检查：`node node_modules/vue-tsc/bin/vue-tsc.js --noEmit` → 通过，0 输出、0 错误。
+  - 构建：`node node_modules/vite/bin/vite.js build` → 通过，1518 个模块完成转换。
+  - 产物自检：`node scripts/verify-build.mjs` → 通过；93 个产物，首屏 JS 112.3KB，懒加载 JS 6067.1KB，CSS 222.6KB，页面分包 16/16。既有 browserslist、`lobby.jpg`、大 chunk 与 CSS 偏大告警仍在，未顺手修改。
+- 当前授权范围不变：KIMI 保留算法维护，先不新增路由或调整技能语义；权威 start/action/state、实例归属、胜负只写一次与零奖励仍由 Codex 接续。
+- 未验证项：权威路由仍未实现，`/duel` 仍本地演练，旧 result 仍 501；DOT/stun、重启/多进程恢复、持久 actionId 幂等、正式奖励未实现；未做真实浏览器 UI、生产数据库或真实名单验证；未部署、未开启积分同步。产物自检通过不等于允许部署。
+- 文档交付完整 SHA 在最终推送回执中给出；推送后请用户以「KIMI / dev-kimi / SHA / KM-08」转发 Codex。
+
