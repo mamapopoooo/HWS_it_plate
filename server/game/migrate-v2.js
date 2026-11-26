@@ -4,7 +4,7 @@
 import { db } from '../db.js'
 
 import { v4 as uuidv4 } from 'uuid'
-import { hashPassword } from '../utils/password.js'
+import { migrateTeacherPoints } from '../utils/teacherPoints.js'
 
 export function migrateV2() {
   // 扩展 users 表（幂等：列已存在则跳过）
@@ -315,17 +315,7 @@ export function migrateV2() {
     CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, is_read);
   `)
 
-  // 插入默认管理员账号（如果不存在）
-  const adminExists = db.prepare("SELECT id FROM users WHERE username = ?").get('admin')
-  if (!adminExists) {
-    const adminId = uuidv4()
-    const passwordHash = hashPassword('123456')
-    db.prepare(`
-      INSERT INTO users (id, username, password_hash, role, real_name, is_guest, created_at)
-      VALUES (?, ?, ?, 'admin', '管理员', 0, ?)
-    `).run(adminId, 'admin', passwordHash, Date.now())
-    console.log('✅ 创建默认管理员账号 admin/123456')
-  }
+  migrateTeacherPoints(db)
 
   // 插入默认赛季（如果不存在）
   const seasonExists = db.prepare("SELECT id FROM seasons WHERE is_active = 1").get()

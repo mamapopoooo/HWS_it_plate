@@ -1,3 +1,4 @@
+import { createTeacherPointsRoute } from '../utils/teacherPoints.js'
 // 墨境 v2.0 游戏 API 路由
 import { Router } from 'express'
 import { v4 as uuidv4 } from 'uuid'
@@ -715,30 +716,7 @@ router.get('/ranking/class', (req, res) => {
 // ========== 教师端接口 ==========
 
 // 同步学生积分（教师端调用）
-router.post('/teacher/sync-points', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT role FROM users WHERE id = ?').get(req.userId)
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: '权限不足' })
-  }
-
-  const { records } = req.body
-  if (!records || !Array.isArray(records)) {
-    return res.status(400).json({ error: '缺少积分记录' })
-  }
-
-  let synced = 0
-  for (const record of records) {
-    const student = db.prepare('SELECT id FROM users WHERE username = ? AND role = ?').get(record.studentNo, 'student')
-    if (student) {
-      db.prepare('UPDATE users SET game_points = game_points + ? WHERE id = ?').run(record.amount, student.id)
-      db.prepare('INSERT INTO game_points_records (id, user_id, amount, reason, category, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-        .run(uuidv4(), student.id, record.amount, record.reason || '教师同步', 'teacher_sync', record.timestamp || Date.now())
-      synced++
-    }
-  }
-
-  res.json({ success: true, synced })
-})
+router.post('/teacher/sync-points', authMiddleware, createTeacherPointsRoute(db))
 
 // 获取学生列表
 router.get('/teacher/students', authMiddleware, (req, res) => {

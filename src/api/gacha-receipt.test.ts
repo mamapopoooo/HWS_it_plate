@@ -1,7 +1,24 @@
 import { afterEach, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ post: vi.fn(), get: vi.fn(), put: vi.fn(), delete: vi.fn() }))
 vi.mock('@/composables/useAuth', () => ({ useAuth: () => ({ api: mocks }) }))
-import { drawWithReceipt, fetchClassStudents, updateStudent, deleteStudent } from './adapter'
+import { drawWithReceipt, fetchClassStudents, updateStudent, deleteStudent, importStudents } from './adapter'
+
+it('导入拒绝保留服务端错误，不重试或回落为0', async () => {
+  const rejection = { response: { status: 409, data: { error: '学号已存在' } } }
+  mocks.post.mockRejectedValueOnce(rejection)
+  await expect(importStudents('demo', [{ studentNo: '990001', name: '示例甲' }])).rejects.toBe(rejection)
+  expect(mocks.post).toHaveBeenCalledTimes(1)
+})
+it.each([{ success: true }, { success: true, imported: -1 }, { success: true, imported: 2 }, '<html>'])('导入错误回执不会假装保存成功：%j', async (data) => {
+  mocks.post.mockResolvedValueOnce({ data })
+  await expect(importStudents('demo', [{ studentNo: '990001', name: '示例甲' }])).rejects.toThrow('不要重复提交')
+})
+it('导入已确认的0与正数原样返回', async () => {
+  for (const imported of [0, 1]) {
+    mocks.post.mockResolvedValueOnce({ data: { success: true, imported } })
+    expect(await importStudents('demo', [{ studentNo: '990001', name: '示例甲' }])).toBe(imported)
+  }
+})
 afterEach(() => vi.clearAllMocks())
 
 it('教师名单修改/删除的409不会被占位回落吞掉', async () => {

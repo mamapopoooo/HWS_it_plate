@@ -49,7 +49,7 @@ const router = createRouter({
     { path: '/teacher', name: 'teacher', component: () => import('@/pages/TeacherDesk.vue'), meta: ADMIN },
     { path: '/review', name: 'review', component: () => import('@/pages/AdminReview.vue'), meta: ADMIN },
     { path: '/teacher/content', name: 'content-admin', component: () => import('@/pages/ContentAdmin.vue'), meta: ADMIN },
-    // 美术候选预览：仅 DEV 构建注册，正式包不存在该路由
+    // 美术候选预览（开发验收用）：仅 DEV 构建注册，正式包不存在该路由
     ...(import.meta.env.DEV
       ? [{ path: '/dev/art-preview', name: 'art-preview', component: () => import('@/pages/ArtPreview.vue'), meta: ADMIN }]
       : []),

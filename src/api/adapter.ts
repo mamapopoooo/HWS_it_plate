@@ -400,7 +400,13 @@ export async function fetchTeacherStudents(): Promise<TeacherStudent[]> {
 
 /** 批量同步积分（教师端加减分） */
 export async function syncPoints(records: PointsRecord[]): Promise<boolean> {
-  return tryPost('/v2/teacher/sync-points', { records }, (d) => Boolean(asRecord(d)?.success), false)
+  const { data } = await api.post('/v2/teacher/sync-points', { records }, { timeout: 10000 })
+  const results = asArray(data?.results)
+  return data?.success === true && results?.length === records.length &&
+    records.every(r => results.some(raw => {
+      const row = asRecord(raw)
+      return row?.eventId === r.eventId && ['applied', 'duplicate'].includes(String(row.status))
+    })) === true
 }
 
 /* ---------------- 班级与学生（v2 接口，教师端在用） ---------------- */
@@ -442,16 +448,13 @@ export async function fetchClassStudents(classId: string): Promise<TeacherStuden
 
 /** 批量导入学生：body { classId, students: [{ name, studentNo }] } */
 export async function importStudents(classId: string, rows: ImportRow[]): Promise<number> {
-  return tryPost(
-    '/students/import',
-    { classId, students: rows },
-    (d) => {
-      const t = asRecord(d)
-      if (!t || !t.success) return null
-      return num(t.imported, rows.length)
-    },
-    0,
-  )
+  const res = await api.post('/students/import', { classId, students: rows }, { timeout: TIMEOUT })
+  const receipt = asRecord(res.data)
+  const count = receipt?.imported
+  if (receipt?.success !== true || typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > rows.length) {
+    throw new Error('导入回执不完整，请先刷新核对名单，不要重复提交')
+  }
+  return ok(count)
 }
 
 /** 新建班级；失败返回 null（占位模式由调用方本地造一个） */

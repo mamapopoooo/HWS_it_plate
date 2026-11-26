@@ -1,0 +1,240 @@
+{
+  "sourceCommit": "559c79adda6184a390eba8b2ea312b4e15952341",
+  "review": "18 files reviewed on contact sheet; bo stages individually inspected; visual page and production pending",
+  "files": [
+    {
+      "path": "characters/base_m.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 241215,
+      "sha256": "836fb40a3c9324bc2825900c149c5adc65a9e8cc0f27360cc2eafd9a10d5d8ea",
+      "opaque_bbox": [
+        340,
+        307,
+        685,
+        1413
+      ]
+    },
+    {
+      "path": "characters/base_f.png",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 231532,
+      "sha256": "49f4eb7b54684111df393d4d3508da6033f3d5189a4b858f01272656500d5ada",
+      "opaque_bbox": [
+        332,
+        307,
+        692,
+        1413
+      ]
+    },
+    {
+      "path": "pets/qinglong/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 235771,
+      "sha256": "797ea07e6e369685e461486cf36bc8eaf9c174f0bfb5540d928846c009bb981c",
+      "opaque_bbox": [
+        95,
+        205,
+        930,
+        942
+      ]
+    },
+    {
+      "path": "pets/qinglong/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 235225,
+      "sha256": "6e5630b9df049f9ade0e6af24a57a185e42edce8e90d22a0f666ac33c310bef8",
+      "opaque_bbox": [
+        65,
+        205,
+        957,
+        941
+      ]
+    },
+    {
+      "path": "pets/qinglong/form3.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 219361,
+      "sha256": "0a03c8e2a57cd23efd214dc5e0241af658882887340c49af3df754149a48f864",
+      "opaque_bbox": [
+        139,
+        205,
+        885,
+        942
+      ]
+    },
+    {
+      "path": "pets/qinglong/form4.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 249279,
+      "sha256": "decc656d8f9390e6199c6cdb1ca65667937fb07609936432ffd59123cb568bb5",
+      "opaque_bbox": [
+        152,
+        205,
+        872,
+        942
+      ]
+    },
+    {
+      "path": "pets/bo/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 234862,
+      "sha256": "f651919702724453e8b78ac970436f64f97197bc6b5592eb4dfc917170b1504e",
+      "opaque_bbox": [
+        176,
+        205,
+        847,
+        942
+      ]
+    },
+    {
+      "path": "pets/bo/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 247405,
+      "sha256": "349b8edf2d466b26c360f862c8528266df139e6dac9d298def0b1b3fe9f7dd2a",
+      "opaque_bbox": [
+        140,
+        206,
+        883,
+        942
+      ]
+    },
+    {
+      "path": "pets/boshi/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 238387,
+      "sha256": "5598d0fe821ebd669a7bedc349f3465abac7392771752249488eab858c20df02",
+      "opaque_bbox": [
+        116,
+        206,
+        906,
+        942
+      ]
+    },
+    {
+      "path": "pets/boshi/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 245286,
+      "sha256": "ce7a173bcd4cd0abeb8a378eb1df162ccc8d7d4845fed133e980ceb4f7f62b85",
+      "opaque_bbox": [
+        133,
+        206,
+        891,
+        941
+      ]
+    },
+    {
+      "path": "pets/mengji/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 240678,
+      "sha256": "ec37b7033a0e94bfc2c12797d3620919990d0b252c3c3db7289a0118e2fa59f7",
+      "opaque_bbox": [
+        152,
+        205,
+        854,
+        942
+      ]
+    },
+    {
+      "path": "pets/mengji/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 231533,
+      "sha256": "f37259902d7b5e9f369f44c6a9fd3f5a33ef83552259fe17700351c3a45e55b1",
+      "opaque_bbox": [
+        77,
+        206,
+        947,
+        942
+      ]
+    },
+    {
+      "path": "pets/tiangou/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 240519,
+      "sha256": "9ba880c1a69092d45431f62cd58e7ea37462d45e6607d96c709923c3466cf416",
+      "opaque_bbox": [
+        152,
+        206,
+        871,
+        942
+      ]
+    },
+    {
+      "path": "pets/tiangou/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 243435,
+      "sha256": "d22474bf407fe59956bd3875677a74c837969078d69eb007f3381ed1d772716f",
+      "opaque_bbox": [
+        146,
+        205,
+        879,
+        941
+      ]
+    },
+    {
+      "path": "pets/lei/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 215801,
+      "sha256": "21b32c4c3d28d55a8a55fc36bb023240d38d1331e5c311ccc66480d12fbabb63",
+      "opaque_bbox": [
+        159,
+        207,
+        864,
+        942
+      ]
+    },
+    {
+      "path": "pets/lei/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 229680,
+      "sha256": "08a98cd2b90ba680bb99523f710cfe270489d30104ec329eee65291b1cc5d89b",
+      "opaque_bbox": [
+        143,
+        206,
+        880,
+        941
+      ]
+    },
+    {
+      "path": "pets/zhuru/form1.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 236798,
+      "sha256": "e2e5ea0544fc9faa27cd38d21d06ea395fa1214687e970a14b727171405f1562",
+      "opaque_bbox": [
+        101,
+        206,
+        938,
+        942
+      ]
+    },
+    {
+      "path": "pets/zhuru/form2.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 228355,
+      "sha256": "186e737bdc795ab0e2d3917bbb3d25c7fd93a93871cf86190b8ea6c69c893fa4",
+      "opaque_bbox": [
+        110,
+        205,
+        914,
+        942
+      ]
+    }
+  ]
+}
