@@ -54,6 +54,63 @@ async function call(path, body, id = 'demo-user', method) {
 }
 const points = () => db.prepare("SELECT game_points FROM users WHERE id='demo-user'").get().game_points
 
+describe('年级榜参数与分组', () => {
+  it('未知指标包括原型名明确拒绝', async () => {
+    db.exec("INSERT OR REPLACE INTO ranking_config(id,name,metric,scope) VALUES('invalid','测试','toString','grade')")
+    expect((await call('/api/v3/rankings/invalid?grade=7')).status).toBe(400)
+  })
+  it.each(['points','power','collection_rate'])('指标%s在分组前筛选年级并在筛选内排名', async metric => {
+    db.prepare(`INSERT OR REPLACE INTO ranking_config(id,name,metric,scope) VALUES('test-grade','测试',?,'grade')`).run(metric)
+    db.exec("INSERT INTO users(id,username,role,grade,game_points) VALUES('other','other','student',6,9999)")
+    const r=await call('/api/v3/rankings/test-grade?grade=7')
+    expect(r.status).toBe(200)
+    expect(r.data.rankings).toHaveLength(1)
+    expect(r.data.rankings[0]).toMatchObject({ username:'0001',rank:1,grade:7 })
+  })
+  it.each(['abc','0','','6%20OR%201=1','6&grade=7'])('拒绝非法年级%s而非SQL报错', async grade => {
+    db.exec("INSERT OR REPLACE INTO ranking_config(id,name,metric,scope) VALUES('test-grade','测试','points','grade')")
+    expect((await call('/api/v3/rankings/test-grade?grade='+grade)).status).toBe(400)
+  })
+})
+
+describe('教师持久事件与事务', () => {
+  const event = () => ({ eventId:crypto.randomUUID(),studentNo:'0001',amount:5,reason:'示例课堂' })
+  const send = records => call('/api/v2/teacher/sync-points',{ records },'demo-teacher')
+  it('同事件重复只记一次，消费余额与累计分独立', async () => {
+    const r=event()
+    expect((await send([r])).status).toBe(200)
+    expect((await send([r])).data.results[0].status).toBe('duplicate')
+    expect(points()).toBe(1005)
+    expect(db.prepare('SELECT total_points FROM students').get().total_points).toBe(5)
+    expect(db.prepare('SELECT COUNT(*) n FROM game_points_records').get().n).toBe(1)
+    expect((await send([{...r,amount:6}])).status).toBe(409)
+    expect(points()).toBe(1005)
+  })
+  it('批次含未知学生或扣款不足时整批回滚', async () => {
+    expect((await send([event(),{...event(),studentNo:'missing'}])).status).toBe(409)
+    expect(points()).toBe(1000)
+    expect((await send([event(),{...event(),amount:-10000}])).status).toBe(409)
+    expect(points()).toBe(1000)
+  })
+  it('流水失败时余额、累计与去重一起回滚', async () => {
+    db.exec("CREATE TEMP TRIGGER fail_points BEFORE INSERT ON game_points_records BEGIN SELECT RAISE(ABORT,'test failure'); END")
+    const r=event()
+    try { expect((await send([r])).status).toBe(409); expect(points()).toBe(1000)
+      expect(db.prepare('SELECT 1 FROM teacher_point_events WHERE event_id=?').get(r.eventId)).toBeUndefined()
+    } finally { db.exec('DROP TRIGGER fail_points') }
+  })
+  it('累计积分溢出时拒绝，余额保持原值', async () => {
+    db.prepare('UPDATE students SET total_points=?').run(Number.MAX_SAFE_INTEGER)
+    expect((await send([event()])).status).toBe(409)
+    expect(points()).toBe(1000)
+  })
+  it.each([1.5,0,'5'])('非法金额%s不写入，学生无权提交', async amount => {
+    expect((await send([{...event(),amount}])).status).toBe(400)
+    expect((await call('/api/v2/teacher/sync-points',{ records:[event()] })).status).toBe(403)
+    expect(points()).toBe(1000)
+  })
+})
+
 describe('真实挂载消费接口', () => {
   it('G7道具单价按配置四舍五入，数量是单价整数倍；G6保留原价', async () => {
     const r = await call('/api/v2/shop/buy', { itemId: 'demo-item', quantity: 3 })
