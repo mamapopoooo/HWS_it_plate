@@ -3,58 +3,645 @@
   "_imageConvention": "/pet-garden/pets/{id 去 pet_ 前缀}/form{N}.png",
   "_styleBalance": "目标：萌 8 / 俊 10 / 雅 10 / 奇 10；每阶至少 2 种风格，单种风格在同阶内不超过 50%，萌系不低于 15%",
   "pets": [
-    { "id": "pet_luwu",        "name": "陆吾",     "pinyin": "lù wú",              "tier": 1, "trigram": "qian", "style": "jun", "source": "西次三经", "role": "守卫", "description": "昆仑之守，人面虎身九尾，司天之九部。", "sortOrder": 1 },
-    { "id": "pet_kaimingshou", "name": "开明兽",   "pinyin": "kāi míng shòu",      "tier": 1, "trigram": "qian", "style": "qi",  "source": "海内西经", "role": "守卫", "description": "昆仑门神，九首人面，虎身而立。", "sortOrder": 2 },
-    { "id": "pet_yingzhao",    "name": "英招",     "pinyin": "yīng zhāo",          "tier": 1, "trigram": "qian", "style": "jun", "source": "西次三经", "role": "速攻", "description": "马身人面，虎纹鸟翼，司天帝之苑。", "sortOrder": 3 },
-
-    { "id": "pet_zheng",       "name": "狰",       "pinyin": "zhēng",              "tier": 1, "trigram": "kun",  "style": "qi",  "source": "西山经",   "role": "输出", "description": "章莪之山，五尾一角，其音如击石。", "sortOrder": 4 },
-    { "id": "pet_huan",        "name": "讙",       "pinyin": "huān",               "tier": 1, "trigram": "kun",  "style": "meng","source": "西次三经", "role": "控制", "description": "翼望之山，一目三尾，善御凶。", "sortOrder": 5 },
-    { "id": "pet_bo", "formImages": {"1":"/pet-garden/pets/bo/form1.png?v=f65191970272","2":"/pet-garden/pets/bo/form2.png?v=349b8edf2d46"},          "name": "驳",       "pinyin": "bó",                 "tier": 1, "trigram": "kun",  "style": "jun", "source": "西次四经", "role": "坦克", "description": "中曲之山，马身一角，虎爪锯齿，能驯猛兽。", "sortOrder": 6 },
-
-    { "id": "pet_tiangou", "formImages": {"1":"/pet-garden/pets/tiangou/form1.png?v=9ba880c1a690","2":"/pet-garden/pets/tiangou/form2.png?v=d22474bf407f"},     "name": "天狗",     "pinyin": "tiān gǒu",           "tier": 1, "trigram": "zhen", "style": "meng","source": "西次三经", "role": "速攻", "description": "阴山有兽，状如狸而白首，可以御凶。", "sortOrder": 7 },
-    { "id": "pet_lei", "formImages": {"1":"/pet-garden/pets/lei/form1.png?v=21b32c4c3d28","2":"/pet-garden/pets/lei/form2.png?v=08a98cd2b90b"},         "name": "鸓",       "pinyin": "lěi",                "tier": 1, "trigram": "zhen", "style": "qi",  "source": "西次二经", "role": "输出", "description": "状如鹊，赤黑二首四足，可以御火。", "sortOrder": 8 },
-    { "id": "pet_zhuru", "formImages": {"1":"/pet-garden/pets/zhuru/form1.png?v=e2e5ea0544fc","2":"/pet-garden/pets/zhuru/form2.png?v=186e737bdc79"},       "name": "朱獳",     "pinyin": "zhū rú",             "tier": 1, "trigram": "zhen", "style": "ya",  "source": "东山经",   "role": "控制", "description": "状如狐而鱼翼，见则其国大旱。", "sortOrder": 9 },
-
-    { "id": "pet_boshi", "formImages": {"1":"/pet-garden/pets/boshi/form1.png?v=5598d0fe821e","2":"/pet-garden/pets/boshi/form2.png?v=ce7a173bcd4c"},       "name": "猼訑",     "pinyin": "bó yí",              "tier": 1, "trigram": "xun",  "style": "qi",  "source": "南山经",   "role": "闪避", "description": "基山有兽，羊身九尾四耳，目在背上。", "sortOrder": 10 },
-    { "id": "pet_mengji", "formImages": {"1":"/pet-garden/pets/mengji/form1.png?v=ec37b7033a0e","2":"/pet-garden/pets/mengji/form2.png?v=f37259902d7b"},      "name": "孟极",     "pinyin": "mèng jí",            "tier": 1, "trigram": "xun",  "style": "jun", "source": "北山经",   "role": "速攻", "description": "状如豹而文题白身，善伏。", "sortOrder": 11 },
-    { "id": "pet_qitu",        "name": "鵸鵌",     "pinyin": "qí tú",              "tier": 1, "trigram": "xun",  "style": "meng","source": "西次三经", "role": "辅助", "description": "翼望之山，三首六尾，善笑，可以御凶。", "sortOrder": 12 },
-
-    { "id": "pet_heluoyu",     "name": "何罗鱼",   "pinyin": "hé luó yú",          "tier": 1, "trigram": "kan",  "style": "qi",  "source": "北山经",   "role": "坦克", "description": "一首十身，其音如吠犬，食之已痈。", "sortOrder": 13 },
-    { "id": "pet_luoyu",       "name": "蠃鱼",     "pinyin": "luǒ yú",             "tier": 1, "trigram": "kan",  "style": "ya",  "source": "西山经",   "role": "辅助", "description": "鱼身而鸟翼，见则其邑大水。", "sortOrder": 14 },
-    { "id": "pet_ranyiyu",     "name": "冉遗鱼",   "pinyin": "rǎn yí yú",          "tier": 1, "trigram": "kan",  "style": "qi",  "source": "北山经",   "role": "输出", "description": "鱼身蛇首六足，食之使人不眯。", "sortOrder": 15 },
-
-    { "id": "pet_jiuweihu",    "name": "九尾狐",   "pinyin": "jiǔ wěi hú",         "tier": 1, "trigram": "li",   "style": "ya",  "source": "南山经",   "role": "输出", "description": "青丘之山，状如狐而九尾，其音如婴儿。", "sortOrder": 16 },
-    { "id": "pet_chiru",       "name": "赤鱬",     "pinyin": "chì rú",             "tier": 1, "trigram": "li",   "style": "meng","source": "南山经",   "role": "治疗", "description": "人面鱼身，其音如鸳鸯，食之不疥。", "sortOrder": 17 },
-    { "id": "pet_zhu",         "name": "鴸",       "pinyin": "zhū",                "tier": 1, "trigram": "li",   "style": "qi",  "source": "南山经",   "role": "控制", "description": "状如鸱而人手，其鸣自号，见则多放士。", "sortOrder": 18 },
-
-    { "id": "pet_xiqu",        "name": "犀渠",     "pinyin": "xī qú",              "tier": 1, "trigram": "gen",  "style": "jun", "source": "中山经",   "role": "坦克", "description": "状如牛，苍身，其音如婴儿；性烈，守山径不让人过。", "sortOrder": 19 },
-    { "id": "pet_qianyang",    "name": "羬羊",     "pinyin": "qián yáng",          "tier": 1, "trigram": "gen",  "style": "meng","source": "西山经",   "role": "防御", "description": "状如羊而马尾，其脂可以已腊。", "sortOrder": 20 },
-    { "id": "pet_taotie",      "name": "饕餮",     "pinyin": "tāo tiè",            "tier": 1, "trigram": "gen",  "style": "jun", "source": "北山经",   "role": "输出", "description": "钩吾之山，羊身人面，虎齿人爪，贪吃成性。", "sortOrder": 21 },
-
-    { "id": "pet_changyou",    "name": "长右",     "pinyin": "cháng yòu",          "tier": 1, "trigram": "dui",  "style": "meng","source": "南山经",   "role": "控制", "description": "状如禺而四耳，见则郡县大水。", "sortOrder": 22 },
-    { "id": "pet_lu",          "name": "鯥",       "pinyin": "lù",                 "tier": 1, "trigram": "dui",  "style": "qi",  "source": "南山经",   "role": "辅助", "description": "牛形蛇尾有翼，冬藏夏见，食之不肿。", "sortOrder": 23 },
-    { "id": "pet_wenyaoyu",    "name": "文鳐鱼",   "pinyin": "wén yáo yú",         "tier": 1, "trigram": "dui",  "style": "ya",  "source": "西山经",   "role": "输出", "description": "状如鲤鱼而有翼，夜飞，见则大穰。", "sortOrder": 24 },
-
-    { "id": "pet_baize",       "name": "白泽",     "pinyin": "bái zé",             "tier": 2, "trigram": "qian", "style": "ya",  "source": "海外经",   "role": "辅助", "description": "通万物之情，知万物之状，王者有德则至。", "sortOrder": 25 },
-    { "id": "pet_tulou",       "name": "土蝼",     "pinyin": "tǔ lóu",             "tier": 2, "trigram": "kun",  "style": "meng","source": "西山经",   "role": "坦克", "description": "昆仑之丘，状如羊而四角，守护山间草木。", "sortOrder": 26 },
-    { "id": "pet_kui",         "name": "夔",       "pinyin": "kuí",                "tier": 2, "trigram": "zhen", "style": "jun", "source": "中山经",   "role": "输出", "description": "东海流波之山，状如牛，苍身无角，一足，声如雷。", "sortOrder": 27 },
-    { "id": "pet_lushu",       "name": "鹿蜀",     "pinyin": "lù shǔ",             "tier": 2, "trigram": "xun",  "style": "ya",  "source": "南山经",   "role": "速攻", "description": "杻阳之山，马身虎纹，其音如谣，佩之宜子孙。", "sortOrder": 28 },
-    { "id": "pet_fuzhu",       "name": "夫诸",     "pinyin": "fū zhū",             "tier": 2, "trigram": "kan",  "style": "ya",  "source": "中山经",   "role": "治疗", "description": "状如白鹿而四角，见则其邑大水。", "sortOrder": 29 },
-    { "id": "pet_bifang",      "name": "毕方",     "pinyin": "bì fāng",            "tier": 2, "trigram": "li",   "style": "ya",  "source": "西山经",   "role": "爆发", "description": "状如鹤而一足，赤文青质，见则其邑有讹火。", "sortOrder": 30 },
-    { "id": "pet_diting",      "name": "谛听",     "pinyin": "dì tīng",            "tier": 2, "trigram": "gen",  "style": "meng","source": "传说·九华", "role": "守卫", "description": "伏于地可听人心，能辨善恶真伪。", "sortOrder": 31 },
-    { "id": "pet_huashe",      "name": "化蛇",     "pinyin": "huà shé",            "tier": 2, "trigram": "dui",  "style": "qi",  "source": "中山经",   "role": "控制", "description": "人面豺身，鸟翼蛇行，其音如叱呼，见则大水。", "sortOrder": 32 },
-
-    { "id": "pet_qinglong", "formImages": {"1":"/pet-garden/pets/qinglong/form1.png?v=797ea07e6e36","2":"/pet-garden/pets/qinglong/form2.png?v=6e5630b9df04","3":"/pet-garden/pets/qinglong/form3.png?v=0a03c8e2a57c","4":"/pet-garden/pets/qinglong/form4.png?v=decc656d8f93"},    "name": "青龙·孟章", "pinyin": "qīng lóng · mèng zhāng", "tier": 3, "trigram": "zhen,xun", "style": "jun", "source": "四象·东", "role": "输出", "description": "东方七宿之灵，鳞身鹿角，五爪腾云，主春生。", "sortOrder": 33 },
-    { "id": "pet_baihu",       "name": "白虎·监兵", "pinyin": "bái hǔ · jiān bīng",     "tier": 3, "trigram": "qian,dui", "style": "jun", "source": "四象·西", "role": "速攻", "description": "西方七宿之灵，银毛黑纹，金瞳踏风，主秋收。", "sortOrder": 34 },
-    { "id": "pet_zhuque",      "name": "朱雀·陵光", "pinyin": "zhū què · líng guāng",   "tier": 3, "trigram": "li",      "style": "ya",  "source": "四象·南", "role": "爆发", "description": "南方七宿之灵，朱羽金冠，口衔火珠，主夏长。", "sortOrder": 35 },
-    { "id": "pet_xuanwu",      "name": "玄武·执明", "pinyin": "xuán wǔ · zhí míng",    "tier": 3, "trigram": "kan",     "style": "qi",  "source": "四象·北", "role": "坦克", "description": "北方七宿之灵，龟蛇相缠，背负玄碑，主冬藏。", "sortOrder": 36 },
-
-    { "id": "pet_yinyu",       "name": "阴鱼·太阴", "pinyin": "yīn yú · tài yīn",      "tier": 4, "trigram": "all",     "style": "ya",  "source": "太极·阴", "role": "控制", "description": "两仪之阴，静极生动，主收摄与沉潜。", "sortOrder": 37 },
-    { "id": "pet_yangyu",      "name": "阳鱼·太阳", "pinyin": "yáng yú · tài yáng",    "tier": 4, "trigram": "all",     "style": "jun", "source": "太极·阳", "role": "输出", "description": "两仪之阳，动极生静，主照临与开辟。", "sortOrder": 38 }
+    {
+      "id": "pet_luwu",
+      "name": "陆吾",
+      "pinyin": "lù wú",
+      "tier": 1,
+      "trigram": "qian",
+      "style": "jun",
+      "source": "西次三经",
+      "role": "守卫",
+      "description": "昆仑之守，人面虎身九尾，司天之九部。",
+      "sortOrder": 1,
+      "formImages": {
+        "1": "/pet-garden/pets/luwu/form1.webp?v=f39e54d0f12e",
+        "2": "/pet-garden/pets/luwu/form2.webp?v=ae9a3595771d"
+      }
+    },
+    {
+      "id": "pet_kaimingshou",
+      "name": "开明兽",
+      "pinyin": "kāi míng shòu",
+      "tier": 1,
+      "trigram": "qian",
+      "style": "qi",
+      "source": "海内西经",
+      "role": "守卫",
+      "description": "昆仑门神，九首人面，虎身而立。",
+      "sortOrder": 2,
+      "formImages": {
+        "1": "/pet-garden/pets/kaimingshou/form1.webp?v=bc11dbdfc779",
+        "2": "/pet-garden/pets/kaimingshou/form2.webp?v=2125ffef8a92"
+      }
+    },
+    {
+      "id": "pet_yingzhao",
+      "name": "英招",
+      "pinyin": "yīng zhāo",
+      "tier": 1,
+      "trigram": "qian",
+      "style": "jun",
+      "source": "西次三经",
+      "role": "速攻",
+      "description": "马身人面，虎纹鸟翼，司天帝之苑。",
+      "sortOrder": 3,
+      "formImages": {
+        "1": "/pet-garden/pets/yingzhao/form1.webp?v=b6cca8a60335",
+        "2": "/pet-garden/pets/yingzhao/form2.webp?v=a1f07b2148ba"
+      }
+    },
+    {
+      "id": "pet_zheng",
+      "name": "狰",
+      "pinyin": "zhēng",
+      "tier": 1,
+      "trigram": "kun",
+      "style": "qi",
+      "source": "西山经",
+      "role": "输出",
+      "description": "章莪之山，五尾一角，其音如击石。",
+      "sortOrder": 4,
+      "formImages": {
+        "1": "/pet-garden/pets/zheng/form1.webp?v=a97688763c06",
+        "2": "/pet-garden/pets/zheng/form2.webp?v=f2f3f952db22"
+      }
+    },
+    {
+      "id": "pet_huan",
+      "name": "讙",
+      "pinyin": "huān",
+      "tier": 1,
+      "trigram": "kun",
+      "style": "meng",
+      "source": "西次三经",
+      "role": "控制",
+      "description": "翼望之山，一目三尾，善御凶。",
+      "sortOrder": 5,
+      "formImages": {
+        "1": "/pet-garden/pets/huan/form1.webp?v=93cfdbef97ee",
+        "2": "/pet-garden/pets/huan/form2.webp?v=fa396483c27e"
+      }
+    },
+    {
+      "id": "pet_bo",
+      "formImages": {
+        "1": "/pet-garden/pets/bo/form1.png?v=f65191970272",
+        "2": "/pet-garden/pets/bo/form2.png?v=349b8edf2d46"
+      },
+      "name": "驳",
+      "pinyin": "bó",
+      "tier": 1,
+      "trigram": "kun",
+      "style": "jun",
+      "source": "西次四经",
+      "role": "坦克",
+      "description": "中曲之山，马身一角，虎爪锯齿，能驯猛兽。",
+      "sortOrder": 6
+    },
+    {
+      "id": "pet_tiangou",
+      "formImages": {
+        "1": "/pet-garden/pets/tiangou/form1.png?v=9ba880c1a690",
+        "2": "/pet-garden/pets/tiangou/form2.png?v=d22474bf407f"
+      },
+      "name": "天狗",
+      "pinyin": "tiān gǒu",
+      "tier": 1,
+      "trigram": "zhen",
+      "style": "meng",
+      "source": "西次三经",
+      "role": "速攻",
+      "description": "阴山有兽，状如狸而白首，可以御凶。",
+      "sortOrder": 7
+    },
+    {
+      "id": "pet_lei",
+      "formImages": {
+        "1": "/pet-garden/pets/lei/form1.png?v=21b32c4c3d28",
+        "2": "/pet-garden/pets/lei/form2.png?v=08a98cd2b90b"
+      },
+      "name": "鸓",
+      "pinyin": "lěi",
+      "tier": 1,
+      "trigram": "zhen",
+      "style": "qi",
+      "source": "西次二经",
+      "role": "输出",
+      "description": "状如鹊，赤黑二首四足，可以御火。",
+      "sortOrder": 8
+    },
+    {
+      "id": "pet_zhuru",
+      "formImages": {
+        "1": "/pet-garden/pets/zhuru/form1.png?v=e2e5ea0544fc",
+        "2": "/pet-garden/pets/zhuru/form2.png?v=186e737bdc79"
+      },
+      "name": "朱獳",
+      "pinyin": "zhū rú",
+      "tier": 1,
+      "trigram": "zhen",
+      "style": "ya",
+      "source": "东山经",
+      "role": "控制",
+      "description": "状如狐而鱼翼，见则其国大旱。",
+      "sortOrder": 9
+    },
+    {
+      "id": "pet_boshi",
+      "formImages": {
+        "1": "/pet-garden/pets/boshi/form1.png?v=5598d0fe821e",
+        "2": "/pet-garden/pets/boshi/form2.png?v=ce7a173bcd4c"
+      },
+      "name": "猼訑",
+      "pinyin": "bó yí",
+      "tier": 1,
+      "trigram": "xun",
+      "style": "qi",
+      "source": "南山经",
+      "role": "闪避",
+      "description": "基山有兽，羊身九尾四耳，目在背上。",
+      "sortOrder": 10
+    },
+    {
+      "id": "pet_mengji",
+      "formImages": {
+        "1": "/pet-garden/pets/mengji/form1.png?v=ec37b7033a0e",
+        "2": "/pet-garden/pets/mengji/form2.png?v=f37259902d7b"
+      },
+      "name": "孟极",
+      "pinyin": "mèng jí",
+      "tier": 1,
+      "trigram": "xun",
+      "style": "jun",
+      "source": "北山经",
+      "role": "速攻",
+      "description": "状如豹而文题白身，善伏。",
+      "sortOrder": 11
+    },
+    {
+      "id": "pet_qitu",
+      "name": "鵸鵌",
+      "pinyin": "qí tú",
+      "tier": 1,
+      "trigram": "xun",
+      "style": "meng",
+      "source": "西次三经",
+      "role": "辅助",
+      "description": "翼望之山，三首六尾，善笑，可以御凶。",
+      "sortOrder": 12,
+      "formImages": {
+        "1": "/pet-garden/pets/qitu/form1.webp?v=30dba830f859",
+        "2": "/pet-garden/pets/qitu/form2.webp?v=718d813fa950"
+      }
+    },
+    {
+      "id": "pet_heluoyu",
+      "name": "何罗鱼",
+      "pinyin": "hé luó yú",
+      "tier": 1,
+      "trigram": "kan",
+      "style": "qi",
+      "source": "北山经",
+      "role": "坦克",
+      "description": "一首十身，其音如吠犬，食之已痈。",
+      "sortOrder": 13,
+      "formImages": {
+        "1": "/pet-garden/pets/heluoyu/form1.webp?v=ee56a6f8775f",
+        "2": "/pet-garden/pets/heluoyu/form2.webp?v=8559d8bdf07a"
+      }
+    },
+    {
+      "id": "pet_luoyu",
+      "name": "蠃鱼",
+      "pinyin": "luǒ yú",
+      "tier": 1,
+      "trigram": "kan",
+      "style": "ya",
+      "source": "西山经",
+      "role": "辅助",
+      "description": "鱼身而鸟翼，见则其邑大水。",
+      "sortOrder": 14,
+      "formImages": {
+        "1": "/pet-garden/pets/luoyu/form1.webp?v=eaa8d20338ed",
+        "2": "/pet-garden/pets/luoyu/form2.webp?v=733e6efd4ea9"
+      }
+    },
+    {
+      "id": "pet_ranyiyu",
+      "name": "冉遗鱼",
+      "pinyin": "rǎn yí yú",
+      "tier": 1,
+      "trigram": "kan",
+      "style": "qi",
+      "source": "北山经",
+      "role": "输出",
+      "description": "鱼身蛇首六足，食之使人不眯。",
+      "sortOrder": 15,
+      "formImages": {
+        "1": "/pet-garden/pets/ranyiyu/form1.webp?v=26b368498ead",
+        "2": "/pet-garden/pets/ranyiyu/form2.webp?v=003213eae062"
+      }
+    },
+    {
+      "id": "pet_jiuweihu",
+      "name": "九尾狐",
+      "pinyin": "jiǔ wěi hú",
+      "tier": 1,
+      "trigram": "li",
+      "style": "ya",
+      "source": "南山经",
+      "role": "输出",
+      "description": "青丘之山，状如狐而九尾，其音如婴儿。",
+      "sortOrder": 16,
+      "formImages": {
+        "1": "/pet-garden/pets/jiuweihu/form1.webp?v=fe9fb94e7f29",
+        "2": "/pet-garden/pets/jiuweihu/form2.webp?v=36df237ad093"
+      }
+    },
+    {
+      "id": "pet_chiru",
+      "name": "赤鱬",
+      "pinyin": "chì rú",
+      "tier": 1,
+      "trigram": "li",
+      "style": "meng",
+      "source": "南山经",
+      "role": "治疗",
+      "description": "人面鱼身，其音如鸳鸯，食之不疥。",
+      "sortOrder": 17,
+      "formImages": {
+        "1": "/pet-garden/pets/chiru/form1.webp?v=36570567b61c",
+        "2": "/pet-garden/pets/chiru/form2.webp?v=03f01098c5f8"
+      }
+    },
+    {
+      "id": "pet_zhu",
+      "name": "鴸",
+      "pinyin": "zhū",
+      "tier": 1,
+      "trigram": "li",
+      "style": "qi",
+      "source": "南山经",
+      "role": "控制",
+      "description": "状如鸱而人手，其鸣自号，见则多放士。",
+      "sortOrder": 18,
+      "formImages": {
+        "1": "/pet-garden/pets/zhu/form1.webp?v=ba494c330a9d",
+        "2": "/pet-garden/pets/zhu/form2.webp?v=ffb2ef374133"
+      }
+    },
+    {
+      "id": "pet_xiqu",
+      "name": "犀渠",
+      "pinyin": "xī qú",
+      "tier": 1,
+      "trigram": "gen",
+      "style": "jun",
+      "source": "中山经",
+      "role": "坦克",
+      "description": "状如牛，苍身，其音如婴儿；性烈，守山径不让人过。",
+      "sortOrder": 19,
+      "formImages": {
+        "1": "/pet-garden/pets/xiqu/form1.webp?v=6076e4cf0c1c",
+        "2": "/pet-garden/pets/xiqu/form2.webp?v=7714237943e5"
+      }
+    },
+    {
+      "id": "pet_qianyang",
+      "name": "羬羊",
+      "pinyin": "qián yáng",
+      "tier": 1,
+      "trigram": "gen",
+      "style": "meng",
+      "source": "西山经",
+      "role": "防御",
+      "description": "状如羊而马尾，其脂可以已腊。",
+      "sortOrder": 20,
+      "formImages": {
+        "1": "/pet-garden/pets/qianyang/form1.webp?v=6576aef14ab2",
+        "2": "/pet-garden/pets/qianyang/form2.webp?v=5511ccfd4ea2"
+      }
+    },
+    {
+      "id": "pet_taotie",
+      "name": "饕餮",
+      "pinyin": "tāo tiè",
+      "tier": 1,
+      "trigram": "gen",
+      "style": "jun",
+      "source": "北山经",
+      "role": "输出",
+      "description": "钩吾之山，羊身人面，虎齿人爪，贪吃成性。",
+      "sortOrder": 21,
+      "formImages": {
+        "1": "/pet-garden/pets/taotie/form1.webp?v=f404328eaf06",
+        "2": "/pet-garden/pets/taotie/form2.webp?v=8f99cf59e441"
+      }
+    },
+    {
+      "id": "pet_changyou",
+      "name": "长右",
+      "pinyin": "cháng yòu",
+      "tier": 1,
+      "trigram": "dui",
+      "style": "meng",
+      "source": "南山经",
+      "role": "控制",
+      "description": "状如禺而四耳，见则郡县大水。",
+      "sortOrder": 22,
+      "formImages": {
+        "1": "/pet-garden/pets/changyou/form1.webp?v=7a40fdfcaec4",
+        "2": "/pet-garden/pets/changyou/form2.webp?v=0bb2967b5ad0"
+      }
+    },
+    {
+      "id": "pet_lu",
+      "name": "鯥",
+      "pinyin": "lù",
+      "tier": 1,
+      "trigram": "dui",
+      "style": "qi",
+      "source": "南山经",
+      "role": "辅助",
+      "description": "牛形蛇尾有翼，冬藏夏见，食之不肿。",
+      "sortOrder": 23,
+      "formImages": {
+        "1": "/pet-garden/pets/lu/form1.webp?v=9ac9dbd710e1",
+        "2": "/pet-garden/pets/lu/form2.webp?v=cdb9e647a27b"
+      }
+    },
+    {
+      "id": "pet_wenyaoyu",
+      "name": "文鳐鱼",
+      "pinyin": "wén yáo yú",
+      "tier": 1,
+      "trigram": "dui",
+      "style": "ya",
+      "source": "西山经",
+      "role": "输出",
+      "description": "状如鲤鱼而有翼，夜飞，见则大穰。",
+      "sortOrder": 24,
+      "formImages": {
+        "1": "/pet-garden/pets/wenyaoyu/form1.webp?v=0817aa9a383f",
+        "2": "/pet-garden/pets/wenyaoyu/form2.webp?v=8fca471a794c"
+      }
+    },
+    {
+      "id": "pet_baize",
+      "name": "白泽",
+      "pinyin": "bái zé",
+      "tier": 2,
+      "trigram": "qian",
+      "style": "ya",
+      "source": "海外经",
+      "role": "辅助",
+      "description": "通万物之情，知万物之状，王者有德则至。",
+      "sortOrder": 25,
+      "formImages": {
+        "1": "/pet-garden/pets/baize/form1.webp?v=b62fb413f4aa",
+        "2": "/pet-garden/pets/baize/form2.webp?v=974e83185b84",
+        "3": "/pet-garden/pets/baize/form3.webp?v=7ea6202120c5"
+      }
+    },
+    {
+      "id": "pet_tulou",
+      "name": "土蝼",
+      "pinyin": "tǔ lóu",
+      "tier": 2,
+      "trigram": "kun",
+      "style": "meng",
+      "source": "西山经",
+      "role": "坦克",
+      "description": "昆仑之丘，状如羊而四角，守护山间草木。",
+      "sortOrder": 26,
+      "formImages": {
+        "1": "/pet-garden/pets/tulou/form1.webp?v=1723d287b854",
+        "2": "/pet-garden/pets/tulou/form2.webp?v=13bc9beb66ea",
+        "3": "/pet-garden/pets/tulou/form3.webp?v=cff2ac92a8a7"
+      }
+    },
+    {
+      "id": "pet_kui",
+      "name": "夔",
+      "pinyin": "kuí",
+      "tier": 2,
+      "trigram": "zhen",
+      "style": "jun",
+      "source": "中山经",
+      "role": "输出",
+      "description": "东海流波之山，状如牛，苍身无角，一足，声如雷。",
+      "sortOrder": 27,
+      "formImages": {
+        "1": "/pet-garden/pets/kui/form1.webp?v=ca56b333a181",
+        "2": "/pet-garden/pets/kui/form2.webp?v=1bf6386fa59b",
+        "3": "/pet-garden/pets/kui/form3.webp?v=7df8339770fa"
+      }
+    },
+    {
+      "id": "pet_lushu",
+      "name": "鹿蜀",
+      "pinyin": "lù shǔ",
+      "tier": 2,
+      "trigram": "xun",
+      "style": "ya",
+      "source": "南山经",
+      "role": "速攻",
+      "description": "杻阳之山，马身虎纹，其音如谣，佩之宜子孙。",
+      "sortOrder": 28,
+      "formImages": {
+        "1": "/pet-garden/pets/lushu/form1.webp?v=baeb2eb48c37",
+        "2": "/pet-garden/pets/lushu/form2.webp?v=c9baa7dc7092",
+        "3": "/pet-garden/pets/lushu/form3.webp?v=678da34605cf"
+      }
+    },
+    {
+      "id": "pet_fuzhu",
+      "name": "夫诸",
+      "pinyin": "fū zhū",
+      "tier": 2,
+      "trigram": "kan",
+      "style": "ya",
+      "source": "中山经",
+      "role": "治疗",
+      "description": "状如白鹿而四角，见则其邑大水。",
+      "sortOrder": 29,
+      "formImages": {
+        "1": "/pet-garden/pets/fuzhu/form1.webp?v=a04a9bc73180",
+        "2": "/pet-garden/pets/fuzhu/form2.webp?v=8628e96b4d2b",
+        "3": "/pet-garden/pets/fuzhu/form3.webp?v=64e595529edf"
+      }
+    },
+    {
+      "id": "pet_bifang",
+      "name": "毕方",
+      "pinyin": "bì fāng",
+      "tier": 2,
+      "trigram": "li",
+      "style": "ya",
+      "source": "西山经",
+      "role": "爆发",
+      "description": "状如鹤而一足，赤文青质，见则其邑有讹火。",
+      "sortOrder": 30,
+      "formImages": {
+        "1": "/pet-garden/pets/bifang/form1.webp?v=7788ec8355fa",
+        "2": "/pet-garden/pets/bifang/form2.webp?v=c9dbe0e383f8",
+        "3": "/pet-garden/pets/bifang/form3.webp?v=7c745dfcf133"
+      }
+    },
+    {
+      "id": "pet_diting",
+      "name": "谛听",
+      "pinyin": "dì tīng",
+      "tier": 2,
+      "trigram": "gen",
+      "style": "meng",
+      "source": "传说·九华",
+      "role": "守卫",
+      "description": "伏于地可听人心，能辨善恶真伪。",
+      "sortOrder": 31,
+      "formImages": {
+        "1": "/pet-garden/pets/diting/form1.webp?v=1ef06db3abba",
+        "2": "/pet-garden/pets/diting/form2.webp?v=b348a1455bf8",
+        "3": "/pet-garden/pets/diting/form3.webp?v=56af98a01d16"
+      }
+    },
+    {
+      "id": "pet_huashe",
+      "name": "化蛇",
+      "pinyin": "huà shé",
+      "tier": 2,
+      "trigram": "dui",
+      "style": "qi",
+      "source": "中山经",
+      "role": "控制",
+      "description": "人面豺身，鸟翼蛇行，其音如叱呼，见则大水。",
+      "sortOrder": 32,
+      "formImages": {
+        "1": "/pet-garden/pets/huashe/form1.webp?v=5177c65a5326",
+        "2": "/pet-garden/pets/huashe/form2.webp?v=74357ad38a50",
+        "3": "/pet-garden/pets/huashe/form3.webp?v=9e53158926ff"
+      }
+    },
+    {
+      "id": "pet_qinglong",
+      "formImages": {
+        "1": "/pet-garden/pets/qinglong/form1.png?v=797ea07e6e36",
+        "2": "/pet-garden/pets/qinglong/form2.png?v=6e5630b9df04",
+        "3": "/pet-garden/pets/qinglong/form3.png?v=0a03c8e2a57c",
+        "4": "/pet-garden/pets/qinglong/form4.png?v=decc656d8f93"
+      },
+      "name": "青龙·孟章",
+      "pinyin": "qīng lóng · mèng zhāng",
+      "tier": 3,
+      "trigram": "zhen,xun",
+      "style": "jun",
+      "source": "四象·东",
+      "role": "输出",
+      "description": "东方七宿之灵，鳞身鹿角，五爪腾云，主春生。",
+      "sortOrder": 33
+    },
+    {
+      "id": "pet_baihu",
+      "name": "白虎·监兵",
+      "pinyin": "bái hǔ · jiān bīng",
+      "tier": 3,
+      "trigram": "qian,dui",
+      "style": "jun",
+      "source": "四象·西",
+      "role": "速攻",
+      "description": "西方七宿之灵，银毛黑纹，金瞳踏风，主秋收。",
+      "sortOrder": 34,
+      "formImages": {
+        "1": "/pet-garden/pets/baihu/form1.png?v=de39b15f9905",
+        "2": "/pet-garden/pets/baihu/form2.webp?v=c3b628016c6a",
+        "3": "/pet-garden/pets/baihu/form3.webp?v=2dd769ad7714",
+        "4": "/pet-garden/pets/baihu/form4.webp?v=5d388795fea7"
+      }
+    },
+    {
+      "id": "pet_zhuque",
+      "name": "朱雀·陵光",
+      "pinyin": "zhū què · líng guāng",
+      "tier": 3,
+      "trigram": "li",
+      "style": "ya",
+      "source": "四象·南",
+      "role": "爆发",
+      "description": "南方七宿之灵，朱羽金冠，口衔火珠，主夏长。",
+      "sortOrder": 35,
+      "formImages": {
+        "1": "/pet-garden/pets/zhuque/form1.png?v=2ca677419946",
+        "2": "/pet-garden/pets/zhuque/form2.webp?v=d6abd2d78a6e",
+        "3": "/pet-garden/pets/zhuque/form3.webp?v=5633066c94ff",
+        "4": "/pet-garden/pets/zhuque/form4.webp?v=79d5442a847d"
+      }
+    },
+    {
+      "id": "pet_xuanwu",
+      "name": "玄武·执明",
+      "pinyin": "xuán wǔ · zhí míng",
+      "tier": 3,
+      "trigram": "kan",
+      "style": "qi",
+      "source": "四象·北",
+      "role": "坦克",
+      "description": "北方七宿之灵，龟蛇相缠，背负玄碑，主冬藏。",
+      "sortOrder": 36,
+      "formImages": {
+        "1": "/pet-garden/pets/xuanwu/form1.png?v=d41f0306a2f5",
+        "2": "/pet-garden/pets/xuanwu/form2.webp?v=272d69c805fd",
+        "3": "/pet-garden/pets/xuanwu/form3.webp?v=237c8b67bec4",
+        "4": "/pet-garden/pets/xuanwu/form4.webp?v=1a81ddbb5e42"
+      }
+    },
+    {
+      "id": "pet_yinyu",
+      "name": "阴鱼·太阴",
+      "pinyin": "yīn yú · tài yīn",
+      "tier": 4,
+      "trigram": "all",
+      "style": "ya",
+      "source": "太极·阴",
+      "role": "控制",
+      "description": "两仪之阴，静极生动，主收摄与沉潜。",
+      "sortOrder": 37,
+      "formImages": {
+        "1": "/pet-garden/pets/yinyu/form1.png?v=270993e5266f",
+        "2": "/pet-garden/pets/yinyu/form2.webp?v=1434cd72f796",
+        "3": "/pet-garden/pets/yinyu/form3.webp?v=12113d1a62d4",
+        "4": "/pet-garden/pets/yinyu/form4.webp?v=63f34c52d725",
+        "5": "/pet-garden/pets/yinyu/form5.webp?v=72cfd3415f87"
+      }
+    },
+    {
+      "id": "pet_yangyu",
+      "name": "阳鱼·太阳",
+      "pinyin": "yáng yú · tài yáng",
+      "tier": 4,
+      "trigram": "all",
+      "style": "jun",
+      "source": "太极·阳",
+      "role": "输出",
+      "description": "两仪之阳，动极生静，主照临与开辟。",
+      "sortOrder": 38,
+      "formImages": {
+        "1": "/pet-garden/pets/yangyu/form1.png?v=b33524753060",
+        "2": "/pet-garden/pets/yangyu/form2.webp?v=a4bb769ee38f",
+        "3": "/pet-garden/pets/yangyu/form3.webp?v=b410652748aa",
+        "4": "/pet-garden/pets/yangyu/form4.webp?v=11ee4e3e8d62",
+        "5": "/pet-garden/pets/yangyu/form5.webp?v=d8b9bcab678b"
+      }
+    }
   ],
   "hidden": {
     "tier": 5,
-    "unlock": { "requires": ["pet_yinyu", "pet_yangyu"] },
+    "unlock": {
+      "requires": [
+        "pet_yinyu",
+        "pet_yangyu"
+      ]
+    },
     "mode": "custom",
     "_comment": "无极由学生造物产生，不入 pets_template；教师审核通过后写入 custom_pets。学生自造名称需教师审核读音与含义。"
   }
