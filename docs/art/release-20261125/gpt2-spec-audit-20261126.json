@@ -1,0 +1,302 @@
+[
+  {
+    "path": "baize/form1.png",
+    "spec_pass": true,
+    "bytes": 206607,
+    "palette": "64"
+  },
+  {
+    "path": "baize/form2.png",
+    "spec_pass": true,
+    "bytes": 204546,
+    "palette": "64"
+  },
+  {
+    "path": "baize/form3.png",
+    "spec_pass": true,
+    "bytes": 245952,
+    "palette": "16"
+  },
+  {
+    "path": "bifang/form1.png",
+    "spec_pass": true,
+    "bytes": 153185,
+    "palette": "128"
+  },
+  {
+    "path": "bifang/form2.png",
+    "spec_pass": true,
+    "bytes": 221658,
+    "palette": "128"
+  },
+  {
+    "path": "bifang/form3.png",
+    "spec_pass": true,
+    "bytes": 186216,
+    "palette": "12"
+  },
+  {
+    "path": "changyou/form1.png",
+    "spec_pass": true,
+    "bytes": 219091,
+    "palette": "64"
+  },
+  {
+    "path": "changyou/form2.png",
+    "spec_pass": true,
+    "bytes": 232323,
+    "palette": "12"
+  },
+  {
+    "path": "chiru/form1.png",
+    "spec_pass": true,
+    "bytes": 239547,
+    "palette": "96"
+  },
+  {
+    "path": "chiru/form2.png",
+    "spec_pass": true,
+    "bytes": 220765,
+    "palette": "16"
+  },
+  {
+    "path": "diting/form1.png",
+    "spec_pass": true,
+    "bytes": 229075,
+    "palette": "16"
+  },
+  {
+    "path": "diting/form2.png",
+    "spec_pass": true,
+    "bytes": 247669,
+    "palette": "32"
+  },
+  {
+    "path": "diting/form3.png",
+    "spec_pass": true,
+    "bytes": 232996,
+    "palette": "12"
+  },
+  {
+    "path": "fuzhu/form1.png",
+    "spec_pass": true,
+    "bytes": 223759,
+    "palette": "96"
+  },
+  {
+    "path": "fuzhu/form2.png",
+    "spec_pass": true,
+    "bytes": 170150,
+    "palette": "96"
+  },
+  {
+    "path": "fuzhu/form3.png",
+    "spec_pass": true,
+    "bytes": 248696,
+    "palette": "32"
+  },
+  {
+    "path": "heluoyu/form1.png",
+    "spec_pass": true,
+    "bytes": 240529,
+    "palette": "24"
+  },
+  {
+    "path": "heluoyu/form2.png",
+    "spec_pass": true,
+    "bytes": 241283,
+    "palette": "16"
+  },
+  {
+    "path": "huashe/form1.png",
+    "spec_pass": true,
+    "bytes": 226754,
+    "palette": "16"
+  },
+  {
+    "path": "huashe/form2.png",
+    "spec_pass": true,
+    "bytes": 229166,
+    "palette": "12"
+  },
+  {
+    "path": "huashe/form3.png",
+    "spec_pass": true,
+    "bytes": 231279,
+    "palette": "12"
+  },
+  {
+    "path": "jiuweihu/form1.png",
+    "spec_pass": true,
+    "bytes": 176782,
+    "palette": "64"
+  },
+  {
+    "path": "jiuweihu/form2.png",
+    "spec_pass": true,
+    "bytes": 248558,
+    "palette": "32"
+  },
+  {
+    "path": "kui/form1.png",
+    "spec_pass": true,
+    "bytes": 248842,
+    "palette": "48"
+  },
+  {
+    "path": "kui/form2.png",
+    "spec_pass": true,
+    "bytes": 225836,
+    "palette": "96"
+  },
+  {
+    "path": "kui/form3.png",
+    "spec_pass": true,
+    "bytes": 234135,
+    "palette": "24"
+  },
+  {
+    "path": "lu/form1.png",
+    "spec_pass": true,
+    "bytes": 235561,
+    "palette": "32"
+  },
+  {
+    "path": "lu/form2.png",
+    "spec_pass": true,
+    "bytes": 245296,
+    "palette": "16"
+  },
+  {
+    "path": "luoyu/form1.png",
+    "spec_pass": true,
+    "bytes": 217425,
+    "palette": "16"
+  },
+  {
+    "path": "luoyu/form2.png",
+    "spec_pass": true,
+    "bytes": 240051,
+    "palette": "12"
+  },
+  {
+    "path": "lushu/form1.png",
+    "spec_pass": true,
+    "bytes": 232280,
+    "palette": "64"
+  },
+  {
+    "path": "lushu/form2.png",
+    "spec_pass": true,
+    "bytes": 246188,
+    "palette": "96"
+  },
+  {
+    "path": "lushu/form3.png",
+    "spec_pass": true,
+    "bytes": 234048,
+    "palette": "16"
+  },
+  {
+    "path": "qianyang/form1.png",
+    "spec_pass": true,
+    "bytes": 248174,
+    "palette": "64"
+  },
+  {
+    "path": "qianyang/form2.png",
+    "spec_pass": true,
+    "bytes": 236754,
+    "palette": "12"
+  },
+  {
+    "path": "qitu/form1.png",
+    "spec_pass": true,
+    "bytes": 240004,
+    "palette": "24"
+  },
+  {
+    "path": "qitu/form2.png",
+    "spec_pass": true,
+    "bytes": 226794,
+    "palette": "16"
+  },
+  {
+    "path": "ranyiyu/form1.png",
+    "spec_pass": true,
+    "bytes": 202468,
+    "palette": "8"
+  },
+  {
+    "path": "ranyiyu/form2.png",
+    "spec_pass": true,
+    "bytes": 222086,
+    "palette": "8"
+  },
+  {
+    "path": "taotie/form1.png",
+    "spec_pass": true,
+    "bytes": 245436,
+    "palette": "12"
+  },
+  {
+    "path": "taotie/form2.png",
+    "spec_pass": true,
+    "bytes": 242350,
+    "palette": "12"
+  },
+  {
+    "path": "tulou/form1.png",
+    "spec_pass": true,
+    "bytes": 175034,
+    "palette": "48"
+  },
+  {
+    "path": "tulou/form2.png",
+    "spec_pass": true,
+    "bytes": 239102,
+    "palette": "32"
+  },
+  {
+    "path": "tulou/form3.png",
+    "spec_pass": true,
+    "bytes": 210728,
+    "palette": "8"
+  },
+  {
+    "path": "wenyaoyu/form1.png",
+    "spec_pass": true,
+    "bytes": 219960,
+    "palette": "32"
+  },
+  {
+    "path": "wenyaoyu/form2.png",
+    "spec_pass": true,
+    "bytes": 247468,
+    "palette": "24"
+  },
+  {
+    "path": "xiqu/form1.png",
+    "spec_pass": true,
+    "bytes": 224719,
+    "palette": "64"
+  },
+  {
+    "path": "xiqu/form2.png",
+    "spec_pass": true,
+    "bytes": 220559,
+    "palette": "8"
+  },
+  {
+    "path": "zhu/form1.png",
+    "spec_pass": true,
+    "bytes": 238106,
+    "palette": "32"
+  },
+  {
+    "path": "zhu/form2.png",
+    "spec_pass": true,
+    "bytes": 228628,
+    "palette": "16"
+  }
+]
