@@ -1,0 +1,15 @@
+file,reference,stage,change,sha256,width,height,alpha_min,alpha_max
+baize-form2.png,baize/form1.png @84fbfdf,youth,muzzle eyes proportions and pose,27c6e6ff1ade6a923bc6692f0686204ba0ce8e03b6e64a2211b42d5840537c19,1536,1024,0,254
+baize-form3.png,baize/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,03691510fa196ba69b602ef430aabc7b7ff8b1f74d42c80826d488462a9f1ec7,1536,1024,0,254
+changyou-form2.png,changyou/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,3ec452849fad5307c54bdae033f555f0c125a2d257cbc4a9b773f6561ab34b32,1536,1024,0,254
+diting-form2.png,diting/form1.png @84fbfdf,youth,muzzle eyes proportions and pose,2dcb4c11d6e3ecfe0cb80cec0831798e6ccc50eddbbf6a373a1d5a2ea08477df,1536,1024,0,254
+diting-form3.png,diting/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,1a47eaac69217e203bfa3faf251337bde51ff6ccee2ebc33e7420795617adc17,1536,1024,0,254
+fuzhu-form2.png,fuzhu/form1.png @84fbfdf,youth,muzzle eyes proportions and pose,eb0eebd70b38b954cba0e06a7084f56899fa2fe1744cfa695c12ea78c26378a9,1199,1312,0,255
+fuzhu-form3.png,fuzhu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,e2d7d5ddca89079356f9e87ef0cc6de1a2a7d6321636ac5aef30f1423b843fdf,1199,1312,0,255
+lu-form2.png,lu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,bc59fd13fcd58791d814b10dabda6733da186b159a40bdfc3d708f74641f14cf,1536,1024,0,254
+luoyu-form2.png,luoyu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,4709069ab6a0502ee4f6af97fbc0cc61004816d0cd53b519391f58ea8e8b1695,1536,1024,0,254
+lushu-form3.png,lushu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,bef42db62fc3922b280d52807a600a60adb7cc036628e70727bd1b4f54b0c19d,1536,1024,0,254
+qianyang-form2.png,qianyang/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,99b7814f46658739b9642bcab100e31e6dfd89526d18649d861a37b0966f2a20,1228,1281,0,255
+ranyiyu-form2.png,ranyiyu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,df601e3b84a872dd92839efc4dc440727f1bddad39118735c3d48975b4bbd1cf,1774,887,0,255
+wenyaoyu-form2.png,wenyaoyu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,5201bdc63f47d9867f1cd8d0395b1ad690d13f1782283651396ea938ba2ddafd,1536,1024,0,254
+xiqu-form2.png,xiqu/form1.png @84fbfdf,adult,muzzle eyes proportions and pose,40e193d7a99306ebfd6a6bcc1857583dc3ccb5477963a5d8a126fd4fd30b4107,1536,1024,0,254
